@@ -1,5 +1,5 @@
-@import '../../../styles/variables';
-@import '../../../styles/mixins';
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
 
 .navbar {
   background-color: $white;
@@ -16,6 +16,15 @@
     align-items: center;
     padding: $spacing-3 0;
     position: relative;
+    
+    // Scale navbar height proportionally on larger screens
+    @media (min-width: $xl) {
+      padding: $spacing-4 0;
+    }
+    
+    @media (min-width: $xxl) {
+      padding: $spacing-5 0;
+    }
   }
   
   .logo {
@@ -25,12 +34,30 @@
     img {
       height: 30px;
       margin-right: $spacing-2;
+      
+      // Scale logo with viewport
+      @media (min-width: $xl) {
+        height: 36px;
+      }
+      
+      @media (min-width: $xxl) {
+        height: 42px;
+      }
     }
     
     span {
       font-weight: 600;
       font-size: 1.125rem;
       color: $text-color;
+      
+      // Scale logo text with viewport
+      @media (min-width: $xl) {
+        font-size: 1.375rem;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.5rem;
+      }
     }
   }
   
@@ -38,7 +65,7 @@
     display: flex;
     align-items: center;
     
-    @include respond-to(md) {
+    @include mix.respond-to(md) {
       flex-grow: 1;
       justify-content: flex-end;
     }
@@ -76,6 +103,15 @@
     li {
       margin-right: $spacing-6;
       
+      // Scale nav item spacing on larger screens
+      @media (min-width: $xl) {
+        margin-right: $spacing-8;
+      }
+      
+      @media (min-width: $xxl) {
+        margin-right: $spacing-10;
+      }
+      
       @media (max-width: $md) {
         margin-right: 0;
         margin-bottom: $spacing-6;
@@ -84,7 +120,16 @@
       a {
         color: $text-color;
         font-weight: 500;
-        @include transition(color);
+        @include mix.transition(color);
+        
+        // Scale nav item text size
+        @media (min-width: $xl) {
+          font-size: 1.125rem;
+        }
+        
+        @media (min-width: $xxl) {
+          font-size: 1.25rem;
+        }
         
         &:hover {
           color: $primary-color;
@@ -94,9 +139,20 @@
   }
   
   .cta-button {
-    @include button-primary;
+    @include mix.button-primary;
     font-size: 0.875rem;
     padding: $spacing-2 $spacing-4;
+    
+    // Scale CTA button with viewport
+    @media (min-width: $xl) {
+      font-size: 1rem;
+      padding: $spacing-3 $spacing-6;
+    }
+    
+    @media (min-width: $xxl) {
+      font-size: 1.125rem;
+      padding: $spacing-3 $spacing-8;
+    }
     
     @media (max-width: $md) {
       width: 100%;

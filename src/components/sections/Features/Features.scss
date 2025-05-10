@@ -1,9 +1,18 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
 
 .features {
   padding: $spacing-12 0;
   background-color: $gray-100;
+  
+  // Scale section padding proportionally with screen size
+  @media (min-width: $xl) {
+    padding: $spacing-16 0;
+  }
+  
+  @media (min-width: $xxl) {
+    padding: $spacing-20 0;
+  }
   
   @media (max-width: $sm) {
     padding: $spacing-8 0;
@@ -15,8 +24,20 @@
     gap: $spacing-8;
     margin-bottom: $spacing-8;
     
-    @include respond-to(md) {
+    // Responsive grid adjustments
+    @media (min-width: $md) {
       grid-template-columns: repeat(3, 1fr);
+    }
+    
+    // Larger gap on bigger screens
+    @media (min-width: $xl) {
+      gap: $spacing-12;
+      margin-bottom: $spacing-12;
+    }
+    
+    @media (min-width: $xxl) {
+      gap: $spacing-16;
+      margin-bottom: $spacing-16;
     }
     
     @media (max-width: $sm) {
@@ -26,6 +47,10 @@
     &.secondary {
       padding-top: $spacing-8;
       border-top: 1px solid $gray-300;
+      
+      @media (min-width: $xl) {
+        padding-top: $spacing-12;
+      }
       
       @media (max-width: $sm) {
         padding-top: $spacing-6;
@@ -46,6 +71,18 @@
       height: 48px;
       margin-bottom: $spacing-4;
       
+      // Scale icons proportionally with screen size
+      @media (min-width: $xl) {
+        width: 64px;
+        height: 64px;
+        margin-bottom: $spacing-6;
+      }
+      
+      @media (min-width: $xxl) {
+        width: 72px;
+        height: 72px;
+      }
+      
       @media (max-width: $sm) {
         width: 40px;
         height: 40px;
@@ -58,8 +95,18 @@
       font-weight: 500;
       margin-bottom: $spacing-2;
       
-      @include respond-to(md) {
+      // Scale headings with screen size
+      @media (min-width: $lg) {
         font-size: 1.25rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.5rem;
+        margin-bottom: $spacing-4;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.75rem;
       }
       
       @media (max-width: $sm) {
@@ -73,8 +120,20 @@
       max-width: 250px;
       margin: 0 auto;
       
-      @include respond-to(md) {
+      // Scale descriptions with screen size
+      @media (min-width: $lg) {
         font-size: 1rem;
+        max-width: 300px;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.125rem;
+        max-width: 350px;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.25rem;
+        max-width: 400px;
       }
       
       @media (max-width: $sm) {

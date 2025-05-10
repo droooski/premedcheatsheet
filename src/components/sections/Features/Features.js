@@ -14,17 +14,17 @@ const Features = () => {
   // Primary features
   const primaryFeatures = [
     {
-      icon: "/images/icon-trusted.svg",
+      icon: "/images/icon-trusted.svg", // Public directory reference maintained
       title: "Trusted by thousands",
       description: "Data vetted by med students and admissions experts"
     },
     {
-      icon: "/images/icon-updated.svg",
+      icon: "/images/icon-updated.svg", // Public directory reference maintained
       title: "Updated regularly",
       description: "New applicant profiles added weekly"
     },
     {
-      icon: "/images/icon-easy.svg",
+      icon: "/images/icon-easy.svg", // Public directory reference maintained
       title: "Easy to use",
       description: "Intuitive interface to find the data you need"
     }
@@ -33,17 +33,17 @@ const Features = () => {
   // Secondary features
   const secondaryFeatures = [
     {
-      icon: "/images/icon-data.svg",
+      icon: "/images/icon-data.svg", // Public directory reference maintained
       title: "Data-driven insights",
       description: "Make decisions based on real acceptance data"
     },
     {
-      icon: "/images/icon-secure.svg",
+      icon: "/images/icon-secure.svg", // Public directory reference maintained
       title: "Secure and private",
       description: "Your data is protected with industry-standard security"
     },
     {
-      icon: "/images/icon-community.svg",
+      icon: "/images/icon-community.svg", // Public directory reference maintained
       title: "Community support",
       description: "Connect with others on the same journey"
     }

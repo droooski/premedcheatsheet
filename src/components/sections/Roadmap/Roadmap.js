@@ -1,4 +1,5 @@
 import React from 'react';
+import roadmapImage from '../../../assets/images/layoutImage-1.png'; // Import from src/assets instead
 import './Roadmap.scss';
 
 const Roadmap = () => {
@@ -7,7 +8,7 @@ const Roadmap = () => {
       <div className="container">
         <div className="roadmap-content">
           <div className="image-container">
-            <img src="/images/roadmap-image.jpg" alt="Medical student equipment" />
+            <img src={roadmapImage} alt="Medical student equipment" />
           </div>
           <div className="text-content">
             <h2>Your roadmap to med school, built by those who made it</h2>

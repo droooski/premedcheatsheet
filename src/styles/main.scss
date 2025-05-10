@@ -1,10 +1,9 @@
-// src/styles/main.scss - Fix import order
-// Import Google Fonts first
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
-
-// Import variables and mixins using @use instead of @import
+// src/styles/main.scss
 @use './variables' as *;
 @use './mixins' as mix;
+
+// Import Google Fonts after @use statements
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
 // Base styles
 * {
@@ -16,8 +15,25 @@
 html {
   font-size: 16px;
   
+  // Scale base font size based on viewport width - CRITICAL for proper content scaling
+  @media (min-width: $lg) {
+    font-size: 17px;
+  }
+  
+  @media (min-width: $xl) {
+    font-size: 18px;
+  }
+  
+  @media (min-width: $xxl) {
+    font-size: 19px;
+  }
+  
+  @media (min-width: $xxxl) {
+    font-size: 20px;
+  }
+  
   @media (max-width: $sm) {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
@@ -57,18 +73,69 @@ img {
   display: block;
 }
 
+// ENHANCED CONTAINER SYSTEM - Critical for proper content scaling on large screens
 .container {
   width: 100%;
-  max-width: $container-max;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 $spacing-4;
   
-  @include mix.respond-to(md) {
+  // Progressively expanded container with proper horizontal padding
+  @media (min-width: $sm) {
+    max-width: 92%;  // Utilize more screen space on small screens
     padding: 0 $spacing-6;
   }
   
-  @include mix.respond-to(lg) {
+  @media (min-width: $md) {
+    max-width: 90%;  // Utilize more screen space on medium screens
     padding: 0 $spacing-8;
+  }
+  
+  @media (min-width: $lg) {
+    max-width: 88%;  // Proportional scaling on larger screens
+    padding: 0 $spacing-8;
+  }
+  
+  @media (min-width: $xl) {
+    max-width: 84%;  // Wider content on extra-large screens
+  }
+  
+  @media (min-width: $xxl) {
+    max-width: 80%;  // Maximum width constraint on ultra-wide screens
+  }
+  
+  @media (min-width: $xxxl) {
+    max-width: $container-max;  // Fixed maximum width for extreme screens
+  }
+}
+
+// Specialized container for profile sections - wider to accommodate profiles
+.profile-container {
+  @extend .container;
+  
+  @media (min-width: $xl) {
+    max-width: 92%;  // Even wider for profile displays
+  }
+  
+  @media (min-width: $xxl) {
+    max-width: 88%;  // Maximize profile visibility on large screens
+  }
+}
+
+// Centered narrow container for text-focused sections
+.narrow-container {
+  @extend .container;
+  
+  @media (min-width: $md) {
+    max-width: 80%;  // Narrower for readability
+  }
+  
+  @media (min-width: $lg) {
+    max-width: 70%;  // Optimal reading width
+  }
+  
+  @media (min-width: $xl) {
+    max-width: 60%;  // Maintain comfortable reading width
   }
 }
 
@@ -77,6 +144,7 @@ img {
   text-align: center;
 }
 
+// Enhanced margin utilities with responsive scaling
 .mb-1 { margin-bottom: $spacing-1; }
 .mb-2 { margin-bottom: $spacing-2; }
 .mb-4 { margin-bottom: $spacing-4; }
@@ -88,6 +156,17 @@ img {
 .mt-4 { margin-top: $spacing-4; }
 .mt-6 { margin-top: $spacing-6; }
 .mt-8 { margin-top: $spacing-8; }
+
+// Responsive margin utilities that scale with screen size
+@media (min-width: $lg) {
+  .mb-lg-8 { margin-bottom: $spacing-8; }
+  .mb-lg-12 { margin-bottom: $spacing-12; }
+  .mb-lg-16 { margin-bottom: $spacing-16; }
+  
+  .mt-lg-8 { margin-top: $spacing-8; }
+  .mt-lg-12 { margin-top: $spacing-12; }
+  .mt-lg-16 { margin-top: $spacing-16; }
+}
 
 // Animations
 @keyframes fadeIn {

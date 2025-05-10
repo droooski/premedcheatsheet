@@ -7,6 +7,7 @@ import Roadmap from '../../components/sections/Roadmap/Roadmap';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
 import Features from '../../components/sections/Features/Features';
 import FaqItem from '../../components/sections/FaqItem/FaqItem';
+import medSchoolImage from '../../assets/images/layoutImage-2.png';
 import './HomePage.scss';
 
 const MedSchoolCode = () => {
@@ -22,7 +23,7 @@ const MedSchoolCode = () => {
             </p>
           </div>
           <div className="image-container">
-            <img src="/images/med-school-code.jpg" alt="Medical gloves" />
+            <img src={medSchoolImage} alt="Medical gloves" />
           </div>
         </div>
       </div>

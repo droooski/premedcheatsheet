@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../ProfileCard/ProfileCard';
+import heroImage from '../../../assets/images/newhero.png'; // Import hero image from src/assets
 import './Hero.scss';
 
 const Hero = () => {
@@ -11,7 +12,8 @@ const Hero = () => {
   };
 
   return (
-    <section className="hero">
+    <section className="hero" style={{ backgroundImage: `url(${heroImage})`, backgroundPosition: 'center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}>
+      <div className="overlay"></div> {/* Overlay for better text readability */}
       <div className="container">
         <h1>Premed Cheatsheet</h1>
         <p className="hero-text">

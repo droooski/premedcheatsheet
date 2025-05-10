@@ -1,8 +1,8 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
 
 .profile-card {
-  @include card;
+  @include mix.card;
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   width: 100%;
@@ -13,17 +13,34 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   }
   
+  // Large profile card scaling based on viewport
   &.large {
     max-width: 650px;
     margin: 0 auto;
     
+    @media (min-width: $xl) {
+      max-width: 800px; // Wider cards on larger screens
+    }
+    
+    @media (min-width: $xxl) {
+      max-width: 900px; // Even wider on ultra-large screens
+    }
+    
+    @media (max-width: $md) {
+      max-width: 90%; // Relative width on medium screens
+    }
+    
     @media (max-width: $sm) {
-      max-width: 100%;
+      max-width: 100%; // Full width on small screens
     }
   }
   
   &.small {
     height: 100%;
+    
+    @media (min-width: $lg) {
+      min-height: 360px; // Consistent height on larger screens
+    }
   }
   
   .profile-header {
@@ -33,13 +50,22 @@
     padding: $spacing-4;
     border-bottom: 1px solid $gray-200;
     
+    @media (min-width: $lg) {
+      padding: $spacing-6; // More padding on larger screens
+    }
+    
     h3 {
       font-size: 1rem;
       font-weight: 600;
       margin: 0;
       
-      @include respond-to(md) {
+      // Fluid typography for headers
+      @media (min-width: $lg) {
         font-size: 1.25rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.5rem;
       }
       
       @media (max-width: $sm) {
@@ -52,6 +78,10 @@
       transition: opacity 0.3s ease;
       flex-shrink: 0;
       
+      @media (min-width: $lg) {
+        transform: scale(1.2); // Larger icon on bigger screens
+      }
+      
       &:hover {
         opacity: 0.7;
       }
@@ -60,6 +90,10 @@
   
   .profile-details {
     padding: $spacing-4;
+    
+    @media (min-width: $lg) {
+      padding: $spacing-6; // More padding on larger screens
+    }
     
     @media (max-width: $sm) {
       padding: $spacing-3;
@@ -71,6 +105,11 @@
     grid-template-columns: repeat(3, 1fr);
     gap: $spacing-4;
     margin-bottom: $spacing-4;
+    
+    @media (min-width: $lg) {
+      gap: $spacing-6; // More spacing between columns on larger screens
+      margin-bottom: $spacing-6;
+    }
     
     @media (max-width: $sm) {
       gap: $spacing-2;
@@ -86,8 +125,12 @@
       color: $gray-500;
       margin-bottom: $spacing-1;
       
-      @include respond-to(md) {
+      @media (min-width: $lg) {
         font-size: 0.875rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem; // Larger labels on xl screens
       }
     }
     
@@ -95,8 +138,12 @@
       font-size: 0.875rem;
       font-weight: 500;
       
-      @include respond-to(md) {
+      @media (min-width: $lg) {
         font-size: 1rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.125rem; // Larger values on xl screens
       }
       
       @media (max-width: $sm) {
@@ -109,6 +156,10 @@
   .highlight-section {
     margin-bottom: $spacing-4;
     
+    @media (min-width: $lg) {
+      margin-bottom: $spacing-6; // More spacing on larger screens
+    }
+    
     .highlight-header {
       display: flex;
       align-items: center;
@@ -120,6 +171,11 @@
         border-radius: 50%;
         margin-right: $spacing-2;
         flex-shrink: 0;
+        
+        @media (min-width: $lg) {
+          width: 12px; // Larger dots on bigger screens
+          height: 12px;
+        }
       }
       
       .accepted-dot {
@@ -134,8 +190,12 @@
         font-weight: 600;
         font-size: 0.875rem;
         
-        @include respond-to(md) {
+        @media (min-width: $lg) {
           font-size: 1rem;
+        }
+        
+        @media (min-width: $xl) {
+          font-size: 1.125rem; // Larger text on xl screens
         }
         
         @media (max-width: $sm) {
@@ -150,8 +210,14 @@
       line-height: 1.5;
       margin-bottom: $spacing-1;
       
-      @include respond-to(md) {
+      @media (min-width: $lg) {
         font-size: 0.875rem;
+        margin-bottom: $spacing-2;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem; // Larger text on xl screens
+        line-height: 1.6;
       }
       
       @media (max-width: $sm) {
@@ -165,17 +231,25 @@
     text-align: center;
     padding: $spacing-2 0;
     
+    @media (min-width: $lg) {
+      padding: $spacing-4 0; // More padding on larger screens
+    }
+    
     a {
       color: $blue-500;
       font-size: 0.75rem;
-      @include transition(text-decoration);
+      @include mix.transition(text-decoration);
+      
+      @media (min-width: $lg) {
+        font-size: 0.875rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem; // Larger link on xl screens
+      }
       
       &:hover {
         text-decoration: underline;
-      }
-      
-      @include respond-to(md) {
-        font-size: 0.875rem;
       }
     }
   }

@@ -1,5 +1,5 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
 
 .roadmap {
   padding: $spacing-16 0 $spacing-12;
@@ -8,11 +8,22 @@
   // Top padding to accommodate the overlapping profile card
   padding-top: 180px;
   
-  @include respond-to(md) {
+  // Scale padding proportionally with screen size
+  @media (min-width: $xl) {
+    padding-top: 220px;
+    padding-bottom: $spacing-16;
+  }
+  
+  @media (min-width: $xxl) {
+    padding-top: 240px;
+    padding-bottom: $spacing-20;
+  }
+  
+  @media (min-width: $md) {
     padding-top: 160px;
   }
   
-  @include respond-to(lg) {
+  @media (min-width: $lg) {
     padding-top: 140px;
   }
   
@@ -26,9 +37,19 @@
     flex-direction: column;
     gap: $spacing-8;
     
-    @include respond-to(md) {
+    // Convert to row layout on medium screens and above
+    @media (min-width: $md) {
       flex-direction: row;
       align-items: center;
+    }
+    
+    // Increase spacing between elements on larger screens
+    @media (min-width: $xl) {
+      gap: $spacing-12;
+    }
+    
+    @media (min-width: $xxl) {
+      gap: $spacing-16;
     }
     
     @media (max-width: $sm) {
@@ -39,8 +60,13 @@
   .image-container {
     flex: 0 0 100%;
     
-    @include respond-to(md) {
+    // Adjust image size based on screen width
+    @media (min-width: $md) {
       flex: 0 0 40%;
+    }
+    
+    @media (min-width: $xl) {
+      flex: 0 0 45%; // Larger image on XL screens
     }
     
     img {
@@ -49,7 +75,13 @@
       border-radius: 8px;
       object-fit: cover;
       aspect-ratio: 1/1;
-      @include box-shadow;
+      @include mix.box-shadow;
+      
+      // Enhanced image styling on larger screens
+      @media (min-width: $xl) {
+        border-radius: 12px;
+        @include mix.box-shadow(0 8px 20px rgba(0, 0, 0, 0.15));
+      }
       
       @media (max-width: $sm) {
         aspect-ratio: 16/9;
@@ -62,8 +94,18 @@
     flex: 1;
     
     h2 {
-      @include heading-2;
+      @include mix.heading-2;
       margin-bottom: $spacing-6;
+      
+      // Fluid typography for headings based on screen size
+      @media (min-width: $xl) {
+        font-size: 2.5rem;
+        margin-bottom: $spacing-8;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 3rem;
+      }
       
       @media (max-width: $sm) {
         font-size: 1.5rem;
@@ -75,10 +117,22 @@
       color: $text-color;
       line-height: 1.6;
       margin-bottom: $spacing-4;
-      @include paragraph;
+      @include mix.paragraph;
+      
+      // Proportional text scaling for all screen sizes
+      @media (min-width: $xl) {
+        font-size: 1.25rem;
+        margin-bottom: $spacing-6;
+        line-height: 1.7;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.375rem;
+      }
       
       @media (max-width: $sm) {
         margin-bottom: $spacing-3;
+        font-size: 0.9rem;
       }
     }
   }

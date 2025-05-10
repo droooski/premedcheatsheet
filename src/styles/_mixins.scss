@@ -1,10 +1,15 @@
 // src/styles/_mixins.scss
-// Import variables with a namespace to avoid conflicts
+// Import variables with a namespace to avoid collision issues
 @use './variables' as vars;
 
-// Rest of mixins stay the same but reference through vars namespace
+// RESPONSIVE FRAMEWORK
+// -------------------
+
+// Primary mobile-first responsive breakpoint control
 @mixin respond-to($breakpoint) {
-  @if $breakpoint == sm {
+  @if $breakpoint == xs {
+    @media (min-width: 320px) { @content; }
+  } @else if $breakpoint == sm {
     @media (min-width: vars.$sm) { @content; }
   } @else if $breakpoint == md {
     @media (min-width: vars.$md) { @content; }
@@ -17,67 +22,136 @@
   }
 }
 
-// Flex center mixin
+// Complementary max-width breakpoint control for targeted mobile/small device styling
+@mixin respond-down($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: 319px) { @content; }
+  } @else if $breakpoint == sm {
+    @media (max-width: calc(vars.$sm - 1px)) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: calc(vars.$md - 1px)) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: calc(vars.$lg - 1px)) { @content; }
+  } @else if $breakpoint == xl {
+    @media (max-width: calc(vars.$xl - 1px)) { @content; }
+  }
+}
+
+// Range-specific media query for precise breakpoint control
+@mixin respond-between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) { @content; }
+}
+
+// LAYOUT UTILITIES
+// ---------------
+
+// Flexbox center alignment utility
 @mixin flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-// Flex column mixin
+// Flexbox column orientation utility
 @mixin flex-column {
   display: flex;
   flex-direction: column;
 }
 
-// Transition mixin
+// Flexbox row with gap utility
+@mixin flex-row($gap: vars.$spacing-4) {
+  display: flex;
+  flex-direction: row;
+  gap: $gap;
+}
+
+// CSS Grid layout with responsive column count
+@mixin grid-columns($cols-mobile: 1, $cols-tablet: 2, $cols-desktop: 3, $gap: vars.$spacing-4) {
+  display: grid;
+  grid-template-columns: repeat($cols-mobile, 1fr);
+  gap: $gap;
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat($cols-tablet, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat($cols-desktop, 1fr);
+  }
+}
+
+// VISUAL EFFECTS
+// -------------
+
+// Standardized transition property control
 @mixin transition($property: all, $duration: 0.3s, $timing: ease) {
   transition: $property $duration $timing;
 }
 
-// Box shadow mixin
+// Consistent box shadow implementation
 @mixin box-shadow($shadow: 0 4px 6px rgba(0, 0, 0, 0.1)) {
   box-shadow: $shadow;
 }
 
-// Border radius mixin
+// Standardized border radius control
 @mixin border-radius($radius: 4px) {
   border-radius: $radius;
 }
 
-// Typography mixins
+// TYPOGRAPHY
+// ---------
+
+// Helper function to strip units for fluid typography calculations
+@function strip-unit($value) {
+  @return $value / ($value * 0 + 1);
+}
+
+// Fluid typography scaling between viewport widths
+@mixin fluid-type($min-font-size, $max-font-size, $min-vw: 320px, $max-vw: 1280px) {
+  font-size: $min-font-size;
+  
+  @media (min-width: $min-vw) {
+    font-size: calc(#{$min-font-size} + #{strip-unit($max-font-size - $min-font-size)} * 
+      ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}));
+  }
+  
+  @media (min-width: $max-vw) {
+    font-size: $max-font-size;
+  }
+}
+
+// Primary heading styles with responsive scaling
 @mixin heading-1 {
   font-family: vars.$font-family-serif;
-  font-size: 2.5rem;
   font-weight: 600;
   line-height: 1.2;
+  @include fluid-type(2rem, 4.5rem);
   
-  @include respond-to(md) {
-    font-size: 3.5rem;
-  }
-  
-  @include respond-to(lg) {
-    font-size: 4.5rem;
+  @media (max-width: vars.$sm) {
+    line-height: 1.3;
   }
 }
 
+// Secondary heading styles with responsive scaling
 @mixin heading-2 {
   font-family: vars.$font-family-serif;
-  font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.3;
-  
-  @include respond-to(md) {
-    font-size: 2.25rem;
-  }
+  @include fluid-type(1.5rem, 2.25rem);
 }
 
+// Tertiary heading styles
 @mixin heading-3 {
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.4;
+  
+  @include respond-to(md) {
+    font-size: 1.5rem;
+  }
 }
 
+// Standard paragraph styling
 @mixin paragraph {
   font-size: 1rem;
   line-height: 1.6;
@@ -87,7 +161,10 @@
   }
 }
 
-// Button mixins
+// COMPONENTS
+// ---------
+
+// Primary button styling
 @mixin button-primary {
   background-color: vars.$black;
   color: vars.$white;
@@ -102,6 +179,7 @@
   }
 }
 
+// Secondary button styling
 @mixin button-secondary {
   background-color: vars.$white;
   color: vars.$text-color;
@@ -116,11 +194,79 @@
   }
 }
 
-// Card mixin
+// Standardized card component styling
 @mixin card {
   background-color: vars.$white;
   @include border-radius(8px);
   @include box-shadow;
   border: 1px solid vars.$gray-200;
   overflow: hidden;
+}
+
+// LAYOUT STRUCTURE
+// --------------
+
+// Responsive container with appropriate padding and width constraints
+@mixin container {
+  width: 100%;
+  padding-left: vars.$spacing-4;
+  padding-right: vars.$spacing-4;
+  margin-left: auto;
+  margin-right: auto;
+  
+  @include respond-to(sm) {
+    max-width: vars.$container-sm;
+  }
+  
+  @include respond-to(md) {
+    max-width: vars.$container-md;
+    padding-left: vars.$spacing-6;
+    padding-right: vars.$spacing-6;
+  }
+  
+  @include respond-to(lg) {
+    max-width: vars.$container-lg;
+    padding-left: vars.$spacing-8;
+    padding-right: vars.$spacing-8;
+  }
+  
+  @include respond-to(xl) {
+    max-width: vars.$container-xl;
+  }
+  
+  @include respond-to(xxl) {
+    max-width: vars.$container-max;
+  }
+}
+
+// Section padding control with responsive adjustments
+@mixin section-padding($top: vars.$spacing-12, $bottom: vars.$spacing-12) {
+  padding-top: $top;
+  padding-bottom: $bottom;
+  
+  @media (max-width: vars.$md) {
+    padding-top: calc($top * 0.75);
+    padding-bottom: calc($bottom * 0.75);
+  }
+  
+  @media (max-width: vars.$sm) {
+    padding-top: calc($top * 0.5);
+    padding-bottom: calc($bottom * 0.5);
+  }
+}
+
+@mixin responsive-heading-1 {
+  font-family: $font-family-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  font-size: clamp(2.5rem, 5vw, 4.5rem); // Fluid scaling between 40px and 72px
+  margin-bottom: clamp(1rem, 3vw, 2rem); // Proportional margins
+}
+
+@mixin responsive-heading-2 {
+  font-family: $font-family-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  font-size: clamp(1.75rem, 3.5vw, 3rem); // Fluid scaling between 28px and 48px
+  margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
 }

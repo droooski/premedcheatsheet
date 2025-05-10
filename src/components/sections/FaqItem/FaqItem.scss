@@ -1,5 +1,5 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
 
 .faq-item {
   border-bottom: 1px solid $gray-200;
@@ -15,6 +15,15 @@
     align-items: center;
     cursor: pointer;
     
+    // Scale padding with screen size
+    @media (min-width: $xl) {
+      padding: $spacing-8 0;
+    }
+    
+    @media (min-width: $xxl) {
+      padding: $spacing-10 0;
+    }
+    
     @media (max-width: $sm) {
       padding: $spacing-4 0;
     }
@@ -24,8 +33,21 @@
       font-weight: 500;
       padding-right: $spacing-4;
       
-      @include respond-to(md) {
+      // Fluid typography for questions
+      @media (min-width: $md) {
         font-size: 1.125rem;
+      }
+      
+      @media (min-width: $lg) {
+        font-size: 1.25rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.5rem;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.75rem;
       }
       
       @media (max-width: $sm) {
@@ -34,20 +56,44 @@
     }
     
     .arrow-icon {
-      @include transition(transform);
+      @include mix.transition(transform);
       flex-shrink: 0;
+      
+      // Scale arrow size with screen size
+      @media (min-width: $xl) {
+        transform: scale(1.25);
+      }
+      
+      @media (min-width: $xxl) {
+        transform: scale(1.5);
+      }
     }
   }
   
   &.expanded {
     .arrow-icon {
       transform: rotate(180deg);
+      
+      // Maintain scale when expanded on larger screens
+      @media (min-width: $xl) {
+        transform: rotate(180deg) scale(1.25);
+      }
+      
+      @media (min-width: $xxl) {
+        transform: rotate(180deg) scale(1.5);
+      }
     }
     
     .faq-answer {
       max-height: 1000px;
       padding-bottom: $spacing-6;
       opacity: 1;
+      
+      // Scale padding with screen size
+      @media (min-width: $xl) {
+        padding-bottom: $spacing-8;
+        max-height: 2000px; // Allow more content on large screens
+      }
       
       @media (max-width: $sm) {
         padding-bottom: $spacing-4;
@@ -59,15 +105,29 @@
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    @include transition(all 0.3s ease);
+    @include mix.transition(all 0.3s ease);
     
     p {
       color: $text-color-light;
       font-size: 0.875rem;
       line-height: 1.6;
       
-      @include respond-to(md) {
+      // Fluid typography for answers
+      @media (min-width: $md) {
         font-size: 1rem;
+      }
+      
+      @media (min-width: $lg) {
+        font-size: 1.125rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1.25rem;
+        line-height: 1.7;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.375rem;
       }
       
       @media (max-width: $sm) {
