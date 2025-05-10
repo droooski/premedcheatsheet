@@ -1,11 +1,12 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
 
 .profile-card {
   @include card;
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   width: 100%;
+  background-color: $white;
   
   &:hover {
     transform: translateY(-4px);
@@ -35,6 +36,7 @@
     h3 {
       font-size: 1rem;
       font-weight: 600;
+      margin: 0;
       
       @include respond-to(md) {
         font-size: 1.25rem;
