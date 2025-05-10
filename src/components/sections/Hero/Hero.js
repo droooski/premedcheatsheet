@@ -1,7 +1,7 @@
 // src/components/sections/Hero/Hero.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import heroImage from '../../../assets/images/heroImage.png'; // Import the correct hero image
+import heroImage from '../../../assets/images/heroImage.png'; // Import your hero image
 import './Hero.scss';
 
 const Hero = () => {
@@ -19,10 +19,11 @@ const Hero = () => {
         <button className="get-started-btn" onClick={() => navigate('/signup')}>
           Get Started
         </button>
-        
-        <div className="hero-image-container">
-          <img src={heroImage} alt="Medical school application" className="hero-image" />
-        </div>
+      </div>
+      
+      {/* The hero image container positioned below the button */}
+      <div className="hero-image-container">
+        <img src={heroImage} alt="Medical school application profile" className="hero-image" />
       </div>
     </section>
   );

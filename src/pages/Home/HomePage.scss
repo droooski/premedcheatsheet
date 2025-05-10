@@ -2,9 +2,11 @@
 @import '../../styles/mixins';
 
 .home-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  position: relative;
+  
+  > section {
+    position: relative;
+  }
 }
 
 // Med School Code section - enhanced for responsiveness

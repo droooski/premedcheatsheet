@@ -1,8 +1,6 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as mix;
 
-
-
 .hero {
   position: relative;
   overflow: visible; /* Allow image to overflow */

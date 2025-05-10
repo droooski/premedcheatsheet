@@ -3,28 +3,29 @@
 
 .roadmap {
   background-color: $white;
-  /* Top padding to accommodate the overlapping profile card */
-  padding-top: 180px;
+  /* Top padding to accommodate the overlapping hero image */
+  padding-top: 200px; /* Increased to accommodate hero image overflow */
   padding-bottom: $spacing-12;
-  margin-top: 0;
+  position: relative;
+  z-index: 1;
   
   /* Scale padding proportionally with screen size */
   @media (min-width: $xl) {
-    padding-top: 220px;
+    padding-top: 260px;
     padding-bottom: $spacing-16;
   }
   
   @media (min-width: $xxl) {
-    padding-top: 260px;
+    padding-top: 300px;
     padding-bottom: $spacing-20;
   }
   
-  @media (min-width: $md) {
-    padding-top: 160px;
+  @media (max-width: $md) {
+    padding-top: 180px;
   }
   
   @media (max-width: $sm) {
-    padding-top: 140px;
+    padding-top: 160px;
     padding-bottom: $spacing-8;
   }
   
