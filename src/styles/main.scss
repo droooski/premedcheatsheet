@@ -1,9 +1,10 @@
-// Import Google Fonts
+// src/styles/main.scss - Fix import order
+// Import Google Fonts first
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
-// Import partials
+// Import variables and mixins using @use instead of @import
 @use './variables' as *;
-@use './mixins' as *;
+@use './mixins' as mix;
 
 // Base styles
 * {
@@ -62,11 +63,11 @@ img {
   margin: 0 auto;
   padding: 0 $spacing-4;
   
-  @include respond-to(md) {
+  @include mix.respond-to(md) {
     padding: 0 $spacing-6;
   }
   
-  @include respond-to(lg) {
+  @include mix.respond-to(lg) {
     padding: 0 $spacing-8;
   }
 }
