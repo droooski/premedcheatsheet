@@ -3,39 +3,69 @@
 
 .navbar {
   background-color: $white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #000000; /* Added border instead of box-shadow */
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
   z-index: $z-sticky;
   
-  .navbar-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $spacing-3 0;
-    position: relative;
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 $spacing-4;
     
-    // Scale navbar height proportionally on larger screens
+    @media (min-width: $lg) {
+      padding: 0 $spacing-8;
+    }
+    
     @media (min-width: $xl) {
-      padding: $spacing-4 0;
+      padding: 0 $spacing-12;
     }
     
     @media (min-width: $xxl) {
-      padding: $spacing-5 0;
+      padding: 0 $spacing-16;
+    }
+  }
+  
+  .navbar-content {
+    display: flex;
+    justify-content: space-between; // This creates the expanding middle gap
+    align-items: center;
+    padding: $spacing-3 0;
+    position: relative;
+  }
+  
+  // Left side of navbar (logo + primary nav)
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    
+    @media (max-width: $md) {
+      // On mobile, only show logo
+      .primary-menu {
+        display: none;
+      }
     }
   }
   
   .logo {
     display: flex;
     align-items: center;
+    margin-right: $spacing-6;
+    
+    @media (min-width: $lg) {
+      margin-right: $spacing-8;
+    }
+    
+    @media (min-width: $xl) {
+      margin-right: $spacing-10;
+    }
     
     img {
       height: 30px;
       margin-right: $spacing-2;
       
-      // Scale logo with viewport
       @media (min-width: $xl) {
         height: 36px;
       }
@@ -50,7 +80,6 @@
       font-size: 1.125rem;
       color: $text-color;
       
-      // Scale logo text with viewport
       @media (min-width: $xl) {
         font-size: 1.375rem;
       }
@@ -61,68 +90,30 @@
     }
   }
   
-  .navbar-menu {
-    display: flex;
-    align-items: center;
-    
-    @include mix.respond-to(md) {
-      flex-grow: 1;
-      justify-content: flex-end;
-    }
-    
-    // Mobile styles
-    @media (max-width: $md) {
-      position: fixed;
-      top: 0;
-      right: -280px;
-      width: 280px;
-      height: 100vh;
-      background-color: $white;
-      flex-direction: column;
-      justify-content: flex-start;
-      padding: $spacing-12 $spacing-4;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-      transition: right 0.3s ease;
-      
-      &.open {
-        right: 0;
-      }
-    }
-  }
-  
-  .menu-items {
+  // Primary horizontal menu (visible on desktop)
+  .primary-menu {
     display: flex;
     list-style: none;
-    
-    @media (max-width: $md) {
-      flex-direction: column;
-      width: 100%;
-      margin-bottom: $spacing-8;
-    }
+    margin: 0;
+    padding: 0;
     
     li {
       margin-right: $spacing-6;
       
-      // Scale nav item spacing on larger screens
-      @media (min-width: $xl) {
+      @media (min-width: $lg) {
         margin-right: $spacing-8;
       }
       
-      @media (min-width: $xxl) {
+      @media (min-width: $xl) {
         margin-right: $spacing-10;
-      }
-      
-      @media (max-width: $md) {
-        margin-right: 0;
-        margin-bottom: $spacing-6;
       }
       
       a {
         color: $text-color;
         font-weight: 500;
         @include mix.transition(color);
+        font-size: 1rem;
         
-        // Scale nav item text size
         @media (min-width: $xl) {
           font-size: 1.125rem;
         }
@@ -138,24 +129,60 @@
     }
   }
   
-  .cta-button {
-    @include mix.button-primary;
-    font-size: 0.875rem;
-    padding: $spacing-2 $spacing-4;
-    
-    // Scale CTA button with viewport
-    @media (min-width: $xl) {
-      font-size: 1rem;
-      padding: $spacing-3 $spacing-6;
-    }
-    
-    @media (min-width: $xxl) {
-      font-size: 1.125rem;
-      padding: $spacing-3 $spacing-8;
-    }
+  // Right side of navbar (login + try free)
+  .navbar-right {
+    display: flex;
+    align-items: center;
     
     @media (max-width: $md) {
-      width: 100%;
+      display: none; // Hide on mobile
+    }
+    
+    .login-link {
+      color: $text-color;
+      font-weight: 500;
+      margin-right: $spacing-4;
+      font-size: 1rem;
+      
+      @media (min-width: $lg) {
+        margin-right: $spacing-6;
+        font-size: 1rem;
+      }
+      
+      @media (min-width: $xl) {
+        margin-right: $spacing-8;
+        font-size: 1.125rem;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.25rem;
+      }
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+    
+
+    .try-free-button {
+      @include mix.button-primary;
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.875rem;
+      border-radius: 15px; /* Added border radius */
+      
+      @media (min-width: $lg) {
+        padding: $spacing-2 $spacing-6;
+        font-size: 1rem;
+      }
+      
+      @media (min-width: $xl) {
+        padding: $spacing-3 $spacing-8;
+        font-size: 1.125rem;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.25rem;
+      }
     }
   }
   
@@ -218,6 +245,56 @@
           top: 8px;
           transform: rotate(-135deg);
         }
+      }
+    }
+  }
+  
+  // Mobile menu
+  .mobile-menu {
+    display: none;
+    
+    @media (max-width: $md) {
+      display: block;
+      position: fixed;
+      top: 0;
+      right: -280px;
+      width: 280px;
+      height: 100vh;
+      background-color: $white;
+      z-index: 999;
+      padding: $spacing-12 $spacing-4;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      
+      &.open {
+        right: 0;
+      }
+    }
+  }
+  
+  .mobile-menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      margin-bottom: $spacing-6;
+      
+      a {
+        color: $text-color;
+        font-weight: 500;
+        font-size: 1rem;
+        
+        &:hover {
+          color: $primary-color;
+        }
+      }
+      
+      .try-free-mobile {
+        @include mix.button-primary;
+        display: inline-block;
+        padding: $spacing-2 $spacing-4;
+        font-size: 0.875rem;
       }
     }
   }

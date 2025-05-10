@@ -2,20 +2,20 @@
 @use '../../../styles/mixins' as mix;
 
 .roadmap {
-  padding: $spacing-16 0 $spacing-12;
   background-color: $white;
-  
-  // Top padding to accommodate the overlapping profile card
+  /* Top padding to accommodate the overlapping profile card */
   padding-top: 180px;
+  padding-bottom: $spacing-12;
+  margin-top: 0;
   
-  // Scale padding proportionally with screen size
+  /* Scale padding proportionally with screen size */
   @media (min-width: $xl) {
     padding-top: 220px;
     padding-bottom: $spacing-16;
   }
   
   @media (min-width: $xxl) {
-    padding-top: 240px;
+    padding-top: 260px;
     padding-bottom: $spacing-20;
   }
   
@@ -23,12 +23,8 @@
     padding-top: 160px;
   }
   
-  @media (min-width: $lg) {
-    padding-top: 140px;
-  }
-  
   @media (max-width: $sm) {
-    padding-top: 120px;
+    padding-top: 140px;
     padding-bottom: $spacing-8;
   }
   
@@ -37,13 +33,13 @@
     flex-direction: column;
     gap: $spacing-8;
     
-    // Convert to row layout on medium screens and above
+    /* Convert to row layout on medium screens and above */
     @media (min-width: $md) {
       flex-direction: row;
       align-items: center;
     }
     
-    // Increase spacing between elements on larger screens
+    /* Increase spacing between elements on larger screens */
     @media (min-width: $xl) {
       gap: $spacing-12;
     }
@@ -60,13 +56,13 @@
   .image-container {
     flex: 0 0 100%;
     
-    // Adjust image size based on screen width
+    /* Adjust image size based on screen width */
     @media (min-width: $md) {
       flex: 0 0 40%;
     }
     
     @media (min-width: $xl) {
-      flex: 0 0 45%; // Larger image on XL screens
+      flex: 0 0 45%; /* Larger image on XL screens */
     }
     
     img {
@@ -77,7 +73,7 @@
       aspect-ratio: 1/1;
       @include mix.box-shadow;
       
-      // Enhanced image styling on larger screens
+      /* Enhanced image styling on larger screens */
       @media (min-width: $xl) {
         border-radius: 12px;
         @include mix.box-shadow(0 8px 20px rgba(0, 0, 0, 0.15));
@@ -97,7 +93,7 @@
       @include mix.heading-2;
       margin-bottom: $spacing-6;
       
-      // Fluid typography for headings based on screen size
+      /* Fluid typography for headings based on screen size */
       @media (min-width: $xl) {
         font-size: 2.5rem;
         margin-bottom: $spacing-8;
@@ -119,7 +115,7 @@
       margin-bottom: $spacing-4;
       @include mix.paragraph;
       
-      // Proportional text scaling for all screen sizes
+      /* Proportional text scaling for all screen sizes */
       @media (min-width: $xl) {
         font-size: 1.25rem;
         margin-bottom: $spacing-6;

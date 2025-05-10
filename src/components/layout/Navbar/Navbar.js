@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../../../assets/icons/Icon.png'; // Fixed logo path
+import logo from '../../../assets/icons/Icon.png';
 import './Navbar.scss';
 
 const Navbar = () => {
@@ -15,20 +15,48 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   };
 
-  const navigateToCheckout = () => {
-    closeMobileMenu();
-    navigate('/checkout');
-  };
-
   return (
     <nav className="navbar">
       <div className="container">
         <div className="navbar-content">
-          <Link to="/" className="logo" onClick={closeMobileMenu}>
-            <img src={logo} alt="PremedCheatsheet" />
-            <span>PremedCheatsheet</span>
-          </Link>
+          {/* Left side with logo and main nav links */}
+          <div className="navbar-left">
+            <Link to="/" className="logo" onClick={closeMobileMenu}>
+              <img src={logo} alt="PremedCheatsheet" />
+              <span>PremedCheatsheet</span>
+            </Link>
+            
+            {/* Primary navigation items */}
+            <ul className="primary-menu">
+              <li>
+                <Link to="/" onClick={closeMobileMenu}>
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" onClick={closeMobileMenu}>
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" onClick={closeMobileMenu}>
+                  Pricing
+                </Link>
+              </li>
+            </ul>
+          </div>
           
+          {/* Right side with login and CTA */}
+          <div className="navbar-right">
+            <Link to="/login" className="login-link">
+              Log in
+            </Link>
+            <Link to="/signup" className="try-free-button">
+              Try it Free
+            </Link>
+          </div>
+          
+          {/* Mobile menu toggle */}
           <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
             <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}>
               <span></span>
@@ -37,25 +65,35 @@ const Navbar = () => {
             </div>
           </div>
           
-          <div className={`navbar-menu ${mobileMenuOpen ? 'open' : ''}`}>
-            <ul className="menu-items">
+          {/* Mobile menu */}
+          <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+            <ul className="mobile-menu-items">
+              <li>
+                <Link to="/" onClick={closeMobileMenu}>
+                  Home
+                </Link>
+              </li>
               <li>
                 <Link to="/about" onClick={closeMobileMenu}>
                   About
                 </Link>
               </li>
               <li>
-                <Link to="/contact" onClick={closeMobileMenu}>
-                  Contact
+                <Link to="/pricing" onClick={closeMobileMenu}>
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" onClick={closeMobileMenu}>
+                  Log in
+                </Link>
+              </li>
+              <li>
+                <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>
+                  Try it Free
                 </Link>
               </li>
             </ul>
-            <button 
-              className="cta-button"
-              onClick={navigateToCheckout}
-            >
-              Get Started
-            </button>
           </div>
         </div>
       </div>
