@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../../../assets/icons/Icon.png'; // Fixed logo path
 import './Navbar.scss';
 
 const Navbar = () => {
@@ -24,7 +25,7 @@ const Navbar = () => {
       <div className="container">
         <div className="navbar-content">
           <Link to="/" className="logo" onClick={closeMobileMenu}>
-            <img src="/images/logo.svg" alt="PremedCheatsheet" />
+            <img src={logo} alt="PremedCheatsheet" />
             <span>PremedCheatsheet</span>
           </Link>
           

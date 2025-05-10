@@ -1,10 +1,11 @@
+// src/components/sections/ProfileCard/ProfileCard.js
 import React from 'react';
 import './ProfileCard.scss';
 
 const ProfileCard = ({ 
   type = "biomedical", 
   showBookmark = true,
-  size = "large" // "large" or "small"
+  size = "large"
 }) => {
   const isBiomedical = type === "biomedical";
   
@@ -13,8 +14,17 @@ const ProfileCard = ({
     title: isBiomedical 
       ? "Biomedical Engineering Student" 
       : "Non-Trad Applicant with Research Focus",
-    major: isBiomedical ? "Biomedical" : "Neuroscience",
+    gender: "Male",
+    ethnicity: "Taiwanese",
+    state: "New Jersey",
+    year: "2024",
     gpa: isBiomedical ? "3.94" : "3.84",
+    sgpa: "3.91",
+    mcat: "513",
+    mcatBreakdown: "127, 129, 131, 129",
+    acceptedSchools: isBiomedical 
+      ? ["Einstein School of Medicine (Accepted)", "Rutgers New Jersey Medical School"] 
+      : ["Stanford Medical School", "UCSF Medical School"],
     backgroundItems: isBiomedical 
       ? [
           "Major: Biomedical Engineering",
@@ -40,33 +50,37 @@ const ProfileCard = ({
       </div>
       
       <div className="profile-details">
-        <div className="detail-row">
-          <div className="detail-item">
-            <span className="label">Major</span>
-            <span className="value">{data.major}</span>
+        <div className="grid-layout">
+          <div className="detail-group">
+            <span className="label">Gender</span>
+            <span className="value">{data.gender}</span>
           </div>
-          <div className="detail-item">
+          <div className="detail-group">
+            <span className="label">Ethnicity</span>
+            <span className="value">{data.ethnicity}</span>
+          </div>
+          <div className="detail-group">
             <span className="label">State</span>
-            <span className="value">New Jersey</span>
+            <span className="value">{data.state}</span>
           </div>
-          <div className="detail-item">
-            <span className="label">Year</span>
-            <span className="value">2024</span>
+          <div className="detail-group">
+            <span className="label">Application Year</span>
+            <span className="value">{data.year}</span>
           </div>
         </div>
 
-        <div className="detail-row">
-          <div className="detail-item">
+        <div className="grid-layout">
+          <div className="detail-group">
             <span className="label">GPA</span>
             <span className="value">{data.gpa}</span>
           </div>
-          <div className="detail-item">
-            <span className="label">sGPA</span>
-            <span className="value">3.91</span>
-          </div>
-          <div className="detail-item">
+          <div className="detail-group">
             <span className="label">MCAT</span>
-            <span className="value">517, 129, 131, 129</span>
+            <span className="value">{data.mcat}</span>
+          </div>
+          <div className="detail-group">
+            <span className="label">MCAT Breakdown</span>
+            <span className="value">{data.mcatBreakdown}</span>
           </div>
         </div>
 
@@ -75,7 +89,9 @@ const ProfileCard = ({
             <div className="dot accepted-dot"></div>
             <span>Accepted Schools</span>
           </div>
-          <p>Einstein School of Medicine (Accepted)</p>
+          {data.acceptedSchools.map((school, index) => (
+            <p key={index}>{school}</p>
+          ))}
         </div>
 
         <div className="highlight-section background">

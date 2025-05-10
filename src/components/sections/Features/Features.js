@@ -1,5 +1,12 @@
+// src/components/sections/Features/Features.js
 import React from 'react';
 import './Features.scss';
+import icon1 from '../../../assets/icons/Icon-6.png';
+import icon2 from '../../../assets/icons/Icon-1.png';
+import icon3 from '../../../assets/icons/Icon-5.png';
+import icon4 from '../../../assets/icons/Icon-2.png';
+import icon5 from '../../../assets/icons/Icon-3.png';
+import icon6 from '../../../assets/icons/Icon-4.png';
 
 // Feature Item Component
 const FeatureItem = ({ icon, title, description }) => (
@@ -11,20 +18,20 @@ const FeatureItem = ({ icon, title, description }) => (
 );
 
 const Features = () => {
-  // Primary features
+  // Primary features with corrected icon paths
   const primaryFeatures = [
     {
-      icon: "/images/icon-trusted.svg", // Public directory reference maintained
+      icon: icon1,
       title: "Trusted by thousands",
       description: "Data vetted by med students and admissions experts"
     },
     {
-      icon: "/images/icon-updated.svg", // Public directory reference maintained
+      icon: icon2,
       title: "Updated regularly",
       description: "New applicant profiles added weekly"
     },
     {
-      icon: "/images/icon-easy.svg", // Public directory reference maintained
+      icon: icon3,
       title: "Easy to use",
       description: "Intuitive interface to find the data you need"
     }
@@ -33,17 +40,17 @@ const Features = () => {
   // Secondary features
   const secondaryFeatures = [
     {
-      icon: "/images/icon-data.svg", // Public directory reference maintained
+      icon: icon4,
       title: "Data-driven insights",
       description: "Make decisions based on real acceptance data"
     },
     {
-      icon: "/images/icon-secure.svg", // Public directory reference maintained
+      icon: icon5,
       title: "Secure and private",
       description: "Your data is protected with industry-standard security"
     },
     {
-      icon: "/images/icon-community.svg", // Public directory reference maintained
+      icon: icon6,
       title: "Community support",
       description: "Connect with others on the same journey"
     }
