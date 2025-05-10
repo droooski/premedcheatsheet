@@ -1,0 +1,29 @@
+import React from 'react';
+import './Roadmap.scss';
+
+const Roadmap = () => {
+  return (
+    <section className="roadmap">
+      <div className="container">
+        <div className="roadmap-content">
+          <div className="image-container">
+            <img src="/images/roadmap-image.jpg" alt="Medical student equipment" />
+          </div>
+          <div className="text-content">
+            <h2>Your roadmap to med school, built by those who made it</h2>
+            <p>
+              Wondering if you're on track for med school? Our database gives you exactly what we wished we had: 
+              detailed stats, successful strategies, and honest insights from accepted students.
+            </p>
+            <p>
+              Browse thousands of real acceptance profiles, complete with GPAs, MCAT scores, and the extracurriculars that 
+              actually worked. Created by med students who remember exactly what you're going through.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Roadmap;

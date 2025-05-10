@@ -1,0 +1,74 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.hero {
+  background-color: $gray-100;
+  padding: $spacing-16 0 $spacing-12;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  
+  @media (max-width: $sm) {
+    padding: $spacing-8 0 $spacing-16;
+  }
+  
+  h1 {
+    @include heading-1;
+    margin-bottom: $spacing-6;
+    
+    @media (max-width: $sm) {
+      font-size: 2rem;
+      margin-bottom: $spacing-4;
+    }
+  }
+  
+  .hero-text {
+    max-width: 600px;
+    margin: 0 auto $spacing-8;
+    color: $text-color;
+    @include paragraph;
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
+      padding: 0 $spacing-4;
+      margin-bottom: $spacing-6;
+    }
+  }
+  
+  .get-started-btn {
+    @include button-primary;
+    margin-bottom: $spacing-12;
+    font-size: 1rem;
+    
+    @include respond-to(md) {
+      font-size: 1.125rem;
+      padding: $spacing-3 $spacing-6;
+    }
+    
+    @media (max-width: $sm) {
+      margin-bottom: $spacing-8;
+      padding: $spacing-3 $spacing-6;
+    }
+  }
+  
+  .profile-card-preview {
+    margin-top: $spacing-8;
+    margin-bottom: -120px; // Makes the card overlap with the next section
+    position: relative;
+    z-index: 10;
+    padding: 0 $spacing-4;
+    
+    @include respond-to(md) {
+      margin-bottom: -100px;
+    }
+    
+    @include respond-to(lg) {
+      margin-bottom: -80px;
+    }
+    
+    @media (max-width: $sm) {
+      margin-bottom: -60px;
+      padding: 0 $spacing-2;
+    }
+  }
+}

@@ -1,0 +1,75 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: $font-family-sans;
+  
+  &:focus {
+    outline: none;
+  }
+  
+  // Variants
+  &.button-primary {
+    background-color: $black;
+    color: $white;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+  }
+  
+  &.button-secondary {
+    background-color: $white;
+    color: $text-color;
+    border: 1px solid $gray-300;
+    
+    &:hover {
+      background-color: $gray-100;
+    }
+  }
+  
+  &.button-text {
+    background-color: transparent;
+    color: $text-color;
+    padding: 0;
+    
+    &:hover {
+      color: $primary-color;
+    }
+  }
+  
+  // Sizes
+  &.button-small {
+    padding: $spacing-1 $spacing-3;
+    font-size: 0.875rem;
+  }
+  
+  &.button-medium {
+    padding: $spacing-2 $spacing-4;
+    font-size: 1rem;
+  }
+  
+  &.button-large {
+    padding: $spacing-3 $spacing-6;
+    font-size: 1.125rem;
+  }
+  
+  // Full width
+  &.button-full-width {
+    width: 100%;
+  }
+  
+  // Disabled state
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,124 @@
+@import 'variables';
+
+// Responsive breakpoints mixin
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $sm) { @content; }
+  } @else if $breakpoint == md {
+    @media (min-width: $md) { @content; }
+  } @else if $breakpoint == lg {
+    @media (min-width: $lg) { @content; }
+  } @else if $breakpoint == xl {
+    @media (min-width: $xl) { @content; }
+  } @else if $breakpoint == xxl {
+    @media (min-width: $xxl) { @content; }
+  }
+}
+
+// Flex center mixin
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Flex column mixin
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Transition mixin
+@mixin transition($property: all, $duration: 0.3s, $timing: ease) {
+  transition: $property $duration $timing;
+}
+
+// Box shadow mixin
+@mixin box-shadow($shadow: 0 4px 6px rgba(0, 0, 0, 0.1)) {
+  box-shadow: $shadow;
+}
+
+// Border radius mixin
+@mixin border-radius($radius: 4px) {
+  border-radius: $radius;
+}
+
+// Typography mixins
+@mixin heading-1 {
+  font-family: $font-family-serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  
+  @include respond-to(md) {
+    font-size: 3.5rem;
+  }
+  
+  @include respond-to(lg) {
+    font-size: 4.5rem;
+  }
+}
+
+@mixin heading-2 {
+  font-family: $font-family-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  
+  @include respond-to(md) {
+    font-size: 2.25rem;
+  }
+}
+
+@mixin heading-3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@mixin paragraph {
+  font-size: 1rem;
+  line-height: 1.6;
+  
+  @include respond-to(md) {
+    font-size: 1.125rem;
+  }
+}
+
+// Button mixins
+@mixin button-primary {
+  background-color: $black;
+  color: $white;
+  border: none;
+  @include border-radius;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  @include transition;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+@mixin button-secondary {
+  background-color: $white;
+  color: $text-color;
+  border: 1px solid $gray-300;
+  @include border-radius;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  @include transition;
+  
+  &:hover {
+    background-color: $gray-100;
+  }
+}
+
+// Card mixin
+@mixin card {
+  background-color: $white;
+  @include border-radius(8px);
+  @include box-shadow;
+  border: 1px solid $gray-200;
+  overflow: hidden;
+}

@@ -1,0 +1,184 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.navbar {
+  background-color: $white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: $z-sticky;
+  
+  .navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-3 0;
+    position: relative;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    
+    img {
+      height: 30px;
+      margin-right: $spacing-2;
+    }
+    
+    span {
+      font-weight: 600;
+      font-size: 1.125rem;
+      color: $text-color;
+    }
+  }
+  
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    
+    @include respond-to(md) {
+      flex-grow: 1;
+      justify-content: flex-end;
+    }
+    
+    // Mobile styles
+    @media (max-width: $md) {
+      position: fixed;
+      top: 0;
+      right: -280px;
+      width: 280px;
+      height: 100vh;
+      background-color: $white;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: $spacing-12 $spacing-4;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      
+      &.open {
+        right: 0;
+      }
+    }
+  }
+  
+  .menu-items {
+    display: flex;
+    list-style: none;
+    
+    @media (max-width: $md) {
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: $spacing-8;
+    }
+    
+    li {
+      margin-right: $spacing-6;
+      
+      @media (max-width: $md) {
+        margin-right: 0;
+        margin-bottom: $spacing-6;
+      }
+      
+      a {
+        color: $text-color;
+        font-weight: 500;
+        @include transition(color);
+        
+        &:hover {
+          color: $primary-color;
+        }
+      }
+    }
+  }
+  
+  .cta-button {
+    @include button-primary;
+    font-size: 0.875rem;
+    padding: $spacing-2 $spacing-4;
+    
+    @media (max-width: $md) {
+      width: 100%;
+    }
+  }
+  
+  // Mobile menu toggle
+  .mobile-menu-toggle {
+    display: none;
+    cursor: pointer;
+    z-index: 1000;
+    
+    @media (max-width: $md) {
+      display: block;
+    }
+  }
+  
+  .hamburger {
+    width: 24px;
+    height: 18px;
+    position: relative;
+    transform: rotate(0deg);
+    transition: 0.5s ease-in-out;
+    
+    span {
+      display: block;
+      position: absolute;
+      height: 2px;
+      width: 100%;
+      background: $text-color;
+      border-radius: 2px;
+      opacity: 1;
+      left: 0;
+      transform: rotate(0deg);
+      transition: 0.25s ease-in-out;
+      
+      &:nth-child(1) {
+        top: 0px;
+      }
+      
+      &:nth-child(2) {
+        top: 8px;
+      }
+      
+      &:nth-child(3) {
+        top: 16px;
+      }
+    }
+    
+    &.open {
+      span {
+        &:nth-child(1) {
+          top: 8px;
+          transform: rotate(135deg);
+        }
+        
+        &:nth-child(2) {
+          opacity: 0;
+          left: -60px;
+        }
+        
+        &:nth-child(3) {
+          top: 8px;
+          transform: rotate(-135deg);
+        }
+      }
+    }
+  }
+  
+  // Mobile menu overlay
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: none;
+    
+    @media (max-width: $md) {
+      display: block;
+    }
+  }
+}
