@@ -1,21 +1,15 @@
 // src/components/sections/Hero/Hero.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileCard from '../ProfileCard/ProfileCard';
+import heroImage from '../../../assets/images/heroImage.png'; // Import the correct hero image
 import './Hero.scss';
 
 const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="hero" style={{
-      backgroundImage: "url('/images/newhero.png')",
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      backgroundRepeat: "no-repeat"
-    }}>
+    <section className="hero">
       <div className="container">
-        {/* Content remains unchanged */}
         <h1>Premed Cheatsheet</h1>
         <p className="hero-text">
           Stop guessing what it takes to get accepted. Our database offers dozens of acceptance profiles
@@ -26,8 +20,8 @@ const Hero = () => {
           Get Started
         </button>
         
-        <div className="profile-card-preview">
-          <ProfileCard type="biomedical" size="large" />
+        <div className="hero-image-container">
+          <img src={heroImage} alt="Medical school application" className="hero-image" />
         </div>
       </div>
     </section>
