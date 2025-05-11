@@ -811,7 +811,7 @@ html body .hero {
 .cta {
   // Use existing spacing variables and combine them
   padding: $spacing-20 0 calc($spacing-32 + $spacing-32) !important; // Huge bottom padding
-  background-color: $background-color !important;
+  background-color: #F2F6F5;
   text-align: center;
   position: relative;
   
