@@ -55,7 +55,7 @@
         
         .footer-links-wrapper {
           display: flex;
-          gap: 10rem;
+          gap: 6rem;
         }
         
         .footer-links-column {
@@ -64,7 +64,7 @@
         }
         
         .footer-links-column h4 {
-          font-size: 1.5rem;
+          font-size: 1.2rem;
           font-weight: 500;
           color: #1f2937;
           margin-bottom: 0.75rem;
@@ -72,9 +72,8 @@
         
         .footer-link {
           color: #1f2937;
-          font-size: 1.2rem;
+          font-size: 0.875rem;
           text-decoration: none;
-          margin-bottom: 0.5rem;
         }
         
         .footer-link:hover {

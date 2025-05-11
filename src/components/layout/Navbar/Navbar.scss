@@ -2,7 +2,7 @@
 @use '../../../styles/mixins' as mix;
 
 .navbar {
-  background-color: $white;
+  background-color: #F2F6F5;
   border-bottom: 1px solid #000000; /* Added border instead of box-shadow */
   position: sticky;
   top: 0;
@@ -32,7 +32,7 @@
     display: flex;
     justify-content: space-between; // This creates the expanding middle gap
     align-items: center;
-    padding: $spacing-3 0;
+    padding: $spacing-5 0;
     position: relative;
   }
   
@@ -63,29 +63,29 @@
     }
     
     img {
-      height: 20px;
+      height: 30px;
       margin-right: $spacing-2;
       
       @media (min-width: $xl) {
-        height: 25px;
+        height: 35px;
       }
       
       @media (min-width: $xxl) {
-        height: 30px;
+        height: 40px;
       }
     }
     
     span {
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 1.4rem;
       color: $text-color;
       
       @media (min-width: $xl) {
-        font-size: 1.375rem;
+        font-size: 1.6rem;
       }
       
       @media (min-width: $xxl) {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
       }
     }
   }
@@ -112,14 +112,14 @@
         color: $text-color;
         font-weight: 500;
         @include mix.transition(color);
-        font-size: 0.6rem;
+        font-size: 0.8rem;
         
         @media (min-width: $xl) {
-          font-size: 0.8rem;
+          font-size: 1rem;
         }
         
         @media (min-width: $xxl) {
-          font-size: 1rem;
+          font-size: 1.2rem;
         }
         
         &:hover {
@@ -142,20 +142,15 @@
       color: $text-color;
       font-weight: 500;
       margin-right: $spacing-4;
-      font-size: 0.6rem;
-      
-      @media (min-width: $lg) {
-        margin-right: $spacing-6;
-        font-size: 0.6rem;
-      }
+      font-size: 0.8rem;
       
       @media (min-width: $xl) {
         margin-right: $spacing-8;
-        font-size: 0.8rem;
+        font-size: 1rem;
       }
       
       @media (min-width: $xxl) {
-        font-size: 1rem;
+        font-size: 1.2rem;
       }
       
       &:hover {
@@ -167,21 +162,16 @@
     .try-free-button {
       @include mix.button-primary;
       padding: $spacing-2 $spacing-4;
-      font-size: 0.6rem;
+      font-size: 0.8rem;
       border-radius: 10px; /* Added border radius */
-      
-      @media (min-width: $lg) {
-        padding: $spacing-2 $spacing-6;
-        font-size: 0.6rem;
-      }
       
       @media (min-width: $xl) {
         padding: $spacing-3 $spacing-8;
-        font-size: 0.8rem;
+        font-size: 1rem;
       }
       
       @media (min-width: $xxl) {
-        font-size: 1rem;
+        font-size: 1.2rem;
       }
     }
   }
