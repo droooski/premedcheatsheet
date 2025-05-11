@@ -40,7 +40,7 @@ html {
 body {
   font-family: $font-family-sans;
   color: $text-color;
-  background-color: $background-color;
+  background-color: #F2F6F5 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -400,7 +400,7 @@ html.scroll-smooth {
 
 /* Additional style to ensure the footer or next section doesn't have a gray top */
 .roadmap, section + section {
-  background: #fff !important;
+  background-color: #F2F6F5 !important;
   border-top: none !important;
 }
 
@@ -654,5 +654,225 @@ html body .hero {
         }
       }
     }
+  }
+}
+
+// Add these styles to your main.scss file
+// =========================================
+// FAQ SECTION GLOBAL ENHANCEMENTS
+// =========================================
+
+/* Global FAQ Section Styling */
+.faq {
+  padding: $spacing-32 0;
+  background-color: #F2F6F5 !important;
+  position: relative;
+  
+  /* Add clean, consistent lines at top and bottom */
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0.5px !important; /* THIN top line */
+    background-color: $black;
+    width: 100%;
+    top: 0;
+  }
+  
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px !important; /* THICK bottom line */
+    background-color: $black;
+    width: 100%;
+    bottom: 0;
+  }
+  
+  /* Override any container styling */
+  .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  
+  /* Force BIZ font on headers */
+  h2 {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.01em !important;
+    margin-bottom: $spacing-16 !important; /* More space below heading */
+    
+    @media (min-width: $xl) {
+      margin-bottom: $spacing-20 !important;
+    }
+    
+    @media (max-width: $md) {
+      margin-bottom: $spacing-12 !important;
+    }
+    
+    @media (max-width: $sm) {
+      margin-bottom: $spacing-8 !important;
+    }
+  }
+  
+  /* Question headers with BIZ font and REDUCED PADDING */
+  .faq-question {
+    padding: $spacing-6 0 !important; /* Less vertical padding */
+    
+    @media (max-width: $md) {
+      padding: $spacing-4 0 !important; /* Even less on medium screens */
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-3 0 !important; /* Minimum on small screens */
+    }
+    
+    h3 {
+      font-family: $font-family-mincho !important;
+      font-weight: 400 !important;
+      letter-spacing: 0.01em !important;
+      text-align: left !important;
+    }
+  }
+  
+  /* Force full width on FAQ items */
+  .faq-items {
+    width: 85% !important;
+    max-width: none !important;
+    
+    @media (min-width: $xl) {
+      max-width: 1500px !important;
+    }
+    
+    @media (min-width: $xxl) {
+      max-width: 1700px !important;
+    }
+  }
+  
+  /* Ensure consistent THIN dividing lines */
+  .faq-item {
+    /* Remove any borders that might conflict */
+    border: none !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    
+    /* CONSISTENT thin line using only the ::after pseudo-element */
+    &::after {
+      content: "" !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 0.5px !important;
+      background-color: #000000 !important;
+    }
+    
+    /* First item gets a top line */
+    &:first-child {
+      &::before {
+        content: "" !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 0.5px !important;
+        background-color: #000000 !important;
+      }
+    }
+  }
+}
+
+// Add these styles to your main.scss file to ensure the CTA styling
+// =========================================
+// CTA SECTION GLOBAL ENHANCEMENTS
+// =========================================
+
+/* Global CTA Section Styling */
+.cta {
+  // Use existing spacing variables and combine them
+  padding: $spacing-20 0 calc($spacing-32 + $spacing-32) !important; // Huge bottom padding
+  background-color: $background-color !important;
+  text-align: center;
+  position: relative;
+  
+  /* Responsive padding that maintains huge bottom space */
+  @media (min-width: $xxl) {
+    padding: $spacing-24 0 calc($spacing-32 + $spacing-32 + $spacing-8) !important; // Even more on extra large screens
+  }
+  
+  @media (max-width: $lg) {
+    padding: $spacing-16 0 $spacing-32 !important; // Still very large on large screens
+  }
+  
+  @media (max-width: $md) {
+    padding: $spacing-16 0 $spacing-24 !important; // Large on medium screens
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-12 0 $spacing-20 !important; // Smaller but still substantial on mobile
+  }
+  
+  /* Add thin lines at top and bottom */
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px !important;
+    background-color: $black !important;
+    width: 100%;
+  }
+  
+  &:after {
+    bottom: 0;
+  }
+  
+  /* Force BIZ font on headers */
+  h2 {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.01em !important;
+    text-align: center !important;
+  }
+  
+  /* Button styles with RESPONSIVE sizes */
+  .cta-button {
+    background-color: #1A3A34 !important;
+    color: $white !important;
+    border-radius: 8px !important;
+    min-width: 250px !important; // Minimum button width
+    margin-top: $spacing-4 !important;
+    
+    @media (min-width: $xl) {
+      min-width: 300px !important; // Wider on large screens
+    }
+    
+    @media (min-width: $xxl) {
+      min-width: 350px !important; // Even wider on extra large screens
+    }
+    
+    @media (max-width: $md) {
+      min-width: 220px !important; // Slightly narrower on tablet
+    }
+    
+    @media (max-width: $sm) {
+      min-width: 200px !important; // Narrower on mobile
+    }
+    
+    &:hover {
+      background-color: darken(#1A3A34, 5%) !important;
+    }
+  }
+  
+  /* Text paragraph */
+  p {
+    text-align: center !important;
+    color: $text-color !important;
+    max-width: 600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 }

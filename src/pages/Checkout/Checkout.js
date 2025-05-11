@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
-import Footer from '../../components/layout/Footer/Footer';
+import Footer from '../../components/sections/Footer/Footer';
 import './Checkout.scss';
 
 const Checkout = () => {

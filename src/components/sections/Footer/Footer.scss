@@ -1,0 +1,85 @@
+// src/components/layout/Footer/Footer.scss
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
+
+.footer {
+  background-color: $background-color;
+  border-top: 0.5px solid $black;
+  padding: $spacing-8 0;
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+    
+    @media (max-width: $sm) {
+      flex-direction: column;
+      align-items: center;
+      gap: $spacing-6;
+      text-align: center;
+    }
+    
+    @media (min-width: $md) and (max-width: $lg) {
+      padding: 0 $spacing-8;
+    }
+    
+    @media (min-width: $lg) {
+      padding: 0 $spacing-12;
+    }
+  }
+  
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    
+    .logo-icon {
+      font-size: 1.5rem;
+      margin-right: $spacing-2;
+    }
+    
+    .logo-text {
+      font-family: $font-family-serif;
+      font-weight: 500;
+      font-size: 1.2rem;
+      color: $text-color;
+    }
+    
+    @media (max-width: $sm) {
+      margin-bottom: $spacing-6;
+    }
+  }
+  
+  .footer-links-column {
+    display: flex;
+    flex-direction: column;
+    
+    h4 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: $text-color;
+      margin-bottom: $spacing-3;
+    }
+    
+    .footer-link {
+      color: $text-color;
+      font-size: 0.875rem;
+      text-decoration: none;
+      margin-bottom: $spacing-2;
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+    
+    @media (max-width: $sm) {
+      margin-bottom: $spacing-4;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

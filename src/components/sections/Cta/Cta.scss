@@ -1,0 +1,157 @@
+// src/components/sections/Cta/Cta.scss
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
+
+.cta {
+  // Use existing spacing variables and multiply them
+  padding: $spacing-20 0 calc($spacing-32 + $spacing-6); // Huge bottom padding using existing variables
+  background-color: $background-color;
+  text-align: center;
+  position: relative;
+  
+  // Add thin line at the top that spans the entire screen
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0.5px;
+    background-color: $black;
+    width: 100%;
+  }
+  
+  // Add thin line at the bottom that spans the entire screen
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0.5px;
+    background-color: $black;
+    width: 100%;
+  }
+  
+  // Responsive padding that maintains huge bottom padding
+  @media (min-width: $xxl) {
+    padding: $spacing-24 0 calc($spacing-32 + $spacing-8); // Even more on extra large screens
+  }
+  
+  @media (max-width: $lg) {
+    padding: $spacing-16 0 $spacing-32; // Still very large on large screens
+  }
+  
+  @media (max-width: $md) {
+    padding: $spacing-16 0 $spacing-24; // Large on medium screens
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-12 0 $spacing-20; // Smaller but still substantial on mobile
+  }
+  
+  h2 {
+    font-family: $font-family-mincho !important; // BIZ UDPMincho font
+    font-weight: 400 !important;
+    font-size: 2rem;
+    letter-spacing: 0.01em !important;
+    line-height: 1.2;
+    margin-bottom: $spacing-6;
+    color: $text-color;
+    
+    @media (min-width: $xl) {
+      font-size: 2.25rem;
+      letter-spacing: 0.015em !important;
+    }
+    
+    @media (min-width: $xxl) {
+      font-size: 2.5rem;
+      letter-spacing: 0.02em !important;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 1.75rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.5rem;
+      margin-bottom: $spacing-4;
+    }
+  }
+  
+  p {
+    max-width: 600px;
+    margin: 0 auto $spacing-10;
+    color: $text-color;
+    font-family: $font-family-sans;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    font-weight: 400;
+    
+    @media (min-width: $xl) {
+      font-size: 1.25rem;
+      max-width: 650px;
+      margin-bottom: $spacing-12;
+    }
+    
+    @media (min-width: $xxl) {
+      font-size: 1.375rem;
+      max-width: 700px;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 1rem;
+      max-width: 550px;
+      margin-bottom: $spacing-8;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 0.875rem;
+      max-width: 85%;
+      margin-bottom: $spacing-6;
+      padding: 0 $spacing-4;
+    }
+  }
+  
+  .cta-button {
+    background-color: #1A3A34; // Dark green
+    color: $white;
+    border: none;
+    border-radius: 4px;
+    padding: $spacing-4 $spacing-6;
+    font-family: $font-family-sans;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 250px; // ADDED minimum width
+    
+    // IMPROVED RESPONSIVE BUTTON SIZING
+    @media (min-width: $xl) {
+      font-size: 1.125rem;
+      padding: $spacing-4 $spacing-8;
+      min-width: 300px; // Wider on large screens
+    }
+    
+    @media (min-width: $xxl) {
+      padding: $spacing-5 $spacing-10;
+      min-width: 350px; // Even wider on extra large screens
+      font-size: 1.25rem; // Larger text on extra large screens
+    }
+    
+    @media (max-width: $md) {
+      padding: $spacing-3 $spacing-5;
+      min-width: 220px; // Slightly narrower on tablet
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 0.875rem;
+      padding: $spacing-3 $spacing-4;
+      min-width: 200px; // Narrower on mobile
+    }
+    
+    &:hover {
+      background-color: darken(#1A3A34, 5%);
+    }
+  }
+}
