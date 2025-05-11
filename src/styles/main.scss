@@ -44,7 +44,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-  overflow-x: hidden;
+  overflow-x: hidden; // Prevent horizontal scrolling
 }
 
 h1, h2, h3.serif {
@@ -186,3 +186,368 @@ img {
 .slide-up {
   animation: slideUp 0.5s ease-out;
 }
+
+// =========================================
+// NEW FIXES FOR HERO IMAGE POSITIONING
+// =========================================
+
+// Ensure sections are properly stacked
+.home-page {
+  position: relative;
+  
+  > section {
+    position: relative;
+  }
+}
+
+// Fix for Safari and other browsers to ensure proper positioning
+@supports (-webkit-touch-callout: none) {
+  /* Safari specific fix */
+  .hero {
+    padding-bottom: 350px !important;
+    
+    .hero-image-container {
+      position: absolute !important;
+      bottom: -150px !important;
+    }
+  }
+  
+  .roadmap {
+    padding-top: 200px !important;
+    margin-top: 100px !important;
+  }
+}
+
+// Special Firefox fix
+@-moz-document url-prefix() {
+  .hero {
+    padding-bottom: 320px;
+  }
+  
+  .hero-image-container {
+    bottom: -140px;
+  }
+}
+
+// Ensure section spacing stays consistent
+.roadmap + section {
+  position: relative;
+  z-index: 1;
+}
+
+// Override any conflicting styles
+.hero .hero-image-container {
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+// Ensure the next section maintains proper positioning
+section + section {
+  position: relative;
+  z-index: 1;
+}
+
+// Additional helper classes for section spacing and overlap
+.section-overlap {
+  position: relative;
+  z-index: 1;
+  margin-top: -100px;
+  
+  @media (min-width: $xl) {
+    margin-top: -150px;
+  }
+  
+  @media (max-width: $md) {
+    margin-top: -80px;
+  }
+  
+  @media (max-width: $sm) {
+    margin-top: -60px;
+  }
+}
+
+// Fix for proper layering of overlapping content
+.z-higher {
+  position: relative;
+  z-index: 5;
+}
+
+.z-highest {
+  position: relative;
+  z-index: 10;
+}
+
+// Fix for image positioning consistency
+.fixed-position {
+  position: absolute !important;
+}
+
+// Prevent main content jumps during loading
+.content-stable {
+  min-height: 100vh;
+}
+
+// Fix for proper position on Mobile Safari
+@media not all and (min-resolution:.001dpcm) { 
+  @supports (-webkit-appearance:none) {
+    .hero-image-container {
+      position: absolute !important;
+      transform: translateX(-50%) !important;
+    }
+  }
+}
+
+// Ensure padding consistency when scrolling
+html.scroll-smooth {
+  scroll-behavior: smooth;
+
+  /* Add padding to scroll targets to account for sticky header */
+  [id] {
+    scroll-margin-top: 80px;
+  }
+}
+
+// Fix for image rendering in Safari
+.hero-image {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+// =========================================
+// STRONG HERO IMAGE RESPONSIVE SIZING FIX - ADD THIS TO THE END OF YOUR FILE
+// =========================================
+
+/* Force responsive sizing for the hero image */
+.hero .hero-image-container,
+.hero-image-container {
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 999 !important; /* Extremely high z-index to ensure it's on top */
+  width: 95vw !important; /* Using viewport width units directly - almost full width on mobile */
+  min-width: 300px !important;
+  max-width: none !important; /* Remove any max-width constraints initially */
+  
+  @media (min-width: 500px) {
+    width: 90vw !important; /* 90% viewport width for small screens */
+    bottom: -80px !important;
+  }
+  
+  @media (min-width: 768px) {
+    width: 80vw !important; /* 80% viewport width for medium screens */
+    bottom: -120px !important;
+    max-width: 1000px !important; /* Maximum width for medium screens */
+  }
+  
+  @media (min-width: 1200px) {
+    width: 70vw !important; /* 70% viewport width for large screens */
+    bottom: -150px !important;
+    max-width: 1200px !important; /* Maximum width for large screens */
+  }
+  
+  @media (min-width: 1600px) {
+    width: 60vw !important; /* 60% viewport width for extra large screens */
+    bottom: -180px !important;
+    max-width: 1400px !important; /* Maximum width for extra large screens */
+  }
+}
+
+/* Refined shadow effect - light on sides, strong on bottom */
+.hero .hero-image-container img,
+.hero-image-container img,
+.hero-image {
+  width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  border-radius: 12px !important;
+  
+  /* Even shadow all around, stronger on bottom */
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    0 16px 36px rgba(0, 0, 0, 0.2) !important;
+  
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Full width bottom shadow using a proper rectangle gradient */
+.hero-image-container::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;  /* Full width */
+  right: 0 !important; /* Full width */
+  bottom: -40px !important;
+  height: 80px !important;
+  /* Linear gradient fading downward */
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 100%) !important;
+  filter: blur(20px) !important;
+  z-index: -1 !important;
+  
+  @media (min-width: 768px) {
+    bottom: -50px !important;
+    height: 150px !important;
+  }
+  
+  @media (min-width: 1200px) {
+    bottom: -60px !important;
+    height: 220px !important;
+  }
+}
+
+/* Additional style to ensure the footer or next section doesn't have a gray top */
+.roadmap, section + section {
+  background: #fff !important;
+  border-top: none !important;
+}
+
+/* Fix for any other conflicting styles */
+html body .hero {
+  overflow: visible !important;
+  
+  @media (max-width: 767px) {
+    padding-bottom: 400px !important; /* Ensure enough bottom padding on mobile */
+  }
+  
+  @media (min-width: 768px) {
+    padding-bottom: 550px !important; /* More bottom padding on larger screens */
+  }
+  
+  @media (min-width: 1200px) {
+    padding-bottom: 800px !important; /* Even more bottom padding on large screens */
+  }
+  
+  @media (min-width: 1600px) {
+    padding-bottom: 800px !important; /* Maximum padding on extra large screens */
+  }
+}
+
+// =========================================
+// BIZ UDPMINCHO FONT FOR ROADMAP HEADERS
+// =========================================
+
+/* Target the headers in the roadmap section */
+.roadmap .text-content h2,
+.roadmap h2 {
+  font-family: $font-family-mincho !important; /* Apply BIZ UDPMincho font */
+  font-weight: 400 !important; /* Regular weight */
+  
+  /* Refined styling for this elegant font */
+  letter-spacing: 0.01em !important;
+  line-height: 1.3 !important;
+  
+  /* Ensure good spacing around the header */
+  margin-bottom: $spacing-6 !important;
+  
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    letter-spacing: 0.015em !important; /* Slightly more spacing on larger screens */
+  }
+  
+  @media (min-width: 1200px) {
+    letter-spacing: 0.02em !important; /* More refined spacing on large screens */
+  }
+}
+
+/* Optional: Apply to all headings in the roadmap section */
+.roadmap h1, 
+.roadmap h3, 
+.roadmap h4, 
+.roadmap h5, 
+.roadmap h6 {
+  font-family: $font-family-mincho !important;
+  font-weight: 400 !important;
+}
+
+// Add this to your main.scss file to style paragraph text in the roadmap section
+
+// =========================================
+// ROADMAP PARAGRAPH TEXT STYLING
+// =========================================
+
+/* Style the paragraph text in the roadmap section */
+.roadmap .text-content p,
+.roadmap p {
+  /* Font properties */
+  font-family: $font-family-sans !important; /* Keep sans-serif for body text */
+  font-weight: 400 !important; /* Regular weight for readability */
+  font-size: 0.9rem !important; /* Comfortable reading size */
+  line-height: 1.6 !important; /* Improved line height for readability */
+  
+  /* Spacing and color */
+  margin-bottom: $spacing-4 !important; /* Good spacing between paragraphs */
+  color: $text-color-light !important; /* Slightly lighter color for contrast with headers */
+  
+  /* Subtle refinements */
+  letter-spacing: 0.01em !important; /* Very slight letter spacing improvement */
+  
+  /* Last paragraph has no bottom margin */
+  &:last-of-type {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    font-size: 0.9rem !important; /* Slightly larger on medium screens */
+  }
+  
+  @media (min-width: 1200px) {
+    font-size: 1rem !important; /* Larger on big screens */
+    line-height: 1.7 !important; /* More generous line height on big screens */
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 0.65rem !important; /* Slightly smaller on mobile */
+    line-height: 1.5 !important; /* Tighter line height on mobile */
+  }
+}
+
+/* Create a pleasing visual hierarchy between headers and paragraphs */
+.roadmap .text-content {
+  /* Add subtle spacing between header and first paragraph */
+  h2 + p {
+    margin-top: $spacing-2 !important;
+  }
+  
+  /* Add better spacing between groups of content */
+  p + h2,
+  p + h3 {
+    margin-top: $spacing-6 !important;
+  }
+}
+
+// =========================================
+// MED SCHOOL CODE SECTION STYLING
+// =========================================
+
+/* Target the med-school-code section */
+.med-school-code {
+  h2 {
+    font-family: $font-family-mincho !important; /* Apply BIZ UDPMincho font */
+    font-weight: 400 !important; /* Regular weight */
+    letter-spacing: 0.01em !important;
+    line-height: 1.3 !important;
+    margin-bottom: $spacing-6 !important;
+  }
+  
+  p {
+    font-family: $font-family-sans !important;
+    font-weight: 400 !important;
+    line-height: 1.6 !important;
+    color: $text-color-light !important;
+    margin-bottom: $spacing-4 !important;
+    
+    @media (min-width: 768px) {
+      font-size: 1.05rem !important;
+    }
+    
+    @media (min-width: 1200px) {
+      font-size: 1.1rem !important;
+      line-height: 1.7 !important;
+    }
+  }
+}
+

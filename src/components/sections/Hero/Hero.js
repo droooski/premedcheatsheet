@@ -1,7 +1,6 @@
 // src/components/sections/Hero/Hero.js
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import heroImage from '../../../assets/images/heroImage.png'; // Import your hero image
+import heroImage from '../../../assets/images/heroImage.png'; // Make sure this path is correct
 import './Hero.scss';
 
 const Hero = () => {
@@ -22,8 +21,12 @@ const Hero = () => {
       </div>
       
       {/* The hero image container positioned below the button */}
-      <div className="hero-image-container">
-        <img src={heroImage} alt="Medical school application profile" className="hero-image" />
+      <div className="hero-image-container z-highest">
+        <img 
+          src={heroImage} 
+          alt="Medical school application profile" 
+          className="hero-image" 
+        />
       </div>
     </section>
   );

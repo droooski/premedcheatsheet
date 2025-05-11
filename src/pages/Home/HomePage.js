@@ -1,38 +1,16 @@
-// Updated HomePage.js - only showing the sections that need modification
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/layout/Footer/Footer';
 import Hero from '../../components/sections/Hero/Hero';
 import Roadmap from '../../components/sections/Roadmap/Roadmap';
+import MedSchoolCode from '../../components/sections/MedSchoolCode/MedSchoolCode';
 import Features from '../../components/sections/Features/Features';
 import FaqItem from '../../components/sections/FaqItem/FaqItem';
 // Import correct image paths
 import group1Image from '../../assets/images/Group-1.png';
 import group2Image from '../../assets/images/Group-2.png';
 import './HomePage.scss';
-
-// Updated MedSchoolCode component with correct image
-const MedSchoolCode = () => {
-  return (
-    <section className="med-school-code">
-      <div className="container">
-        <div className="code-content">
-          <div className="text-content">
-            <h2>Crack the med school code</h2>
-            <p>
-              Gain access to entire profiles of successful medical school applicants and discover the schools they got into. 
-              Analyze application patterns and learn how to strengthen your application.
-            </p>
-          </div>
-          <div className="image-container">
-            <img src={group2Image} alt="Medical school insights" className="responsive-image" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
 
 // Simplified component for the profile cards with images - just showing the image
 const ProfileCardWithImage = ({ image }) => {

@@ -1,63 +1,15 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as mix;
 
-.roadmap {
+.med-school-code {
+  padding: $spacing-12 0;
   background-color: $white;
-  /* CRITICAL: Add much more top padding to ensure proper spacing from the hero image */
-  padding-top: 180px; /* Starting point for spacing */
-  padding-bottom: $spacing-12;
-  position: relative;
-  z-index: 1;
-  /* Add higher margin-top to push the entire section down */
-  margin-top: 80px;
-  
-  /* Scale padding and margin proportionally with screen size */
-  @media (min-width: $xl) {
-    padding-top: 220px; /* More space on large screens */
-    padding-bottom: $spacing-16;
-    margin-top: 100px;
-  }
-  
-  @media (min-width: $xxl) {
-    padding-top: 250px; /* Maximum spacing on extra large screens */
-    padding-bottom: $spacing-20;
-    margin-top: 120px;
-  }
-  
-  @media (max-width: $md) {
-    padding-top: 150px; /* Less space on medium screens, but still sufficient */
-    margin-top: 60px;
-  }
   
   @media (max-width: $sm) {
-    padding-top: 120px; /* Minimum spacing on small screens */
-    padding-bottom: $spacing-8;
-    margin-top: 40px;
+    padding: $spacing-8 0;
   }
   
-  // /* Add a divider to visually separate sections */
-  // &:before {
-  //   content: "";
-  //   position: absolute;
-  //   top: 80px; /* Position it below the hero image */
-  //   left: 50%;
-  //   transform: translateX(-50%);
-  //   width: 80%;
-  //   max-width: 1200px;
-  //   height: 1px;
-  //   background-color: $gray-200; /* Subtle separator */
-    
-  //   @media (min-width: $xl) {
-  //     top: 100px;
-  //   }
-    
-  //   @media (max-width: $md) {
-  //     top: 60px;
-  //     width: 90%;
-  //   }
-  // }
-  
-  .roadmap-content {
+  .code-content {
     display: flex;
     flex-direction: column;
     gap: $spacing-8;
@@ -119,13 +71,21 @@
     flex: 1;
     
     h2 {
+      font-family: $font-family-mincho;
+      font-weight: 400;
       @include mix.heading-2;
       margin-bottom: $spacing-6;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
       
-      /* Fluid typography for headings based on screen size */
       @media (min-width: $xl) {
         font-size: 2.5rem;
         margin-bottom: $spacing-8;
+        letter-spacing: 0.015em;
+      }
+      
+      @media (min-width: $xxl) {
+        letter-spacing: 0.02em;
       }
       
       @media (max-width: $sm) {
@@ -135,14 +95,28 @@
     }
     
     p {
-      color: $text-color;
+      color: $text-color-light;
       line-height: 1.6;
       margin-bottom: $spacing-4;
       @include mix.paragraph;
+      font-weight: 400;
+      
+      @media (min-width: $md) {
+        font-size: 0.9rem;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.1rem;
+      }
       
       @media (max-width: $sm) {
         margin-bottom: $spacing-3;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
     }
   }

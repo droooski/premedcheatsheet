@@ -4,9 +4,34 @@
 .hero {
   position: relative;
   overflow: visible; /* Allow image to overflow */
-  background: linear-gradient(180deg, #f9fafb 0%, #e2e4e7 85%, #d1d5db 100%);
-  padding: $spacing-16 0 0; /* NO bottom padding */
+  background: linear-gradient(180deg, #f9fafb 0%, #e2e4e7 85%, #d1d5db 100%, #ffffff 100%);
+  padding-top: $spacing-16;
+  /* IMPORTANT: Add significant bottom padding to extend the background */
+  padding-bottom: 400px; /* Large padding to ensure background extends below the image */
   text-align: center;
+
+  /* Override any border-bottom that might be causing the line */
+  border-bottom: none !important;
+  
+  @media (min-width: $xl) {
+    padding-top: $spacing-20;
+    padding-bottom: 600px; /* Even more padding on larger screens */
+  }
+  
+  @media (min-width: $xxl) {
+    padding-top: $spacing-24;
+    padding-bottom: 800px; /* Maximum padding on extra large screens */
+  }
+  
+  @media (max-width: $md) {
+    padding-top: $spacing-12;
+    padding-bottom: 250px; /* Slightly reduced on medium screens */
+  }
+  
+  @media (max-width: $sm) {
+    padding-top: $spacing-8;
+    padding-bottom: 200px; /* Minimum padding on small screens */
+  }
   
   .container {
     /* Use percentage-based width to ensure content scales with viewport */
@@ -92,22 +117,22 @@
   .get-started-btn {
     @include mix.button-primary;
     margin-top: clamp(#{$spacing-6}, 4vw, #{$spacing-12});
-    margin-bottom: $spacing-12;
+    margin-bottom: $spacing-12; /* Space between button and image */
     padding: $spacing-3 $spacing-8;
-    font-weight: 600;
-    font-size: 1rem;
-    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.4rem;
+    border-radius: 5px;
     
     @media (min-width: $xl) {
-      font-size: 1.25rem;
+      font-size: 0.8rem;
       padding: $spacing-4 $spacing-10;
       margin-bottom: $spacing-16;
       margin-top: clamp(#{$spacing-8}, 5vw, #{$spacing-16});
-      border-radius: 6px;
+      border-radius: 4px;
     }
     
     @media (min-width: $lg) {
-      font-size: 1.125rem;
+      font-size: 1rem;
       padding: $spacing-3 $spacing-8;
     }
     
@@ -115,7 +140,7 @@
       margin-bottom: $spacing-8;
       margin-top: clamp(#{$spacing-4}, 3vw, #{$spacing-8});
       padding: $spacing-3 $spacing-6;
-      font-size: 0.9rem;
+      font-size: 1.2rem;
     }
     
     &:hover {
@@ -125,42 +150,45 @@
   }
   
   .hero-image-container {
-    position: absolute;
-    left: 50%;
-    bottom: -160px; /* Position it to extend below the hero section */
-    transform: translateX(-50%); /* Center horizontally */
-    z-index: 10;
-    padding: 0;
-    width: clamp(450px, 60%, 1000px); /* Responsive width that grows with screen size */
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10 !important;
     
-    @media (min-width: $xl) {
-      width: clamp(600px, 65%, 1200px);
-      bottom: -200px;
+    /* STRONGER RESPONSIVE SIZING - using vw (viewport width) units */
+    width: 70vw !important; /* Base size is now 70% of viewport width */
+    min-width: 300px !important; /* Still maintain a minimum size */
+    max-width: 1200px !important; /* Allow for larger maximum on big screens */
+    
+    /* More dramatic changes between breakpoints */
+    @media screen and (min-width: 1600px) {
+      width: 60vw !important; /* Slightly smaller percentage on extremely large screens */
+      bottom: -180px !important;
     }
     
-    @media (min-width: $xxl) {
-      width: clamp(700px, 70%, 1400px);
-      bottom: -240px;
+    @media screen and (min-width: 1200px) and (max-width: 1599px) {
+      width: 65vw !important;
+      bottom: -150px !important;
     }
     
-    @media (min-width: $xxxl) {
-      width: clamp(800px, 75%, 1600px);
-      bottom: -280px;
+    @media screen and (min-width: 768px) and (max-width: 1199px) {
+      width: 75vw !important;
+      bottom: -100px !important;
     }
     
-    @media (max-width: $md) {
-      width: clamp(400px, 75%, 800px);
-      bottom: -140px;
+    @media screen and (max-width: 767px) {
+      width: 85vw !important; /* Much larger percentage on small screens */
+      bottom: -80px !important;
     }
     
-    @media (max-width: $sm) {
-      width: clamp(300px, 85%, 500px);
-      bottom: -120px;
+    @media screen and (max-width: 480px) {
+      width: 92vw !important; /* Almost full width on mobile */
+      bottom: -60px !important;
     }
     
     .hero-image {
-      width: 100%;
-      height: auto;
+      width: 100% !important;
+      height: auto !important;
       border-radius: 8px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1),
                   0 20px 40px rgba(0, 0, 0, 0.06),
@@ -168,11 +196,8 @@
       display: block;
       background-color: white;
       
-      @media (min-width: $xl) {
+      @media screen and (min-width: 1200px) {
         border-radius: 12px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12),
-                    0 30px 60px rgba(0, 0, 0, 0.08),
-                    0 40px 30px -25px rgba(0, 0, 0, 0.22);
       }
     }
   }
