@@ -742,13 +742,30 @@ html body .hero {
   .faq-items {
     width: 85% !important;
     max-width: none !important;
+
+    @media (max-width: $sm) {
+      width: 100% !important;
+      padding: 0 $spacing-4 !important; /* Add padding on both sides */
+    }
+
+    @media (min-width: $md) {
+      width: 85% !important;
+      max-width: none !important;
+    }
+
+    @media (min-width: $lg) {
+      width: 85% !important;
+      max-width: none !important;
+    }
     
     @media (min-width: $xl) {
-      max-width: 1500px !important;
+      width: 85% !important;
+      max-width: none !important;
     }
     
     @media (min-width: $xxl) {
-      max-width: 1700px !important;
+      width: 85% !important;
+      max-width: none !important;
     }
   }
   

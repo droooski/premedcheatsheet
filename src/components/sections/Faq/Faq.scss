@@ -73,7 +73,6 @@
     width: 100%; // Full width
     max-width: 1200px; // Very wide max-width
     margin: 0 auto;
-    padding: 0 16px; // Add padding on both sides
     
     @media (max-width: $sm) {
       padding: 0 $spacing-4;
