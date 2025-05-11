@@ -25,14 +25,14 @@ const Features = () => {
         <div className="features-grid">
           <FeatureItem icon={icon1} title="Trusted by thousands" />
           <FeatureItem icon={icon2} title="Updated regularly" />
-          <FeatureItem icon={icon3} title="Easy to use" />
+          <FeatureItem icon={icon4} title="Easy to use" />
         </div>
         
         {/* Second row - 3/2/1 features depending on screen size */}
         <div className="features-grid secondary">
-          <FeatureItem icon={icon4} title="Data-driven insights" />
-          <FeatureItem icon={icon5} title="Secure and private" />
-          <FeatureItem icon={icon6} title="Community support" />
+          <FeatureItem icon={icon5} title="Data-driven insights" />
+          <FeatureItem icon={icon6} title="Secure and private" />
+          <FeatureItem icon={icon3} title="Community support" />
         </div>
       </div>
     </section>
