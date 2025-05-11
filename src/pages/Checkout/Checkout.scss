@@ -5,36 +5,81 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: $background-color;
 }
 
 .checkout-content {
   flex: 1;
   padding: $spacing-12 0;
-  background-color: $gray-100;
+  background-color: $background-color;
+  
+  @media (max-width: $md) {
+    padding: $spacing-8 0;
+  }
 }
 
 .checkout-wrapper {
   max-width: 800px;
   margin: 0 auto;
+  
+  @media (max-width: $md) {
+    padding: 0 $spacing-1;
+  }
 }
 
 .checkout-header {
   text-align: center;
-  margin-bottom: $spacing-8;
+  margin-bottom: $spacing-10;
   
   h1 {
-    @include heading-2;
+    font-family: $font-family-mincho;
+    font-weight: 500;
+    font-size: 3.5rem;
     margin-bottom: $spacing-4;
+    letter-spacing: 0.03em;
+    
+    @media (max-width: $md) {
+      font-size: 2rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.75rem;
+    }
   }
   
   p {
     color: $text-color-light;
     @include paragraph;
+    padding: 0 $spacing-1;
+    max-width: 2000px;
+    margin: 0 auto;
+    font-size: 1.4rem;
+
+    @media (max-width: $sm) {
+      font-size: 2rem;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 2rem;
+    }
+
+    @media (max-width: $lg) {
+      font-size: 1.5rem;
+    }
+
+    @media (max-width: $xl) {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: $xxl) {
+      font-size: 1.125rem;
+    }
+
   }
 }
 
 .plan-selector {
-  margin-bottom: $spacing-8;
+  margin-bottom: $spacing-10;
 }
 
 .plan-tabs {
@@ -50,6 +95,13 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    font-size: 1rem;
+    
+    @media (max-width: $sm) {
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
+    }
     
     &:first-child {
       border-radius: 4px 0 0 4px;
@@ -63,6 +115,23 @@
       background-color: $primary-color;
       color: $white;
       border-color: $primary-color;
+      font-weight: 600;
+    }
+    
+    .save-badge {
+      display: inline-block;
+      background-color: #10b981;
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin-left: 0.5rem;
+      font-weight: 600;
+      
+      @media (max-width: $sm) {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.4rem;
+      }
     }
   }
 }
@@ -70,34 +139,77 @@
 .price-card {
   background-color: $white;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: $spacing-8;
+  transform: scale(1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
   
   @include respond-to(md) {
     padding: $spacing-12;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-6;
   }
 }
 
 .price-header {
   text-align: center;
-  margin-bottom: $spacing-6;
+  margin-bottom: $spacing-8;
   
   h3 {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: $spacing-2;
+    color: $text-color;
+    
+    @media (min-width: $lg) {
+      font-size: 1.5rem;
+    }
   }
   
   .price {
     .amount {
-      font-size: 2rem;
+      font-size: 3rem;
       font-weight: 700;
+      color: $text-color;
+      
+      @media (max-width: $sm) {
+        font-size: 2.5rem;
+      }
     }
     
     .period {
-      font-size: 1rem;
+      font-size: 1.25rem;
       color: $text-color-light;
+      
+      @media (max-width: $sm) {
+        font-size: 1rem;
+      }
     }
+  }
+  
+  .yearly-equivalent {
+    font-size: 0.875rem;
+    color: $text-color-light;
+    margin-top: $spacing-1;
+  }
+  
+  .savings-callout {
+    display: inline-block;
+    background-color: #ebfaf5;
+    color: #0e906a;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: $spacing-2 $spacing-4;
+    border-radius: 4px;
+    margin-top: $spacing-2;
+    border: 1px solid #a7f3d0;
   }
 }
 
@@ -108,46 +220,210 @@
   li {
     padding: $spacing-2 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    color: $text-color;
+    font-size: 1rem;
     
     &:before {
       content: "✓";
       color: $green-500;
       font-weight: bold;
       margin-right: $spacing-3;
+      flex-shrink: 0;
+    }
+    
+    &.premium-feature {
+      font-weight: 600;
+      
+      &:before {
+        content: "★";
+        color: #fbbf24;
+      }
+    }
+  }
+}
+
+.coupon-prompt {
+  text-align: center;
+  color: $primary-color;
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-bottom: $spacing-6;
+  text-decoration: underline;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.coupon-input-group {
+  display: flex;
+  margin-bottom: $spacing-6;
+  
+  input {
+    flex: 1;
+    padding: $spacing-2 $spacing-3;
+    border: 1px solid $gray-300;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    
+    &:focus {
+      border-color: $primary-color;
+    }
+    
+    &:disabled {
+      background-color: $gray-100;
+    }
+  }
+  
+  .apply-coupon-btn {
+    padding: $spacing-4 $spacing-5;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 0 7px 7px 0;
+    cursor: pointer;
+    font-weight: 500;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($primary-color, 5%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
   }
 }
 
 .checkout-button {
   width: 100%;
-  @include button-primary;
+  background-color: #1A3A34;
+  color: $white;
+  border: none;
+  border-radius: 30px;
   padding: $spacing-4;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-bottom: $spacing-4;
+  
+  &:hover {
+    background-color: darken(#1A3A34, 5%);
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.payment-methods {
+  text-align: center;
+  margin-bottom: $spacing-4;
+  
+  .payment-icons {
+    margin-bottom: $spacing-2;
+    
+    .payment-icon {
+      font-size: 1.8rem;
+      margin: 0 $spacing-2;
+    }
+  }
+  
+  .secure-payment {
+    font-size: 0.85rem;
+    color: $text-color-light;
+  }
 }
 
 .guarantee {
   text-align: center;
   color: $text-color-light;
-  font-size: 0.875rem;
-  margin-top: $spacing-4;
+  font-size: 0.975rem;
+  margin-top: $spacing-2;
+}
+
+.trust-elements {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-6;
+  margin: $spacing-12 0;
+  
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-8;
+  }
+  
+  .trust-element {
+    display: flex;
+    align-items: center;
+    
+    .trust-icon {
+      font-size: 2rem;
+      margin-right: $spacing-3;
+      color: $primary-color;
+    }
+    
+    .trust-text {
+      h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: $spacing-1;
+        color: $text-color;
+      }
+      
+      p {
+        font-size: 0.875rem;
+        color: $text-color-light;
+      }
+    }
+  }
 }
 
 .testimonials {
-  margin-top: $spacing-8;
+  margin: $spacing-10 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-6;
+  
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+  }
   
   .testimonial {
     background-color: $white;
     border-radius: 8px;
     padding: $spacing-6;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
     
     p {
       font-style: italic;
       margin-bottom: $spacing-4;
       font-size: 1rem;
       color: $text-color;
+      line-height: 1.6;
+      position: relative;
+      
+      &:before {
+        content: '"';
+        font-size: 3rem;
+        position: absolute;
+        top: -1.5rem;
+        left: -0.5rem;
+        color: $gray-200;
+        font-family: serif;
+        z-index: 0;
+        opacity: 0.5;
+      }
     }
     
     .author {
@@ -157,12 +433,33 @@
   }
 }
 
-@media (max-width: $md) {
-  .checkout-content {
-    padding: $spacing-8 0;
+.faq-section {
+  margin-top: $spacing-12;
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: $spacing-6;
+    text-align: center;
+    color: $text-color;
   }
   
-  .checkout-wrapper {
-    padding: 0 $spacing-4;
+  .faq-item {
+    background-color: $white;
+    border-radius: 8px;
+    padding: $spacing-6;
+    margin-bottom: $spacing-4;
+    
+    h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: $spacing-2;
+      color: $text-color;
+    }
+    
+    p {
+      color: $text-color-light;
+      line-height: 1.6;
+    }
   }
 }
