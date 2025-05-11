@@ -7,6 +7,8 @@ const Roadmap = () => {
     <section className="roadmap">
       <div className="container">
         <div className="roadmap-content">
+          {/* On desktop, image is on left and text on right */}
+          {/* On mobile, the CSS `flex-direction: column-reverse` will put text first, image second */}
           <div className="image-container">
             <img src={roadmapImage} alt="Medical student equipment" />
           </div>

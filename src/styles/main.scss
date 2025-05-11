@@ -551,3 +551,108 @@ html body .hero {
   }
 }
 
+// =========================================
+// FIXED SPACING FOR SMALL TO MEDIUM SCREENS
+// =========================================
+
+/* Fix profile cards with correct aspect ratios */
+.all-in-one {
+  /* Apply BIZ UDPMincho font to headings */
+  h2 {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.01em !important;
+  }
+  
+  .section-subheading {
+    font-family: $font-family-sans !important;
+    font-weight: 400 !important;
+    color: $text-color-light !important;
+  }
+  
+  /* CRITICAL FIX: Adjusted spacing for small to medium screens */
+  .profile-cards-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    
+    /* FIXED: Proper vertical gap for mobile */
+    gap: 1px !important; /* Using explicit pixel value for predictability */
+    
+    @media (min-width: $md) {
+      grid-template-columns: repeat(2, 1fr) !important;
+      max-width: 800px !important;
+      
+      /* FIXED: Smaller gap on medium screens */
+      gap: 1px !important; /* Less spacing on tablet */
+    }
+    
+    @media (min-width: $lg) {
+      max-width: 800px !important;
+      gap: $spacing-1 !important; /* Normal spacing on large screens */
+    }
+    
+    @media (min-width: $xl) {
+      max-width: 1000px !important;
+      gap: $spacing-16 !important; /* Moderate spacing on XL screens */
+    }
+  }
+  
+  /* ASPECT RATIO FIX */
+  .profile-card-with-image {
+    /* Use the exact aspect ratios specified */
+    aspect-ratio: 3/3.45 !important; /* Default aspect ratio */
+    overflow: hidden !important;
+    border-radius: 18px !important;
+    transform: scale(0.8) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    
+    /* Subtle hover effect */
+    &:hover {
+      transform: scale(0.81) !important; /* Just slightly larger */
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    @media (min-width: $md) {
+      aspect-ratio: 13.29/15.2 !important; /* Slightly taller on medium screens */
+      
+      &:hover {
+        transform: scale(0.81) !important; /* Subtle hover */
+      }
+    }
+    
+    @media (min-width: $lg) {
+      aspect-ratio: 15/17.3 !important; /* More vertical on large screens */
+      border-radius: 15px !important; /* Rounded corners */
+    }
+    
+    @media (min-width: $xl) {
+      aspect-ratio: 19/22 !important; /* Taller aspect ratio for XL */
+      transform: scale(1.08) !important; /* Make slightly larger */
+      
+      &:hover {
+        transform: scale(1.10) !important; /* Moderate hover effect */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+      }
+    }
+    
+    .image-container {
+      width: 100% !important;
+      height: 100% !important;
+      
+      img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important; /* Show full image without cropping */
+        
+        @media (min-width: $xl) {
+          /* Optional: Subtle enhancement for XL images */
+          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)) !important;
+        }
+      }
+    }
+  }
+}

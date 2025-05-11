@@ -1,145 +1,150 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as mix;
 
+// =========================================
+// PRECISE BREAKPOINT FIX FOR MEDIUM SCREENS
+// =========================================
+
+/* Exact breakpoint control for the features section */
 .features {
-  padding: $spacing-12 0;
+  padding: $spacing-24 0;
   background-color: $gray-100;
+  position: relative;
   
-  // Scale section padding proportionally with screen size
-  @media (min-width: $xl) {
-    padding: $spacing-16 0;
+  /* Full-width black divider above the section */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 1px;
+    background-color: $black;
   }
   
-  @media (min-width: $xxl) {
-    padding: $spacing-20 0;
+  /* Full-width black divider below the section */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 1px;
+    background-color: $black;
   }
   
-  @media (max-width: $sm) {
-    padding: $spacing-8 0;
-  }
-  
-  .features-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: $spacing-8;
-    margin-bottom: $spacing-8;
+  .container {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 5% !important;
     
-    // Responsive grid adjustments
-    @media (min-width: $md) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    
-    // Larger gap on bigger screens
     @media (min-width: $xl) {
-      gap: $spacing-12;
-      margin-bottom: $spacing-12;
+      padding: 0 10% !important;
     }
+  }
+  
+  /* FIXED: Precise breakpoint control for different layouts */
+  .features-grid {
+    display: grid !important;
+    gap: $spacing-16 $spacing-8 !important;
+    margin: 0 !important;
+    width: 100% !important;
     
-    @media (min-width: $xxl) {
-      gap: $spacing-16;
-      margin-bottom: $spacing-16;
-    }
+    /* Default: 3 columns for large screens (1025px and above) */
+    grid-template-columns: repeat(3, 1fr) !important;
     
-    @media (max-width: $sm) {
-      gap: $spacing-6;
-    }
-    
+    /* Space between grids */
     &.secondary {
-      padding-top: $spacing-8;
-      border-top: 1px solid $gray-300;
+      margin-top: $spacing-20 !important;
+    }
+    
+    /* EXACT MEDIUM SCREENS: 2 columns for screens between 767px and 1024px */
+    @media (max-width: 1024px) and (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: $spacing-16 $spacing-6 !important;
       
-      @media (min-width: $xl) {
-        padding-top: $spacing-12;
+      &.secondary {
+        margin-top: $spacing-16 !important;
       }
+    }
+    
+    /* EXACT SMALL SCREENS: Single column for 767px and below */
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr !important;
+      gap: $spacing-12 !important;
       
-      @media (max-width: $sm) {
-        padding-top: $spacing-6;
+      &.secondary {
+        margin-top: $spacing-16 !important;
       }
     }
   }
   
+  /* Feature item styling */
   .feature-item {
-    text-align: center;
-    transition: transform 0.3s ease;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    padding: $spacing-4 !important;
     
-    &:hover {
-      transform: translateY(-5px);
-    }
-    
+    /* Icon styling */
     img {
-      width: 48px;
-      height: 48px;
-      margin-bottom: $spacing-4;
+      width: 42px !important; /* Slightly larger for better visibility */
+      height: 42px !important;
+      margin-bottom: $spacing-8 !important;
+      display: block !important;
       
-      // Scale icons proportionally with screen size
-      @media (min-width: $xl) {
-        width: 64px;
-        height: 64px;
-        margin-bottom: $spacing-6;
+      /* Size adjustments for different screens */
+      @media (min-width: 1200px) {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: $spacing-10 !important;
       }
       
-      @media (min-width: $xxl) {
-        width: 72px;
-        height: 72px;
+      @media (max-width: 1024px) and (min-width: 768px) {
+        width: 38px !important; /* Medium screens */
+        height: 38px !important;
+        margin-bottom: $spacing-8 !important;
       }
       
-      @media (max-width: $sm) {
-        width: 40px;
-        height: 40px;
-        margin-bottom: $spacing-3;
+      @media (max-width: 767px) {
+        width: 36px !important; /* Small screens */
+        height: 36px !important;
+        margin-bottom: $spacing-6 !important;
       }
     }
     
+    /* Text styling */
     h3 {
-      font-size: 1.125rem;
-      font-weight: 500;
-      margin-bottom: $spacing-2;
+      font-family: $font-family-mincho !important;
+      font-weight: 400 !important;
+      font-size: 1.2rem !important;
+      text-align: center !important;
+      margin-bottom: 0 !important;
+      color: $text-color !important;
       
-      // Scale headings with screen size
-      @media (min-width: $lg) {
-        font-size: 1.25rem;
+      /* Size adjustments for different screens */
+      @media (min-width: 1200px) {
+        font-size: 1.4rem !important;
       }
       
-      @media (min-width: $xl) {
-        font-size: 1.5rem;
-        margin-bottom: $spacing-4;
+      @media (max-width: 1024px) and (min-width: 768px) {
+        font-size: 1.2rem !important; /* Medium screens */
       }
       
-      @media (min-width: $xxl) {
-        font-size: 1.75rem;
-      }
-      
-      @media (max-width: $sm) {
-        font-size: 1rem;
+      @media (max-width: 767px) {
+        font-size: 1.1rem !important; /* Small screens */
       }
     }
     
+    /* Hide paragraphs */
     p {
-      color: $text-color-light;
-      font-size: 0.875rem;
-      max-width: 250px;
-      margin: 0 auto;
-      
-      // Scale descriptions with screen size
-      @media (min-width: $lg) {
-        font-size: 1rem;
-        max-width: 300px;
-      }
-      
-      @media (min-width: $xl) {
-        font-size: 1.125rem;
-        max-width: 350px;
-      }
-      
-      @media (min-width: $xxl) {
-        font-size: 1.25rem;
-        max-width: 400px;
-      }
-      
-      @media (max-width: $sm) {
-        font-size: 0.8rem;
-        max-width: 220px;
-      }
+      display: none !important;
     }
   }
 }

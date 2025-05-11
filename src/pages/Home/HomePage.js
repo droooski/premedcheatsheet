@@ -5,46 +5,10 @@ import Footer from '../../components/layout/Footer/Footer';
 import Hero from '../../components/sections/Hero/Hero';
 import Roadmap from '../../components/sections/Roadmap/Roadmap';
 import MedSchoolCode from '../../components/sections/MedSchoolCode/MedSchoolCode';
+import AllInOne from '../../components/sections/AllInOne/AllInOne';
 import Features from '../../components/sections/Features/Features';
 import FaqItem from '../../components/sections/FaqItem/FaqItem';
-// Import correct image paths
-import group1Image from '../../assets/images/Group-1.png';
-import group2Image from '../../assets/images/Group-2.png';
 import './HomePage.scss';
-
-// Simplified component for the profile cards with images - just showing the image
-const ProfileCardWithImage = ({ image }) => {
-  return (
-    <div className="profile-card-with-image">
-      <div className="image-container">
-        <img src={image} alt="Profile example" className="responsive-image" />
-      </div>
-    </div>
-  );
-};
-
-// Updated AllInOneSection with image cards
-const AllInOneSection = () => {
-  return (
-    <section className="all-in-one">
-      <div className="container">
-        <h2>All in one place</h2>
-        <p className="section-subheading">Access comprehensive stats from accepted medical students.</p>
-        
-        <div className="profile-cards-grid">
-          {/* First card using Group-1.png - image only */}
-          <ProfileCardWithImage image={group1Image} />
-          
-          {/* Second card using Group-2.png - image only */}
-          <ProfileCardWithImage image={group2Image}
-            title="Application Strategy"
-            description="Learn the approaches that worked for successful applicants."
-          />
-        </div>
-      </div>
-    </section>
-  );
-};
 
 const FaqSection = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
@@ -116,7 +80,7 @@ const HomePage = () => {
       <Hero />
       <Roadmap />
       <MedSchoolCode />
-      <AllInOneSection />
+      <AllInOne />
       <Features />
       <FaqSection />
       <CtaSection />

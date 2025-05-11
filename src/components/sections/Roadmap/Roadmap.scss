@@ -35,28 +35,6 @@
     margin-top: 40px;
   }
   
-  // /* Add a divider to visually separate sections */
-  // &:before {
-  //   content: "";
-  //   position: absolute;
-  //   top: 80px; /* Position it below the hero image */
-  //   left: 50%;
-  //   transform: translateX(-50%);
-  //   width: 80%;
-  //   max-width: 1200px;
-  //   height: 1px;
-  //   background-color: $gray-200; /* Subtle separator */
-    
-  //   @media (min-width: $xl) {
-  //     top: 100px;
-  //   }
-    
-  //   @media (max-width: $md) {
-  //     top: 60px;
-  //     width: 90%;
-  //   }
-  // }
-  
   .roadmap-content {
     display: flex;
     flex-direction: column;
@@ -66,6 +44,11 @@
     @media (min-width: $md) {
       flex-direction: row;
       align-items: center;
+    }
+    
+    /* CRITICAL CHANGE: On mobile, put text first, then image */
+    @media (max-width: $md) {
+      flex-direction: column-reverse; /* Text first, image second */
     }
     
     /* Increase spacing between elements on larger screens */
