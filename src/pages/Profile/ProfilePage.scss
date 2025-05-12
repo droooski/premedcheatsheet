@@ -1,0 +1,129 @@
+// src/pages/Profile/ProfilePage.scss
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.profile-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+}
+
+.profile-content {
+  flex: 1;
+  padding: $spacing-12 0;
+  
+  @media (max-width: $md) {
+    padding: $spacing-8 0;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4 0;
+  }
+  
+  h1 {
+    font-family: $font-family-mincho;
+    font-size: 2.5rem;
+    margin-bottom: $spacing-8;
+    text-align: center;
+    
+    @media (max-width: $md) {
+      font-size: 2rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.75rem;
+      margin-bottom: $spacing-6;
+    }
+  }
+}
+
+.profile-section {
+  background-color: $white;
+  border-radius: 8px;
+  padding: $spacing-6;
+  margin-bottom: $spacing-6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: $spacing-4;
+    font-weight: 600;
+    border-bottom: 1px solid $gray-200;
+    padding-bottom: $spacing-2;
+    
+    @media (max-width: $sm) {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .profile-info, .subscription-info {
+    p {
+      margin-bottom: $spacing-2;
+      font-size: 1rem;
+      
+      strong {
+        font-weight: 600;
+        margin-right: $spacing-2;
+      }
+    }
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.25rem;
+  color: $text-color-light;
+}
+
+.school-list {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: $spacing-4;
+  
+  @media (min-width: $md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: $lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.school-item {
+  background-color: $gray-100;
+  border-radius: 6px;
+  padding: $spacing-4;
+  display: flex;
+  flex-direction: column;
+  
+  h3 {
+    font-size: 1.125rem;
+    margin-bottom: $spacing-3;
+    font-weight: 600;
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
+    }
+  }
+  
+  .view-profiles-btn {
+    margin-top: auto;
+    background-color: $primary-color;
+    color: $white;
+    border: none;
+    border-radius: 4px;
+    padding: $spacing-2 $spacing-3;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: darken($primary-color, 5%);
+    }
+  }
+}
