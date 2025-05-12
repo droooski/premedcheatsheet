@@ -1,0 +1,253 @@
+/* src/pages/Account/AccountPage.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.account-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+}
+
+.account-content {
+  flex: 1;
+  padding: $spacing-6 0;
+  
+  @media (max-width: $md) {
+    padding: $spacing-4 0;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-2 0;
+  }
+  
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+    
+    @media (max-width: $sm) {
+      padding: 0 $spacing-2;
+      width: 100%;
+    }
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 1.25rem;
+  color: $text-color-light;
+}
+
+/* Account header with navigation */
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  padding-bottom: $spacing-4;
+  border-bottom: 1px solid $gray-200;
+  
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .account-actions-top {
+    display: flex;
+    gap: $spacing-4;
+    
+    .back-button, .close-button {
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $text-color-light;
+      cursor: pointer;
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+/* Email verification banner */
+.verification-banner {
+  background-color: rgba(#fbbf24, 0.1); // Light amber background
+  border: 1px solid #fbbf24;
+  border-radius: 4px;
+  padding: $spacing-4;
+  margin-bottom: $spacing-6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  
+  p {
+    color: $text-color;
+    margin: 0 0 $spacing-3 0;
+  }
+  
+  .resend-button {
+    background-color: transparent;
+    color: #0284c7; // Blue
+    border: none;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    
+    &:hover {
+      color: darken(#0284c7, 10%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Account main content */
+.account-main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+/* Account cards */
+.account-card {
+  background-color: $white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: $spacing-5;
+  
+  &.user-greeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    .sign-out-button {
+      background: none;
+      border: none;
+      color: $text-color-light;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0 0 $spacing-4 0;
+    color: $text-color;
+  }
+  
+  .section-content {
+    .section-summary {
+      color: $text-color;
+      margin: 0 0 $spacing-3 0;
+    }
+    
+    &.empty {
+      .section-summary {
+        color: $text-color-light;
+      }
+    }
+    
+    .view-all-button, .add-new-button, .edit-button {
+      background: none;
+      color: #0284c7; // Blue
+      border: none;
+      padding: 0;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: underline;
+      
+      &:hover {
+        color: darken(#0284c7, 10%);
+      }
+    }
+  }
+  
+  /* Products list */
+  .products-list {
+    margin-top: $spacing-2;
+    
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      padding: $spacing-2 0;
+      border-bottom: 1px solid $gray-100;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .product-name {
+        font-weight: 500;
+      }
+      
+      .product-status {
+        &.active {
+          color: #10B981; // Green
+        }
+        
+        &.inactive {
+          color: #DC2626; // Red
+        }
+      }
+    }
+  }
+  
+  /* Profile section */
+  .profile-email {
+    color: $text-color;
+    margin: 0 0 $spacing-3 0;
+    word-break: break-all;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: $sm) {
+  .account-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-3;
+    
+    .account-actions-top {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+  
+  .verification-banner {
+    padding: $spacing-3;
+  }
+  
+  .account-card {
+    padding: $spacing-4;
+    
+    &.user-greeting {
+      h2 {
+        font-size: 1.3rem;
+      }
+    }
+  }
+}

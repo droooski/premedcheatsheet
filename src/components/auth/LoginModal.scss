@@ -1,0 +1,156 @@
+/* src/components/auth/LoginModal.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 0 $spacing-4;
+}
+
+.login-modal {
+  background-color: $white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  padding: $spacing-6;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  
+  @media (max-width: $sm) {
+    padding: $spacing-5;
+    max-width: 90%;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: $spacing-3;
+    right: $spacing-3;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: $gray-500;
+    line-height: 1;
+    
+    &:hover {
+      color: $text-color;
+    }
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: $spacing-2;
+    color: $text-color;
+  }
+  
+  .modal-subtitle {
+    text-align: center;
+    color: $text-color-light;
+    margin-bottom: $spacing-6;
+    font-size: 0.95rem;
+  }
+  
+  .login-error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: $spacing-3;
+    border-radius: 4px;
+    margin-bottom: $spacing-4;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-4;
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-size: 0.9rem;
+      color: $text-color;
+    }
+    
+    input {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+  
+  .login-button {
+    width: 100%;
+    background-color: $primary-color;
+    color: $white;
+    border: none;
+    border-radius: 4px;
+    padding: $spacing-3 $spacing-4;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: $spacing-4;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($primary-color, 5%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+  
+  .login-footer {
+    text-align: center;
+    
+    p {
+      margin-bottom: $spacing-2;
+      font-size: 0.9rem;
+      
+      a {
+        color: $primary-color;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    
+    .guest-button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      padding: $spacing-2 $spacing-3;
+      margin-top: $spacing-4;
+      font-size: 0.9rem;
+      color: $text-color;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: $gray-100;
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import HomePage from './pages/Home/HomePage';
 import Checkout from './pages/Checkout/Checkout';
 import ProfilePage from './pages/Profile/ProfilePage';
 import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
+import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
@@ -35,7 +36,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={user ? <Navigate to="/profile" /> : <HomePage />} />
-        <Route path="/checkout" element={user ? <Navigate to="/profile" /> : <Checkout />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/signup" element={user ? <Navigate to="/profile" /> : <Checkout />} />
         
         {/* Protected routes */}
@@ -49,6 +50,11 @@ function App() {
             <SchoolProfilePage />
           </ProtectedRoute>
         } />
+        <Route path="/account" element={
+          <ProtectedRoute>
+            <AccountPage />
+          </ProtectedRoute>
+        } />
         <Route path="/admin" element={
           <AdminRoute>
             <AdminPanel />
@@ -56,10 +62,17 @@ function App() {
         } />
         
         {/* Common routes - redirect based on auth status */}
-        <Route path="/about" element={user ? <Navigate to="/profile" /> : <HomePage />} />
-        <Route path="/contact" element={user ? <Navigate to="/profile" /> : <HomePage />} />
-        <Route path="/privacy" element={user ? <Navigate to="/profile" /> : <HomePage />} />
-        <Route path="/terms" element={user ? <Navigate to="/profile" /> : <HomePage />} />
+        <Route path="/about" element={<HomePage />} />
+        <Route path="/contact" element={<HomePage />} />
+        <Route path="/privacy" element={<HomePage />} />
+        <Route path="/terms" element={<HomePage />} />
+        
+        {/* Application cheatsheet route */}
+        <Route path="/application-cheatsheet" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
         
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" />} />
