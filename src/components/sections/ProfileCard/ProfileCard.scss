@@ -1,16 +1,19 @@
+// src/components/sections/ProfileCard/ProfileCard.scss
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as mix;
 
 .profile-card {
-  @include mix.card;
+  background-color: $white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: left;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   width: 100%;
-  background-color: $white;
   
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
   }
   
   // Large profile card scaling based on viewport
@@ -49,6 +52,7 @@
     align-items: center;
     padding: $spacing-4;
     border-bottom: 1px solid $gray-200;
+    background-color: #F2F6F5;
     
     @media (min-width: $lg) {
       padding: $spacing-6; // More padding on larger screens
@@ -113,6 +117,11 @@
     
     @media (max-width: $sm) {
       gap: $spacing-2;
+    }
+    
+    // For MCAT Breakdown row, let it take full width
+    &:nth-child(3) {
+      grid-template-columns: 1fr;
     }
   }
   
@@ -186,6 +195,10 @@
         background-color: $blue-500;
       }
       
+      .reflections-dot {
+        background-color: #065f46;
+      }
+      
       span {
         font-weight: 600;
         font-size: 0.875rem;
@@ -238,7 +251,7 @@
     a {
       color: $blue-500;
       font-size: 0.75rem;
-      @include mix.transition(text-decoration);
+      transition: text-decoration 0.3s ease;
       
       @media (min-width: $lg) {
         font-size: 0.875rem;

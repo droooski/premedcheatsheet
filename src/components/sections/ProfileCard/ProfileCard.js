@@ -4,63 +4,83 @@ import './ProfileCard.scss';
 
 const ProfileCard = ({ 
   profile,
-  type = "biomedical", 
   showBookmark = true,
-  size = "large"
+  size = "large",
+  onClick = null
 }) => {
-  // If a profile object is provided, use its data
-  // Otherwise, use default data based on the type
+  if (!profile) {
+    return null;
+  }
+
+  // Extract data from the profile
+  const {
+    id,
+    type,
+    gender,
+    race,
+    stateOfResidency,
+    matriculationYear,
+    gpa,
+    mcat,
+    mcatBreakdown,
+    acceptedSchools = [],
+    medicalVolunteering,
+    nonMedicalVolunteering,
+    research,
+    medicalEmployment,
+    shadowing,
+    leadership,
+    hobbies,
+    major,
+    reflections
+  } = profile;
+
+  // Format the title based on the type or major
+  const title = type === "non-trad" 
+    ? "Non-Traditional Applicant with Research Focus"
+    : type === "biomedical" || (major && major.toLowerCase().includes("biomed"))
+      ? "Biomedical Engineering Student"
+      : `${major ? major.split(',')[0].trim() : type} Student`;
+
+  // Background items
+  const backgroundItems = [];
   
-  // Default data based on type
-  const defaultData = {
-    title: type === "biomedical" 
-      ? "Biomedical Engineering Student" 
-      : "Non-Trad Applicant with Research Focus",
-    gender: "Male",
-    ethnicity: "Taiwanese",
-    state: "New Jersey",
-    year: "2024",
-    gpa: type === "biomedical" ? "3.94" : "3.84",
-    sgpa: "3.91",
-    mcat: "513",
-    mcatBreakdown: "127, 129, 131, 129",
-    acceptedSchools: type === "biomedical" 
-      ? ["Einstein School of Medicine (Accepted)", "Rutgers New Jersey Medical School"] 
-      : ["Stanford Medical School", "UCSF Medical School"],
-    backgroundItems: type === "biomedical" 
-      ? [
-          "Major: Biomedical Engineering",
-          "Research: 1000+ hours (including 100+ per year)"
-        ] 
-      : [
-          "Clinical Experience: Hospital volunteering (500+ hours)",
-          "Research: 2000+ hours with multiple publications"
-        ]
-  };
+  if (major) {
+    backgroundItems.push(`Major: ${major}`);
+  }
   
-  // Combine provided profile data with defaults
-  const data = profile ? {
-    title: profile.type === "biomedical" 
-      ? "Biomedical Engineering Student" 
-      : profile.type === "non-trad"
-        ? "Non-Traditional Applicant"
-        : `${profile.type.charAt(0).toUpperCase() + profile.type.slice(1)} Major`,
-    gender: profile.gender,
-    ethnicity: profile.ethnicity,
-    state: profile.state,
-    year: profile.year,
-    gpa: profile.gpa,
-    sgpa: profile.sgpa,
-    mcat: profile.mcat,
-    mcatBreakdown: profile.mcatBreakdown,
-    acceptedSchools: profile.acceptedSchools,
-    backgroundItems: profile.backgroundItems
-  } : defaultData;
+  if (research) {
+    backgroundItems.push(`Research: ${research}`);
+  }
+  
+  if (leadership) {
+    backgroundItems.push(`Leadership: ${leadership}`);
+  }
+  
+  if (medicalEmployment) {
+    backgroundItems.push(`Medical Employment: ${medicalEmployment}`);
+  }
+  
+  if (medicalVolunteering) {
+    backgroundItems.push(`Medical Volunteering: ${medicalVolunteering}`);
+  }
+  
+  if (nonMedicalVolunteering) {
+    backgroundItems.push(`Non-Medical Volunteering: ${nonMedicalVolunteering}`);
+  }
+  
+  if (shadowing) {
+    backgroundItems.push(`Shadowing: ${shadowing}`);
+  }
+  
+  if (hobbies) {
+    backgroundItems.push(`Hobbies: ${hobbies}`);
+  }
   
   return (
-    <div className={`profile-card ${size}`}>
+    <div className={`profile-card ${size}`} onClick={onClick}>
       <div className="profile-header">
-        <h3>{data.title}</h3>
+        <h3>{title}</h3>
         {showBookmark && (
           <div className="bookmark-icon">
             <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -72,40 +92,37 @@ const ProfileCard = ({
       
       <div className="profile-details">
         <div className="detail-row">
-          <div className="detail-group">
+          <div className="detail-item">
             <span className="label">Gender</span>
-            <span className="value">{data.gender}</span>
+            <span className="value">{gender || 'Not specified'}</span>
           </div>
-          <div className="detail-group">
+          <div className="detail-item">
             <span className="label">Ethnicity</span>
-            <span className="value">{data.ethnicity}</span>
+            <span className="value">{race || 'Not specified'}</span>
           </div>
-          <div className="detail-group">
+          <div className="detail-item">
             <span className="label">State</span>
-            <span className="value">{data.state}</span>
-          </div>
-          <div className="detail-group">
-            <span className="label">Application Year</span>
-            <span className="value">{data.year}</span>
+            <span className="value">{stateOfResidency || 'Not specified'}</span>
           </div>
         </div>
-
         <div className="detail-row">
-          <div className="detail-group">
+          <div className="detail-item">
+            <span className="label">Year</span>
+            <span className="value">{matriculationYear || 'N/A'}</span>
+          </div>
+          <div className="detail-item">
             <span className="label">GPA</span>
-            <span className="value">{data.gpa}</span>
+            <span className="value">{gpa || 'N/A'}</span>
           </div>
-          <div className="detail-group">
-            <span className="label">Science GPA</span>
-            <span className="value">{data.sgpa}</span>
-          </div>
-          <div className="detail-group">
+          <div className="detail-item">
             <span className="label">MCAT</span>
-            <span className="value">{data.mcat}</span>
+            <span className="value">{mcat || 'N/A'}</span>
           </div>
-          <div className="detail-group">
+        </div>
+        <div className="detail-row">
+          <div className="detail-item">
             <span className="label">MCAT Breakdown</span>
-            <span className="value">{data.mcatBreakdown}</span>
+            <span className="value">{mcatBreakdown || 'Not specified'}</span>
           </div>
         </div>
 
@@ -114,9 +131,13 @@ const ProfileCard = ({
             <div className="dot accepted-dot"></div>
             <span>Accepted Schools</span>
           </div>
-          {data.acceptedSchools.map((school, index) => (
-            <p key={index}>{school}</p>
-          ))}
+          {acceptedSchools && acceptedSchools.length > 0 ? (
+            acceptedSchools.map((school, index) => (
+              <p key={index}>{school}</p>
+            ))
+          ) : (
+            <p>No schools specified</p>
+          )}
         </div>
 
         <div className="highlight-section background">
@@ -124,10 +145,24 @@ const ProfileCard = ({
             <div className="dot background-dot"></div>
             <span>Applicant Background</span>
           </div>
-          {data.backgroundItems.map((item, index) => (
-            <p key={index}>{item}</p>
-          ))}
+          {backgroundItems.length > 0 ? (
+            backgroundItems.map((item, index) => (
+              <p key={index}>{item}</p>
+            ))
+          ) : (
+            <p>No background information available</p>
+          )}
         </div>
+
+        {reflections && (
+          <div className="highlight-section reflections">
+            <div className="highlight-header">
+              <div className="dot reflections-dot"></div>
+              <span>Reflections</span>
+            </div>
+            <p>{reflections}</p>
+          </div>
+        )}
 
         <div className="profile-footer">
           <a href="/profile">View Full Profile</a>
