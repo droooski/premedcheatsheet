@@ -14,7 +14,7 @@
   padding: $spacing-8 0;
   
   .container {
-    max-width: 1200px;
+    max-width: 1800px; /* Set container back to wider width */
     margin: 0 auto;
     padding: 0 $spacing-4;
     
@@ -33,7 +33,7 @@
   color: $text-color-light;
 }
 
-/* Use BIZ UDPmincho font for the page title */
+/* Page title - keep at original width */
 .page-title {
   font-family: $font-family-mincho;
   font-size: 2.5rem;
@@ -42,6 +42,9 @@
   margin-bottom: $spacing-8;
   letter-spacing: 0.01em;
   color: $text-color;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
   
   @media (max-width: $md) {
     font-size: 2rem;
@@ -54,10 +57,13 @@
   }
 }
 
-/* View Toggle Styles */
+/* View Toggle Styles - keep this at original width */
 .view-toggle-container {
   display: flex;
   margin-bottom: $spacing-6;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
   
   .toggle-button {
     flex: 1;
@@ -88,13 +94,16 @@
   }
 }
 
-/* Search and Sort Container */
+/* Search and Sort Container - keep this narrower */
 .search-sort-container {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: $spacing-4;
   margin-bottom: $spacing-6;
+  max-width: 1200px; /* Keep search/filter at original width */
+  margin-left: auto;
+  margin-right: auto;
   
   .search-box {
     flex: 1;
@@ -247,6 +256,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: $spacing-6;
   margin-bottom: $spacing-8;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
   
   @media (max-width: $lg) {
     grid-template-columns: repeat(2, 1fr);
@@ -331,55 +343,158 @@
   }
 }
 
-/* Profiles View (Quizlet-style) */
-.profiles-view {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-6;
+  margin-bottom: $spacing-8;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
   
-  .navigation-controls {
+  @media (max-width: $xl) and (min-width: $md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+  }
+  
+.profile-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: visible;
+  border-radius: 12px;
+  background-color: transparent; /* Remove background color */
+  height: auto;
+  
+  &:hover {
+    transform: translateY(-5px);
+    z-index: 10; /* Ensure hovered card appears above others */
+  }
+}
+}
+
+/* Add styles for school profile page view toggle */
+.profile-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  h2 {
+    font-family: $font-family-mincho;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .view-options {
     display: flex;
+    
+    .view-toggle-button {
+      background-color: $gray-200;
+      border: none;
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
+      cursor: pointer;
+      
+      &:first-child {
+        border-radius: 4px 0 0 4px;
+      }
+      
+      &:last-child {
+        border-radius: 0 4px 4px 0;
+      }
+      
+      &.active {
+        background-color: $primary-color;
+        color: $white;
+      }
+    }
+  }
+}
+
+/* Profile card view styles */
+.profile-card-view {
+  max-width: 1800px;
+  margin: 0 auto;
+  
+  .profile-navigation {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
     margin-bottom: $spacing-6;
-    width: 100%;
     
     .nav-button {
       background-color: $primary-color;
       color: $white;
       border: none;
       border-radius: 4px;
-      padding: $spacing-3 $spacing-6;
-      font-size: 1rem;
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease;
       
-      &:hover {
-        background-color: darken($primary-color, 7%);
-        transform: translateY(-2px);
+      &:hover:not(:disabled) {
+        background-color: darken($primary-color, 5%);
       }
       
-      &.prev {
-        margin-right: $spacing-3;
-      }
-      
-      &.next {
-        margin-left: $spacing-3;
+      &:disabled {
+        background-color: $gray-300;
+        cursor: not-allowed;
       }
     }
     
     .profile-counter {
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: $text-color-light;
-      font-weight: 500;
     }
   }
   
-  .profile-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+  .profile-display {
+    display: flex;
+    justify-content: center;
+    min-height: 500px; /* Add minimum height to ensure visibility */
+    border: 1px solid $gray-300; /* Add border for debugging */
+    border-radius: 8px;
+    padding: $spacing-6;
+    background-color: $white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Profile list view styles */
+.profile-list-view {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-4;
+  max-width: 1800px;
+  margin: 0 auto;
+  
+  @media (max-width: $lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-list-item {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background-color: transparent;
+    
+    &:hover {
+      transform: translateY(-3px);
+    }
+    
+    &.active {
+      outline: 2px solid $primary-color;
+      border-radius: 8px;
+    }
   }
 }
 

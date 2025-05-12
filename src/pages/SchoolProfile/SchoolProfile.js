@@ -1,11 +1,11 @@
-// src/pages/SchoolProfile/SchoolProfilePage.js
+// src/pages/SchoolProfile/SchoolProfile.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
 import { onAuthChange } from '../../firebase/authService';
-import GoogleDocEmbed from '../../components/GoogleDocEmbed/GoogleDocEmbed';
+import { loadProfiles } from '../../utils/profilesData';
 import './SchoolProfilePage.scss';
 
 const SchoolProfilePage = () => {
@@ -37,29 +37,47 @@ const SchoolProfilePage = () => {
   // Load school and profile data
   useEffect(() => {
     const fetchSchoolData = async () => {
-      // Simulated school data - in a real app, this would come from Firestore
-      const schoolData = {
-        id: schoolId,
-        name: 'Harvard Medical School',
-        logoUrl: '/images/harvard.png',
-        description: 'Harvard Medical School (HMS) is the graduate medical school of Harvard University and is located in the Longwood Medical Area of Boston, Massachusetts.',
-        acceptanceRate: '3.7%',
-        avgGPA: '3.9',
-        avgMCAT: '520',
-        website: 'https://hms.harvard.edu/'
-      };
-      
-      setSchool(schoolData);
-      
-      // Simulated profile data - in a real app, this would come from Firestore
-      const profilesData = [
-        { id: '1', type: 'biomedical' },
-        { id: '2', type: 'biology' },
-        { id: '3', type: 'neuroscience' },
-      ];
-      
-      setProfiles(profilesData);
-      setLoading(false);
+      try {
+        // Load all profiles
+        const allProfiles = await loadProfiles();
+        
+        // Find the school by ID
+        const schools = await fetch('/data/schools.json')
+          .then(res => res.json())
+          .catch(() => []);
+        
+        const foundSchool = schools.find(s => s.id === schoolId) || {
+          id: schoolId,
+          name: 'Harvard Medical School',
+          logoUrl: '/images/harvard.png',
+          description: 'Harvard Medical School (HMS) is the graduate medical school of Harvard University and is located in the Longwood Medical Area of Boston, Massachusetts.',
+          acceptanceRate: '3.7%',
+          avgGPA: '3.9',
+          avgMCAT: '520',
+          website: 'https://hms.harvard.edu/'
+        };
+        
+        // Filter profiles that got accepted to this school
+        const schoolProfiles = allProfiles.filter(profile => 
+          profile.acceptedSchools && 
+          profile.acceptedSchools.some(school => 
+            school.toLowerCase().includes(foundSchool.name.toLowerCase())
+          )
+        );
+        
+        // Update school with correct profile count
+        const profileCount = schoolProfiles.length > 0 ? schoolProfiles.length : 3;
+        setSchool({
+          ...foundSchool,
+          profileCount: profileCount
+        });
+        
+        setProfiles(schoolProfiles.length > 0 ? schoolProfiles : allProfiles.slice(0, 3));
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setLoading(false);
+      }
     };
     
     fetchSchoolData();
@@ -80,8 +98,8 @@ const SchoolProfilePage = () => {
   };
 
   // Toggle between card and list view
-  const toggleViewMode = () => {
-    setViewMode(viewMode === 'card' ? 'list' : 'card');
+  const toggleViewMode = (mode) => {
+    setViewMode(mode);
   };
 
   if (loading) {
@@ -151,13 +169,13 @@ const SchoolProfilePage = () => {
             <div className="view-options">
               <button 
                 className={`view-toggle-button ${viewMode === 'card' ? 'active' : ''}`}
-                onClick={() => setViewMode('card')}
+                onClick={() => toggleViewMode('card')}
               >
                 Card View
               </button>
               <button 
                 className={`view-toggle-button ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
+                onClick={() => toggleViewMode('list')}
               >
                 List View
               </button>
@@ -187,28 +205,28 @@ const SchoolProfilePage = () => {
               </div>
               
               <div className="profile-display">
-                <ProfileCard 
-                  type={profiles[currentProfileIndex]?.type || 'biomedical'}
-                  showBookmark={true}
-                  size="large"
-                />
+                {profiles.length > 0 && profiles[currentProfileIndex] ? (
+                  <ProfileCard profile={profiles[currentProfileIndex]} />
+                ) : (
+                  <div className="no-profile">No profile data available</div>
+                )}
               </div>
             </div>
           ) : (
             <div className="profile-list-view">
               {profiles.map((profile, index) => (
                 <div 
-                  key={profile.id} 
+                  key={profile.id || index} 
                   className={`profile-list-item ${index === currentProfileIndex ? 'active' : ''}`}
                   onClick={() => setCurrentProfileIndex(index)}
                 >
-                  <ProfileCard 
-                    type={profile.type}
-                    showBookmark={false}
-                    size="small"
-                  />
+                  <ProfileCard profile={profile} />
                 </div>
               ))}
+              
+              {profiles.length === 0 && (
+                <div className="no-profiles">No profiles found for this school</div>
+              )}
             </div>
           )}
         </div>

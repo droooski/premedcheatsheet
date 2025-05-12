@@ -38,6 +38,26 @@ export const filterProfiles = (profiles, searchTerm = '') => {
   });
 };
 
+// Extract all schools with their correct profile counts
+export const getSchoolsWithProfileCounts = (profiles) => {
+  const schoolCountMap = new Map();
+  
+  // Count profiles per school
+  profiles.forEach(profile => {
+    if (profile.acceptedSchools && Array.isArray(profile.acceptedSchools)) {
+      profile.acceptedSchools.forEach(schoolName => {
+        const normalizedName = schoolName.trim().toLowerCase();
+        if (normalizedName) {
+          const count = schoolCountMap.get(normalizedName) || 0;
+          schoolCountMap.set(normalizedName, count + 1);
+        }
+      });
+    }
+  });
+  
+  return schoolCountMap;
+};
+
 // Group profiles by type (biomedical, non-trad, etc.)
 export const groupProfilesByType = (profiles) => {
   const groups = {};
