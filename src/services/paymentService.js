@@ -1,6 +1,9 @@
 // src/services/paymentService.js
-import { db } from '../firebase/config';
-import { doc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
+import app from '../firebase/config'; // Import the Firebase app instance, not db directly
+
+// Initialize Firestore directly in this file to ensure it's properly set up
+const db = getFirestore(app);
 
 // Note: In a real implementation, payment processing would be handled by a back-end server
 // The front-end should only collect payment information and send it to the server
@@ -32,11 +35,7 @@ const loadStripe = async () => {
 // Process payment with Stripe
 export const processPayment = async (paymentDetails, userId, orderDetails) => {
   try {
-    // In a real implementation, you would:
-    // 1. Send payment details to your server
-    // 2. Server would create a payment intent with Stripe
-    // 3. Server would return client secret
-    // 4. Client would confirm payment with Stripe using client secret
+    console.log('DB instance:', db); // Debug log to verify db is initialized
     
     // This is a simulated payment process for demonstration
     console.log('Processing payment:', paymentDetails);
@@ -47,10 +46,10 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
       amount: orderDetails.amount,
       plan: orderDetails.plan,
       status: 'processing',
-      createdAt: serverTimestamp(),
+      createdAt: new Date().toISOString(), // Use direct date instead of serverTimestamp()
     };
     
-    // Add order to Firestore
+    // Add order to Firestore - make sure db is properly initialized
     const orderRef = await addDoc(collection(db, 'orders'), orderData);
     
     // Simulate payment processing delay
@@ -60,7 +59,7 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
     await updateDoc(doc(db, 'orders', orderRef.id), {
       status: 'completed',
       paymentId: `sim_${Math.random().toString(36).substring(2, 15)}`,
-      completedAt: serverTimestamp(),
+      completedAt: new Date().toISOString(), // Use direct date
     });
     
     // If user is authenticated, add subscription to user document
