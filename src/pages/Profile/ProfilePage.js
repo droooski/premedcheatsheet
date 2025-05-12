@@ -4,28 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
-import ViewToggle from '../../components/ViewToggle/ViewToggle';
-import SchoolFilters from '../../components/SchoolFilters/SchoolFilters';
-import ProfileSearch from '../../components/ProfileSearch/ProfileSearch';
-import ProfileNavigation from '../../components/ProfileNavigation/ProfileNavigation';
-import { onAuthChange, logoutUser } from '../../firebase/authService';
-import { loadProfiles, filterProfiles, extractSchools } from '../../utils/profilesData';
+import { onAuthChange } from '../../firebase/authService';
+import { loadProfiles, extractSchools } from '../../utils/profilesData';
 import './ProfilePage.scss';
 
 const ProfilePage = () => {
   // State management
   const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState('schools');
+  const [activeView, setActiveView] = useState('schools'); // 'schools' or 'profiles'
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [sortOption, setSortOption] = useState('alphabetical');
-  const [schools, setSchools] = useState([]);
-  const [filteredSchools, setFilteredSchools] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [filteredProfiles, setFilteredProfiles] = useState([]);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
+  const [schools, setSchools] = useState([]);
+  const [filteredSchools, setFilteredSchools] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedFilters, setSelectedFilters] = useState({
+    majors: [],
+    gpaRanges: [],
+    mcatRanges: []
+  });
   
   const navigate = useNavigate();
 
@@ -34,20 +35,6 @@ const ProfilePage = () => {
     const unsubscribe = onAuthChange((currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // For demo, we'll simulate a user profile
-        setUserProfile({
-          firstName: currentUser.displayName?.split(' ')[0] || 'User',
-          lastName: currentUser.displayName?.split(' ').slice(1).join(' ') || '',
-          email: currentUser.email,
-          subscriptions: [
-            {
-              plan: 'monthly',
-              active: true,
-              startDate: new Date().toISOString(),
-              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            }
-          ]
-        });
       } else {
         // Redirect to home page if not authenticated
         navigate('/');
@@ -59,22 +46,21 @@ const ProfilePage = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Load data from JSON file
+  // Load data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Load profiles from JSON
         const profilesData = await loadProfiles();
-        console.log(`Loaded ${profilesData.length} profiles successfully`);
+        setProfiles(profilesData);
+        setFilteredProfiles(profilesData);
         
         // Extract schools from profiles
         const schoolsData = extractSchools(profilesData);
-        console.log(`Extracted ${schoolsData.length} schools from profiles`);
-        
-        setProfiles(profilesData);
-        setFilteredProfiles(profilesData);
         setSchools(schoolsData);
         setFilteredSchools(schoolsData);
+        
+        // Calculate total pages for pagination
+        setTotalPages(Math.ceil(schoolsData.length / 10));
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -82,13 +68,12 @@ const ProfilePage = () => {
       }
     };
     
-    // Only fetch data if user is authenticated
     if (!loading && user) {
       fetchData();
     }
   }, [user, loading]);
 
-  // Update filtered schools when search or sort changes
+  // Filter and sort schools
   useEffect(() => {
     if (schools.length === 0) return;
     
@@ -113,85 +98,141 @@ const ProfilePage = () => {
     }
     
     setFilteredSchools(filtered);
+    
+    // Reset current page on filter/sort change
+    setCurrentPage(1);
+    
+    // Calculate total pages
+    setTotalPages(Math.ceil(filtered.length / 10));
   }, [searchQuery, sortOption, schools]);
 
-  // Update filtered profiles when search changes
+  // Filter profiles based on filters
   useEffect(() => {
     if (profiles.length === 0) return;
     
-    const filtered = filterProfiles(profiles, searchQuery);
+    let filtered = [...profiles];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(profile => {
+        return (
+          (profile.type && profile.type.toLowerCase().includes(query)) ||
+          (profile.major && profile.major.toLowerCase().includes(query)) ||
+          (profile.stateOfResidency && profile.stateOfResidency.toLowerCase().includes(query)) ||
+          (profile.acceptedSchools && profile.acceptedSchools.some(school => 
+            school.toLowerCase().includes(query)
+          ))
+        );
+      });
+    }
+    
+    // Apply major filters
+    if (selectedFilters.majors.length > 0) {
+      filtered = filtered.filter(profile => {
+        if (!profile.major) return false;
+        const profileMajor = profile.major.toLowerCase();
+        return selectedFilters.majors.some(major => 
+          profileMajor.includes(major.toLowerCase())
+        );
+      });
+    }
+    
+    // Apply GPA filters
+    if (selectedFilters.gpaRanges.length > 0) {
+      filtered = filtered.filter(profile => {
+        if (!profile.gpa) return false;
+        const gpa = parseFloat(profile.gpa);
+        
+        return selectedFilters.gpaRanges.some(range => {
+          if (range === '3.9-4.0') return gpa >= 3.9 && gpa <= 4.0;
+          if (range === '3.7-3.89') return gpa >= 3.7 && gpa < 3.9;
+          if (range === '3.5-3.69') return gpa >= 3.5 && gpa < 3.7;
+          if (range === 'Below3.5') return gpa < 3.5;
+          return false;
+        });
+      });
+    }
+    
+    // Apply MCAT filters
+    if (selectedFilters.mcatRanges.length > 0) {
+      filtered = filtered.filter(profile => {
+        if (!profile.mcat) return false;
+        const mcat = parseInt(profile.mcat);
+        
+        return selectedFilters.mcatRanges.some(range => {
+          if (range === '520+') return mcat >= 520;
+          if (range === '515-519') return mcat >= 515 && mcat <= 519;
+          if (range === '510-514') return mcat >= 510 && mcat <= 514;
+          if (range === 'Below510') return mcat < 510;
+          return false;
+        });
+      });
+    }
+    
     setFilteredProfiles(filtered);
-    // Reset current profile index when filters change
-    setCurrentProfileIndex(0);
-  }, [searchQuery, profiles]);
+  }, [searchQuery, selectedFilters, profiles]);
 
-  // Handle search input change
+  // Handle search change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Handle sort option change
+  // Toggle filters
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  // Handle sort change
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
   };
 
-  // Navigate to next profile
-  const goToNextProfile = () => {
-    if (currentProfileIndex < filteredProfiles.length - 1) {
-      setCurrentProfileIndex(currentProfileIndex + 1);
-    }
-  };
-
-  // Navigate to previous profile
-  const goToPrevProfile = () => {
-    if (currentProfileIndex > 0) {
-      setCurrentProfileIndex(currentProfileIndex - 1);
-    }
-  };
-
-  // Go to specific profile
-  const goToProfileIndex = (index) => {
-    if (index >= 0 && index < filteredProfiles.length) {
-      setCurrentProfileIndex(index);
-    }
-  };
-
-  // View profiles for a specific school
-  const viewSchoolProfiles = (schoolId) => {
-    const school = schools.find(s => s.id === schoolId);
-    if (school) {
-      // Filter profiles by this school
-      const schoolProfiles = profiles.filter(profile => 
-        profile.acceptedSchools && profile.acceptedSchools.some(s => 
-          s.toLowerCase().includes(school.name.toLowerCase())
-        )
-      );
+  // Handle filter checkbox change
+  const handleFilterChange = (category, value) => {
+    setSelectedFilters(prev => {
+      const newFilters = {...prev};
+      const index = newFilters[category].indexOf(value);
       
-      if (schoolProfiles.length > 0) {
-        // Navigate to profiles view with filtered profiles
-        setActiveView('profiles');
-        setFilteredProfiles(schoolProfiles);
-        setCurrentProfileIndex(0);
+      if (index === -1) {
+        // Add the filter
+        newFilters[category] = [...newFilters[category], value];
       } else {
-        // No profiles for this school
-        alert(`No profiles found for ${school.name}. Please check back later.`);
+        // Remove the filter
+        newFilters[category] = newFilters[category].filter(item => item !== value);
       }
-    }
+      
+      return newFilters;
+    });
   };
 
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  // Apply filters
+  const applyFilters = () => {
+    // Filters are applied automatically via useEffect
+    setShowFilters(false);
   };
 
   // Clear all filters
-  const clearFilters = () => {
+  const clearAllFilters = () => {
+    setSelectedFilters({
+      majors: [],
+      gpaRanges: [],
+      mcatRanges: []
+    });
     setSearchQuery('');
+  };
+
+  // Calculate pagination for schools
+  const paginatedSchools = filteredSchools.slice(
+    (currentPage - 1) * 10, 
+    currentPage * 10
+  );
+
+  // Go to page
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   if (loading) {
@@ -200,7 +241,7 @@ const ProfilePage = () => {
         <Navbar />
         <div className="profile-content">
           <div className="container">
-            <div className="loading-spinner">Loading your dashboard...</div>
+            <div className="loading-spinner">Loading profiles...</div>
           </div>
         </div>
         <Footer />
@@ -214,105 +255,308 @@ const ProfilePage = () => {
       
       <div className="profile-content">
         <div className="container">
-          <div className="dashboard-header">
-            <h1>Student Profile Database</h1>
-            <p className="subtitle">Discover profiles from successful med school applicants</p>
+          <h1 className="page-title">Student Profile Database</h1>
+          
+          <div className="view-toggle-container">
+            <button 
+              className={`toggle-button ${activeView === 'schools' ? 'active' : ''}`}
+              onClick={() => setActiveView('schools')}
+            >
+              Medical Schools
+            </button>
+            <button 
+              className={`toggle-button ${activeView === 'profiles' ? 'active' : ''}`}
+              onClick={() => setActiveView('profiles')}
+            >
+              All Profiles
+            </button>
           </div>
           
-          <ViewToggle activeView={activeView} setActiveView={setActiveView} />
+          <div className="search-sort-container">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder={activeView === 'schools' ? "Search medical schools..." : "Search profiles..."}
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </div>
+            
+            {activeView === 'schools' && (
+              <div className="sort-options">
+                <label>Sort By:</label>
+                <select value={sortOption} onChange={handleSortChange}>
+                  <option value="alphabetical">Alphabetical (A-Z)</option>
+                  <option value="alphabetical-reverse">Alphabetical (Z-A)</option>
+                  <option value="profiles-desc">Most Profiles</option>
+                  <option value="profiles-asc">Fewest Profiles</option>
+                </select>
+              </div>
+            )}
+            
+            {activeView === 'profiles' && (
+              <button 
+                className="filter-button"
+                onClick={toggleFilters}
+              >
+                Filter
+              </button>
+            )}
+          </div>
+          
+          {activeView === 'profiles' && showFilters && (
+            <div className="filter-panel">
+              <div className="filter-categories">
+                <div className="filter-category">
+                  <h3>Major</h3>
+                  <div className="filter-options">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.majors.includes('Biology')}
+                        onChange={() => handleFilterChange('majors', 'Biology')}
+                      />
+                      Biology
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.majors.includes('Chemistry')}
+                        onChange={() => handleFilterChange('majors', 'Chemistry')}
+                      />
+                      Chemistry
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.majors.includes('Biochemistry')}
+                        onChange={() => handleFilterChange('majors', 'Biochemistry')}
+                      />
+                      Biochemistry
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.majors.includes('Neuroscience')}
+                        onChange={() => handleFilterChange('majors', 'Neuroscience')}
+                      />
+                      Neuroscience
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="filter-category">
+                  <h3>GPA Range</h3>
+                  <div className="filter-options">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.gpaRanges.includes('3.9-4.0')}
+                        onChange={() => handleFilterChange('gpaRanges', '3.9-4.0')}
+                      />
+                      3.9 - 4.0
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.gpaRanges.includes('3.7-3.89')}
+                        onChange={() => handleFilterChange('gpaRanges', '3.7-3.89')}
+                      />
+                      3.7 - 3.89
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.gpaRanges.includes('3.5-3.69')}
+                        onChange={() => handleFilterChange('gpaRanges', '3.5-3.69')}
+                      />
+                      3.5 - 3.69
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.gpaRanges.includes('Below3.5')}
+                        onChange={() => handleFilterChange('gpaRanges', 'Below3.5')}
+                      />
+                      Below 3.5
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="filter-category">
+                  <h3>MCAT Range</h3>
+                  <div className="filter-options">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.mcatRanges.includes('520+')}
+                        onChange={() => handleFilterChange('mcatRanges', '520+')}
+                      />
+                      520+
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.mcatRanges.includes('515-519')}
+                        onChange={() => handleFilterChange('mcatRanges', '515-519')}
+                      />
+                      515-519
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.mcatRanges.includes('510-514')}
+                        onChange={() => handleFilterChange('mcatRanges', '510-514')}
+                      />
+                      510-514
+                    </label>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedFilters.mcatRanges.includes('Below510')}
+                        onChange={() => handleFilterChange('mcatRanges', 'Below510')}
+                      />
+                      Below 510
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="filter-actions">
+                <button className="apply-button" onClick={applyFilters}>Apply Filters</button>
+                <button className="clear-button" onClick={clearAllFilters}>Clear All</button>
+              </div>
+            </div>
+          )}
           
           {activeView === 'schools' ? (
+            <div className="schools-grid">
+              {paginatedSchools.length > 0 ? (
+                paginatedSchools.map(school => (
+                  <div className="school-card" key={school.id}>
+                    <h3 className="school-name">{school.name}</h3>
+                    <p className="profile-count">{school.count || 0} Accepted {school.count === 1 ? 'Profile' : 'Profiles'}</p>
+                    <button 
+                      className="view-profiles-button"
+                      onClick={() => navigate(`/school/${school.id}`)}
+                    >
+                      View Profiles
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="no-results">
+                  <p>No medical schools found matching "{searchQuery}"</p>
+                  <button onClick={() => setSearchQuery('')}>Clear Search</button>
+                </div>
+              )}
+            </div>
+          ) : (
             <>
-              <SchoolFilters 
-                sortOption={sortOption} 
-                handleSortChange={handleSortChange}
-                searchQuery={searchQuery}
-                handleSearchChange={handleSearchChange}
-              />
-              
-              <div className="schools-grid">
-                {filteredSchools.length > 0 ? (
-                  filteredSchools.map(school => (
-                    <div className="school-card" key={school.id}>
-                      <div className="school-logo">
-                        <img src={`/images/default-school-logo.png`} alt={school.name} />
-                      </div>
-                      <div className="school-info">
-                        <h3>{school.name}</h3>
-                        <p>{school.count || 0} Accepted Profiles</p>
-                      </div>
-                      <button 
-                        className="view-profiles-button"
-                        onClick={() => viewSchoolProfiles(school.id)}
-                      >
-                        View Profiles
-                      </button>
+              <div className="profiles-grid">
+                {filteredProfiles.length > 0 ? (
+                  filteredProfiles.map((profile, index) => (
+                    <div className="profile-item" key={profile.id || index}>
+                      <ProfileCard profile={profile} />
                     </div>
                   ))
                 ) : (
                   <div className="no-results">
-                    <p>No medical schools found matching "{searchQuery}"</p>
-                    <button onClick={() => setSearchQuery('')}>Clear Search</button>
+                    <p>No profiles match your search criteria.</p>
+                    <button onClick={clearAllFilters}>Clear All Filters</button>
                   </div>
                 )}
               </div>
+              
+              {filteredProfiles.length > 0 && (
+                <div className="pagination">
+                  <button 
+                    className="page-button prev"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    ← Previous
+                  </button>
+                  
+                  <span className="page-info">
+                    Page {currentPage} of {Math.ceil(filteredProfiles.length / 10)}
+                  </span>
+                  
+                  <button 
+                    className="page-button next"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === Math.ceil(filteredProfiles.length / 10)}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </>
-          ) : (
-            <div className="profiles-container">
-              <div className="profiles-header">
-                <button 
-                  className="back-to-schools"
-                  onClick={() => setActiveView('schools')}
-                >
-                  ← Back to Schools
+          )}
+          
+          {activeView === 'schools' && totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                className="page-button prev"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ← Previous
+              </button>
+              
+              <div className="page-numbers">
+                {currentPage > 1 && (
+                  <button 
+                    className="page-number"
+                    onClick={() => goToPage(1)}
+                  >
+                    1
+                  </button>
+                )}
+                
+                {currentPage > 3 && <span className="ellipsis">...</span>}
+                
+                {currentPage > 2 && (
+                  <button 
+                    className="page-number"
+                    onClick={() => goToPage(currentPage - 1)}
+                  >
+                    {currentPage - 1}
+                  </button>
+                )}
+                
+                <button className="page-number active">
+                  {currentPage}
                 </button>
-                <h2>Applicant Profiles</h2>
-              </div>
-
-              <ProfileSearch 
-                searchQuery={searchQuery}
-                handleSearchChange={handleSearchChange}
-                filters={showFilters}
-                setFilters={setShowFilters}
-              />
-              
-              <div className="profile-navigation">
-                <ProfileNavigation 
-                  currentIndex={currentProfileIndex}
-                  totalProfiles={filteredProfiles.length}
-                  goToPrev={goToPrevProfile}
-                  goToNext={goToNextProfile}
-                  goToIndex={goToProfileIndex}
-                />
-              </div>
-              
-              <div className="profile-display">
-                {filteredProfiles.length > 0 ? (
-                  <ProfileCard 
-                    profile={filteredProfiles[currentProfileIndex]}
-                    showBookmark={true}
-                    size="large"
-                  />
-                ) : (
-                  <div className="no-profiles">
-                    <p>No profiles match your current filters.</p>
-                    <button onClick={clearFilters}>Clear All Filters</button>
-                  </div>
+                
+                {currentPage < totalPages - 1 && (
+                  <button 
+                    className="page-number"
+                    onClick={() => goToPage(currentPage + 1)}
+                  >
+                    {currentPage + 1}
+                  </button>
+                )}
+                
+                {currentPage < totalPages - 2 && <span className="ellipsis">...</span>}
+                
+                {currentPage < totalPages && (
+                  <button 
+                    className="page-number"
+                    onClick={() => goToPage(totalPages)}
+                  >
+                    {totalPages}
+                  </button>
                 )}
               </div>
               
-              {/* Add profile navigation dots at the bottom */}
-              <div className="profile-pagination-dots">
-                {filteredProfiles.length > 0 && 
-                  filteredProfiles.map((_, index) => (
-                    <span 
-                      key={index}
-                      className={`profile-dot ${index === currentProfileIndex ? 'active' : ''}`}
-                      onClick={() => goToProfileIndex(index)}
-                    />
-                  ))
-                }
-              </div>
+              <button 
+                className="page-button next"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next →
+              </button>
             </div>
           )}
         </div>

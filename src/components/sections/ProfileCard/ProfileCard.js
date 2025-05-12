@@ -2,19 +2,12 @@
 import React from 'react';
 import './ProfileCard.scss';
 
-const ProfileCard = ({ 
-  profile,
-  showBookmark = true,
-  size = "large",
-  onClick = null
-}) => {
+const ProfileCard = ({ profile }) => {
   if (!profile) {
     return null;
   }
 
-  // Extract data from the profile
   const {
-    id,
     type,
     gender,
     race,
@@ -26,11 +19,15 @@ const ProfileCard = ({
     acceptedSchools = [],
     medicalVolunteering,
     nonMedicalVolunteering,
+    clinicalExperience,
     research,
+    leadership,
+    nonMedicalEmployment,
     medicalEmployment,
     shadowing,
-    leadership,
+    awardsHonors,
     hobbies,
+    otherActivities,
     major,
     reflections
   } = profile;
@@ -40,134 +37,171 @@ const ProfileCard = ({
     ? "Non-Traditional Applicant with Research Focus"
     : type === "biomedical" || (major && major.toLowerCase().includes("biomed"))
       ? "Biomedical Engineering Student"
-      : `${major ? major.split(',')[0].trim() : type} Student`;
+      : major ? `${major.split(',')[0].trim()} Student` : "General Biology Student";
 
-  // Background items
-  const backgroundItems = [];
-  
-  if (major) {
-    backgroundItems.push(`Major: ${major}`);
-  }
-  
-  if (research) {
-    backgroundItems.push(`Research: ${research}`);
-  }
-  
-  if (leadership) {
-    backgroundItems.push(`Leadership: ${leadership}`);
-  }
-  
-  if (medicalEmployment) {
-    backgroundItems.push(`Medical Employment: ${medicalEmployment}`);
-  }
-  
-  if (medicalVolunteering) {
-    backgroundItems.push(`Medical Volunteering: ${medicalVolunteering}`);
-  }
-  
-  if (nonMedicalVolunteering) {
-    backgroundItems.push(`Non-Medical Volunteering: ${nonMedicalVolunteering}`);
-  }
-  
-  if (shadowing) {
-    backgroundItems.push(`Shadowing: ${shadowing}`);
-  }
-  
-  if (hobbies) {
-    backgroundItems.push(`Hobbies: ${hobbies}`);
-  }
-  
   return (
-    <div className={`profile-card ${size}`} onClick={onClick}>
-      <div className="profile-header">
+    <div className="profile-card">
+      <div className="card-header">
         <h3>{title}</h3>
-        {showBookmark && (
-          <div className="bookmark-icon">
-            <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 19L8 14L1 19V3C1 2.46957 1.21071 1.96086 1.58579 1.58579C1.96086 1.21071 2.46957 1 3 1H13C13.5304 1 14.0391 1.21071 14.4142 1.58579C14.7893 1.96086 15 2.46957 15 3V19Z" stroke="#CCCCCC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      </div>
+      
+      <div className="info-section">
+        <div className="info-grid">
+          <div className="info-item">
+            <div className="label">Gender</div>
+            <div className="value">{gender || 'N/A'}</div>
+          </div>
+          <div className="info-item">
+            <div className="label">Ethnicity</div>
+            <div className="value">{race || 'N/A'}</div>
+          </div>
+          <div className="info-item">
+            <div className="label">State</div>
+            <div className="value">{stateOfResidency || 'N/A'}</div>
+          </div>
+          <div className="info-item">
+            <div className="label">ApplicationYear</div>
+            <div className="value">{matriculationYear || 'N/A'}</div>
+          </div>
+        </div>
+        
+        <div className="scores-grid">
+          <div className="score-item">
+            <div className="label">GPA</div>
+            <div className="value">{gpa || 'N/A'}</div>
+          </div>
+          <div className="score-item">
+            <div className="label">MCAT</div>
+            <div className="value">{mcat || 'N/A'}</div>
+          </div>
+          <div className="score-item">
+            <div className="label">MCAT Subsections</div>
+            <div className="value">{mcatBreakdown || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="section-header">
+        <div className="icon accepted"></div>
+        <h4>Accepted Schools</h4>
+      </div>
+      
+      <div className="accepted-schools">
+        <div className="schools-list">
+          {acceptedSchools && acceptedSchools.length > 0 ? (
+            acceptedSchools.map((school, index) => (
+              <div key={index} className="school-badge">{school}</div>
+            ))
+          ) : (
+            <div className="empty-data">No schools specified</div>
+          )}
+        </div>
+      </div>
+      
+      <div className="section-header">
+        <div className="icon background"></div>
+        <h4>Applicant Background</h4>
+      </div>
+      
+      <div className="background-section">
+        {major && (
+          <div className="background-item">
+            <div className="label">Major:</div>
+            <div className="value">{major}</div>
+          </div>
+        )}
+        
+        {research && (
+          <div className="background-item">
+            <div className="label">Research:</div>
+            <div className="value">{research}</div>
+          </div>
+        )}
+        
+        {clinicalExperience && (
+          <div className="background-item">
+            <div className="label">Clinical Experience:</div>
+            <div className="value">{clinicalExperience}</div>
+          </div>
+        )}
+        
+        {medicalVolunteering && (
+          <div className="background-item">
+            <div className="label">Medical Volunteering Experience:</div>
+            <div className="value">{medicalVolunteering}</div>
+          </div>
+        )}
+        
+        {nonMedicalVolunteering && (
+          <div className="background-item">
+            <div className="label">Non-medical Volunteering Experience:</div>
+            <div className="value">{nonMedicalVolunteering}</div>
+          </div>
+        )}
+        
+        {leadership && (
+          <div className="background-item">
+            <div className="label">Leadership:</div>
+            <div className="value">{leadership}</div>
+          </div>
+        )}
+        
+        {nonMedicalEmployment && (
+          <div className="background-item">
+            <div className="label">Paid Non-medical Employment Activities:</div>
+            <div className="value">{nonMedicalEmployment}</div>
+          </div>
+        )}
+        
+        {medicalEmployment && (
+          <div className="background-item">
+            <div className="label">Paid Medical Employment Activities:</div>
+            <div className="value">{medicalEmployment}</div>
+          </div>
+        )}
+        
+        {shadowing && (
+          <div className="background-item">
+            <div className="label">Shadowing Experience:</div>
+            <div className="value">{shadowing}</div>
+          </div>
+        )}
+        
+        {awardsHonors && (
+          <div className="background-item">
+            <div className="label">Awards:</div>
+            <div className="value">{awardsHonors}</div>
+          </div>
+        )}
+        
+        {hobbies && (
+          <div className="background-item">
+            <div className="label">Hobbies:</div>
+            <div className="value">{hobbies}</div>
+          </div>
+        )}
+        
+        {otherActivities && (
+          <div className="background-item">
+            <div className="label">Other Significant Activities:</div>
+            <div className="value">{otherActivities}</div>
           </div>
         )}
       </div>
       
-      <div className="profile-details">
-        <div className="detail-row">
-          <div className="detail-item">
-            <span className="label">Gender</span>
-            <span className="value">{gender || 'Not specified'}</span>
+      {reflections && (
+        <>
+          <div className="section-header">
+            <div className="icon background"></div>
+            <h4>Reflections</h4>
           </div>
-          <div className="detail-item">
-            <span className="label">Ethnicity</span>
-            <span className="value">{race || 'Not specified'}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">State</span>
-            <span className="value">{stateOfResidency || 'Not specified'}</span>
-          </div>
-        </div>
-        <div className="detail-row">
-          <div className="detail-item">
-            <span className="label">Year</span>
-            <span className="value">{matriculationYear || 'N/A'}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">GPA</span>
-            <span className="value">{gpa || 'N/A'}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">MCAT</span>
-            <span className="value">{mcat || 'N/A'}</span>
-          </div>
-        </div>
-        <div className="detail-row">
-          <div className="detail-item">
-            <span className="label">MCAT Breakdown</span>
-            <span className="value">{mcatBreakdown || 'Not specified'}</span>
-          </div>
-        </div>
-
-        <div className="highlight-section accepted">
-          <div className="highlight-header">
-            <div className="dot accepted-dot"></div>
-            <span>Accepted Schools</span>
-          </div>
-          {acceptedSchools && acceptedSchools.length > 0 ? (
-            acceptedSchools.map((school, index) => (
-              <p key={index}>{school}</p>
-            ))
-          ) : (
-            <p>No schools specified</p>
-          )}
-        </div>
-
-        <div className="highlight-section background">
-          <div className="highlight-header">
-            <div className="dot background-dot"></div>
-            <span>Applicant Background</span>
-          </div>
-          {backgroundItems.length > 0 ? (
-            backgroundItems.map((item, index) => (
-              <p key={index}>{item}</p>
-            ))
-          ) : (
-            <p>No background information available</p>
-          )}
-        </div>
-
-        {reflections && (
-          <div className="highlight-section reflections">
-            <div className="highlight-header">
-              <div className="dot reflections-dot"></div>
-              <span>Reflections</span>
+          <div className="reflections-section">
+            <div className="reflections-content">
+              <p>{reflections}</p>
             </div>
-            <p>{reflections}</p>
           </div>
-        )}
-
-        <div className="profile-footer">
-          <a href="/profile">View Full Profile</a>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

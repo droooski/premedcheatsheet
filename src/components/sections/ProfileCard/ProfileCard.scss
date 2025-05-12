@@ -1,268 +1,182 @@
 // src/components/sections/ProfileCard/ProfileCard.scss
 @use '../../../styles/variables' as *;
-@use '../../../styles/mixins' as mix;
 
 .profile-card {
   background-color: $white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: $spacing-4;
+  border: 1px solid #E5E7EB;
   
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-  }
-  
-  // Large profile card scaling based on viewport
-  &.large {
-    max-width: 650px;
-    margin: 0 auto;
-    
-    @media (min-width: $xl) {
-      max-width: 800px; // Wider cards on larger screens
-    }
-    
-    @media (min-width: $xxl) {
-      max-width: 900px; // Even wider on ultra-large screens
-    }
-    
-    @media (max-width: $md) {
-      max-width: 90%; // Relative width on medium screens
-    }
-    
-    @media (max-width: $sm) {
-      max-width: 100%; // Full width on small screens
-    }
-  }
-  
-  &.small {
-    height: 100%;
-    
-    @media (min-width: $lg) {
-      min-height: 360px; // Consistent height on larger screens
-    }
-  }
-  
-  .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $spacing-4;
-    border-bottom: 1px solid $gray-200;
-    background-color: #F2F6F5;
-    
-    @media (min-width: $lg) {
-      padding: $spacing-6; // More padding on larger screens
-    }
+  .card-header {
+    padding: $spacing-3 $spacing-4;
+    border-bottom: 1px solid #E5E7EB;
     
     h3 {
       font-size: 1rem;
       font-weight: 600;
       margin: 0;
+      color: $text-color;
+    }
+  }
+  
+  /* Info sections (Gender, Ethnicity, etc) */
+  .info-section {
+    padding: $spacing-3 $spacing-4;
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-3;
       
-      // Fluid typography for headers
-      @media (min-width: $lg) {
-        font-size: 1.25rem;
+      @media (max-width: $md) {
+        grid-template-columns: repeat(2, 1fr);
       }
       
-      @media (min-width: $xl) {
-        font-size: 1.5rem;
-      }
-      
-      @media (max-width: $sm) {
-        font-size: 0.9rem;
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        
+        .label {
+          font-size: 0.7rem;
+          color: $text-color-light;
+          margin-bottom: 2px;
+        }
+        
+        .value {
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: $text-color;
+        }
       }
     }
     
-    .bookmark-icon {
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-      flex-shrink: 0;
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-3;
+      margin-top: $spacing-3;
       
-      @media (min-width: $lg) {
-        transform: scale(1.2); // Larger icon on bigger screens
+      @media (max-width: $md) {
+        grid-template-columns: repeat(2, 1fr);
       }
       
-      &:hover {
-        opacity: 0.7;
+      .score-item {
+        display: flex;
+        flex-direction: column;
+        
+        .label {
+          font-size: 0.7rem;
+          color: $text-color-light;
+          margin-bottom: 2px;
+        }
+        
+        .value {
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: $text-color;
+        }
       }
     }
   }
   
-  .profile-details {
-    padding: $spacing-4;
-    
-    @media (min-width: $lg) {
-      padding: $spacing-6; // More padding on larger screens
-    }
-    
-    @media (max-width: $sm) {
-      padding: $spacing-3;
-    }
-  }
-  
-  .detail-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: $spacing-4;
-    margin-bottom: $spacing-4;
-    
-    @media (min-width: $lg) {
-      gap: $spacing-6; // More spacing between columns on larger screens
-      margin-bottom: $spacing-6;
-    }
-    
-    @media (max-width: $sm) {
-      gap: $spacing-2;
-    }
-    
-    // For MCAT Breakdown row, let it take full width
-    &:nth-child(3) {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .detail-item {
+  .section-header {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    margin-bottom: $spacing-3;
+    padding: $spacing-3 $spacing-4;
+    padding-bottom: 0;
     
-    .label {
-      font-size: 0.75rem;
-      color: $gray-500;
-      margin-bottom: $spacing-1;
-      
-      @media (min-width: $lg) {
-        font-size: 0.875rem;
-      }
-      
-      @media (min-width: $xl) {
-        font-size: 1rem; // Larger labels on xl screens
-      }
-    }
-    
-    .value {
-      font-size: 0.875rem;
-      font-weight: 500;
-      
-      @media (min-width: $lg) {
-        font-size: 1rem;
-      }
-      
-      @media (min-width: $xl) {
-        font-size: 1.125rem; // Larger values on xl screens
-      }
-      
-      @media (max-width: $sm) {
-        font-size: 0.8rem;
-        word-break: break-word;
-      }
-    }
-  }
-  
-  .highlight-section {
-    margin-bottom: $spacing-4;
-    
-    @media (min-width: $lg) {
-      margin-bottom: $spacing-6; // More spacing on larger screens
-    }
-    
-    .highlight-header {
+    .icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      margin-right: $spacing-2;
       display: flex;
       align-items: center;
-      margin-bottom: $spacing-2;
+      justify-content: center;
+      flex-shrink: 0;
       
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: $spacing-2;
-        flex-shrink: 0;
+      &.accepted {
+        background-color: #3B82F6; /* Blue */
         
-        @media (min-width: $lg) {
-          width: 12px; // Larger dots on bigger screens
-          height: 12px;
+        &::before {
+          content: "✓";
+          color: white;
+          font-size: 10px;
+          font-weight: bold;
         }
       }
       
-      .accepted-dot {
-        background-color: $green-500;
-      }
-      
-      .background-dot {
-        background-color: $blue-500;
-      }
-      
-      .reflections-dot {
-        background-color: #065f46;
-      }
-      
-      span {
-        font-weight: 600;
-        font-size: 0.875rem;
+      &.background {
+        background-color: #10B981; /* Green */
         
-        @media (min-width: $lg) {
-          font-size: 1rem;
-        }
-        
-        @media (min-width: $xl) {
-          font-size: 1.125rem; // Larger text on xl screens
-        }
-        
-        @media (max-width: $sm) {
-          font-size: 0.8rem;
+        &::before {
+          content: "●";
+          color: white;
+          font-size: 10px;
         }
       }
     }
     
-    p {
-      margin-left: 1.25rem;
-      font-size: 0.75rem;
-      line-height: 1.5;
-      margin-bottom: $spacing-1;
+    h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0;
+      color: $text-color;
+    }
+  }
+  
+  .accepted-schools {
+    padding: 0 $spacing-4 $spacing-3;
+    
+    .schools-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-2;
       
-      @media (min-width: $lg) {
-        font-size: 0.875rem;
-        margin-bottom: $spacing-2;
-      }
-      
-      @media (min-width: $xl) {
-        font-size: 1rem; // Larger text on xl screens
-        line-height: 1.6;
-      }
-      
-      @media (max-width: $sm) {
-        font-size: 0.7rem;
-        margin-left: 1rem;
+      .school-badge {
+        background-color: #DCFCE7; /* Light green */
+        color: #166534; /* Dark green */
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
       }
     }
   }
   
-  .profile-footer {
-    text-align: center;
-    padding: $spacing-2 0;
+  .background-section {
+    padding: 0 $spacing-4 $spacing-3;
     
-    @media (min-width: $lg) {
-      padding: $spacing-4 0; // More padding on larger screens
+    .background-item {
+      margin-bottom: $spacing-2;
+      
+      .label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $text-color;
+        margin-bottom: 2px;
+        display: block;
+      }
+      
+      .value {
+        font-size: 0.75rem;
+        color: $text-color;
+        display: block;
+      }
     }
+  }
+  
+  .reflections-section {
+    padding: 0 $spacing-4 $spacing-4;
     
-    a {
-      color: $blue-500;
-      font-size: 0.75rem;
-      transition: text-decoration 0.3s ease;
-      
-      @media (min-width: $lg) {
-        font-size: 0.875rem;
-      }
-      
-      @media (min-width: $xl) {
-        font-size: 1rem; // Larger link on xl screens
-      }
-      
-      &:hover {
-        text-decoration: underline;
+    .reflections-content {
+      p {
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: $text-color;
+        margin: 0;
       }
     }
   }
