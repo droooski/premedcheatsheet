@@ -40,6 +40,18 @@ const Checkout = () => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+  // If user has completed payment, redirect to profile page
+  if (checkoutStep === 'confirmation' && orderId) {
+    // Add a small delay to show the confirmation screen
+    const timer = setTimeout(() => {
+      navigate('/profile');
+    }, 3000); // 3 seconds delay
+    
+    return () => clearTimeout(timer);
+  }
+}, [checkoutStep, orderId, navigate]);
+
   // Plan toggle function
   const togglePlan = (plan) => {
     setSelectedPlan(plan);
@@ -97,7 +109,6 @@ const Checkout = () => {
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
     setUser(userData?.user || null);
-    setUserProfile(userData);
     setShowAuthModal(false);
     setCheckoutStep('payment');
   };
@@ -385,25 +396,25 @@ const Checkout = () => {
   };
 
   // Render confirmation step
-  const renderConfirmation = () => {
-    return (
-      <div className="confirmation-container">
-        <div className="confirmation-icon">✅</div>
-        <h2>Payment Successful!</h2>
-        <p>Thank you for your purchase. You now have access to PremedCheatsheet.</p>
-        <p>A receipt has been sent to your email address.</p>
-        {orderId && (
-          <p className="order-id">Order ID: #{orderId}</p>
-        )}
-        <button 
-          className="continue-button"
-          onClick={() => navigate('/profile')}
-        >
-          Start Exploring Profiles
-        </button>
-      </div>
-    );
-  };
+const renderConfirmation = () => {
+  return (
+    <div className="confirmation-container">
+      <div className="confirmation-icon">✅</div>
+      <h2>Payment Successful!</h2>
+      <p>Thank you for your purchase. You now have access to PremedCheatsheet.</p>
+      <p>A receipt has been sent to your email address.</p>
+      {orderId && (
+        <p className="order-id">Order ID: #{orderId}</p>
+      )}
+      <button 
+        className="continue-button"
+        onClick={() => navigate('/profile')}
+      >
+        Start Exploring Profiles
+      </button>
+    </div>
+  );
+};
 
   return (
     <div className="checkout-page">

@@ -13,34 +13,45 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Toggle between login and signup modes
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
     setError('');
   };
 
+  // Handle form submission (login or signup)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      console.log("Form submission started");
+      
       // Validate form data
       if (!isLogin && password !== confirmPassword) {
         throw new Error('Passwords do not match');
       }
 
+      console.log("Authentication method:", isLogin ? "Login" : "Register");
+      
       let result;
       
       if (isLogin) {
-        // Login with Firebase
+        // Login with Firebase through our service
+        console.log("Attempting login with:", email);
         result = await loginUser(email, password);
       } else {
-        // Register with Firebase
+        // Register with Firebase through our service
+        console.log("Attempting registration with:", email);
         result = await registerUser(email, password, firstName, lastName);
       }
 
+      console.log("Auth result:", result);
+      
       if (result.success) {
-        // Call the onSuccess callback with user data
+        console.log("Auth success, calling onSuccess callback");
+        // Call onSuccess callback with user data
         onSuccess({
           user: result.user,
           email,
@@ -52,12 +63,14 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
       }
       
     } catch (error) {
+      console.error('Authentication error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // Continue as guest option
   const continueAsGuest = () => {
     onSuccess(null); // Pass null to indicate guest checkout
   };
