@@ -43,11 +43,19 @@ const Checkout = () => {
   // Check for authenticated user on component mount
   useEffect(() => {
     const unsubscribe = onAuthChange((currentUser) => {
+      console.log("Auth state changed:", currentUser);
       setUser(currentUser);
+      
+      // If user is authenticated and we're in confirmation step, redirect to profile
+      if (currentUser && checkoutStep === 'confirmation' && orderId) {
+        setTimeout(() => {
+          navigate('/profile');
+        }, 2000);
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [checkoutStep, orderId]);
 
   useEffect(() => {
     // If user has completed payment, redirect to profile page
@@ -136,6 +144,7 @@ const Checkout = () => {
     setLoading(true);
     
     try {
+      console.log("Processing free purchase with 100% discount");
       // Create a free order record
       const result = await processPayment(
         null, // No payment details needed
@@ -156,6 +165,7 @@ const Checkout = () => {
         throw new Error(result.error || 'Error processing your free access');
       }
     } catch (error) {
+      console.error("Free purchase error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -166,14 +176,20 @@ const Checkout = () => {
   const continueAsGuest = () => {
     // Set a cookie or localStorage item to track guest access
     localStorage.setItem('guestAccess', 'true');
-    localStorage.setItem('guestAccessExpiry', Date.now() + (24 * 60 * 60 * 1000)); // 24 hours
+    localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
     
-    // Redirect to profile page
-    navigate('/profile');
+    // If free with coupon, process the free purchase first
+    if (isFreeWithCoupon()) {
+      processFreePurchase();
+    } else {
+      // Redirect to profile page
+      navigate('/profile');
+    }
   };
 
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
+    console.log("Auth success:", userData);
     setUser(userData?.user || null);
     setShowAuthModal(false);
     
@@ -228,6 +244,7 @@ const Checkout = () => {
         throw new Error(result.error || 'Payment processing failed');
       }
     } catch (error) {
+      console.error("Payment processing error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -281,7 +298,7 @@ const Checkout = () => {
                 <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
               </div>
               {couponApplied && discount === 100 && (
-                <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold'}}>
+                <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold', marginTop: '10px'}}>
                   100% OFF - FREE ACCESS!
                 </div>
               )}
@@ -372,6 +389,19 @@ const Checkout = () => {
 
   // Render payment form step
   const renderPaymentForm = () => {
+    // IMPORTANT: If using a 100% discount coupon, skip payment form and go straight to confirmation
+    if (isFreeWithCoupon()) {
+      useEffect(() => {
+        processFreePurchase();
+      }, []);
+      
+      return (
+        <div className="loading-payment">
+          <p>Processing your free access...</p>
+        </div>
+      );
+    }
+    
     return (
       <div className="payment-form-container">
         <div className="payment-header">

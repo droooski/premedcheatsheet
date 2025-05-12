@@ -1,6 +1,6 @@
 // src/components/auth/AuthModal.js
-import React, { useState } from 'react';
-import { registerUser, loginUser } from '../../firebase/authService';
+import React, { useState, useEffect } from 'react';
+import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
 import './AuthModal.scss';
 
 const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
@@ -12,6 +12,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Update login mode when initialMode prop changes
+  useEffect(() => {
+    setIsLogin(initialMode === 'login');
+  }, [initialMode]);
 
   // Toggle between login and signup modes
   const toggleAuthMode = () => {
@@ -49,11 +54,22 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
 
       console.log("Auth result:", result);
       
-      if (result.success) {
-        console.log("Auth success, calling onSuccess callback");
-        // Call onSuccess callback with user data
+      if (result.user) {
+        console.log("Auth success, getting user profile");
+        
+        // Get user profile data
+        let userProfile = null;
+        if (result.user.uid) {
+          const profileResult = await getUserProfile(result.user.uid);
+          if (profileResult.profile) {
+            userProfile = profileResult.profile;
+          }
+        }
+        
+        // Call onSuccess callback with user data and profile
         onSuccess({
           user: result.user,
+          profile: userProfile,
           email,
           firstName,
           lastName
@@ -64,7 +80,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
       
     } catch (error) {
       console.error('Authentication error:', error);
-      setError(error.message);
+      setError(error.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +88,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
 
   // Continue as guest option
   const continueAsGuest = () => {
+    // Set a cookie or localStorage item to track guest access
+    localStorage.setItem('guestAccess', 'true');
+    localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
+    
     onSuccess(null); // Pass null to indicate guest checkout
   };
 
@@ -173,9 +193,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
             </p>
           )}
           
-            <button className="guest-button" onClick={continueAsGuest}>
+          <button className="guest-button" onClick={continueAsGuest}>
             Continue as guest
-            </button>
+          </button>
         </div>
       </div>
     </div>
