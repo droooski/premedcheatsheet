@@ -28,9 +28,9 @@ const Checkout = () => {
     name: ''
   });
   const [discountCodes, setDiscountCodes] = useState({
-  'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
-  'STUDENT2025': { rate: 20, description: 'Student Discount' },
-  'PARTNER': { rate: 100, description: 'Partnership' }
+    'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
+    'STUDENT2025': { rate: 20, description: 'Student Discount' },
+    'PARTNER': { rate: 100, description: 'Partnership - 100% Off' }
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,16 +50,16 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
-  // If user has completed payment, redirect to profile page
-  if (checkoutStep === 'confirmation' && orderId) {
-    // Add a small delay to show the confirmation screen
-    const timer = setTimeout(() => {
-      navigate('/profile');
-    }, 3000); // 3 seconds delay
-    
-    return () => clearTimeout(timer);
-  }
-}, [checkoutStep, orderId, navigate]);
+    // If user has completed payment, redirect to profile page
+    if (checkoutStep === 'confirmation' && orderId) {
+      // Add a small delay to show the confirmation screen
+      const timer = setTimeout(() => {
+        navigate('/profile');
+      }, 3000); // 3 seconds delay
+      
+      return () => clearTimeout(timer);
+    }
+  }, [checkoutStep, orderId, navigate]);
 
   // Plan toggle function
   const togglePlan = (plan) => {
@@ -77,10 +77,13 @@ const Checkout = () => {
 
   // Apply coupon function
   const applyCoupon = () => {
-    if (couponCode.toLowerCase() === 'premedvip') {
+    // Convert to uppercase for case-insensitive comparison
+    const code = couponCode.toUpperCase();
+    
+    if (discountCodes[code]) {
       setCouponApplied(true);
-      setDiscount(10); // 10% discount
-      alert('Coupon applied! 10% discount added to your order.');
+      setDiscount(discountCodes[code].rate);
+      alert(`Coupon applied! ${discountCodes[code].description} (${discountCodes[code].rate}% off)`);
     } else {
       alert('Invalid coupon code. Please try again.');
     }
@@ -106,14 +109,56 @@ const Checkout = () => {
     return basePrice.toFixed(2);
   };
 
+  // Check if coupon provides a 100% discount
+  const isFreeWithCoupon = () => {
+    return couponApplied && parseFloat(getFinalPrice()) === 0;
+  };
+
   // Start checkout process
   const startCheckout = () => {
     if (user) {
-      // User is already authenticated, proceed to payment
-      setCheckoutStep('payment');
+      // User is already authenticated, process based on coupon
+      if (isFreeWithCoupon()) {
+        // If 100% discount, skip payment and go straight to confirmation
+        processFreePurchase();
+      } else {
+        // Otherwise proceed to payment
+        setCheckoutStep('payment');
+      }
     } else {
       // Show authentication modal
       setShowAuthModal(true);
+    }
+  };
+
+  // Process a free purchase with 100% discount coupon
+  const processFreePurchase = async () => {
+    setLoading(true);
+    
+    try {
+      // Create a free order record
+      const result = await processPayment(
+        null, // No payment details needed
+        user?.uid,
+        {
+          amount: 0,
+          plan: selectedPlan,
+          discount: discount,
+          couponCode: couponCode,
+          isFree: true
+        }
+      );
+
+      if (result.success) {
+        setOrderId(result.orderId);
+        setCheckoutStep('confirmation');
+      } else {
+        throw new Error(result.error || 'Error processing your free access');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,7 +176,13 @@ const Checkout = () => {
   const handleAuthSuccess = (userData) => {
     setUser(userData?.user || null);
     setShowAuthModal(false);
-    setCheckoutStep('payment');
+    
+    // Check if purchase is free with coupon
+    if (isFreeWithCoupon()) {
+      processFreePurchase();
+    } else {
+      setCheckoutStep('payment');
+    }
   };
 
   // Handle card input changes
@@ -149,20 +200,24 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Basic validation
-      if (!cardInfo.number || !cardInfo.expiry || !cardInfo.cvc) {
-        throw new Error('Please fill in all required payment fields');
+      // Skip validation for free purchases
+      if (!isFreeWithCoupon()) {
+        // Basic validation
+        if (!cardInfo.number || !cardInfo.expiry || !cardInfo.cvc) {
+          throw new Error('Please fill in all required payment fields');
+        }
       }
 
       // Process payment
       const result = await processPayment(
-        cardInfo,
+        isFreeWithCoupon() ? null : cardInfo,
         user?.uid,
         {
           amount: parseFloat(getFinalPrice()),
           plan: selectedPlan,
           discount: discount,
-          couponCode: couponApplied ? couponCode : null
+          couponCode: couponApplied ? couponCode : null,
+          isFree: isFreeWithCoupon()
         }
       );
 
@@ -225,12 +280,17 @@ const Checkout = () => {
                 <span className="amount">${getFinalPrice()}</span>
                 <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
               </div>
-              {selectedPlan === 'monthly' && (
+              {couponApplied && discount === 100 && (
+                <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold'}}>
+                  100% OFF - FREE ACCESS!
+                </div>
+              )}
+              {selectedPlan === 'monthly' && !isFreeWithCoupon() && (
                 <div className="yearly-equivalent">
                   ${(parseFloat(getFinalPrice()) * 12).toFixed(2)}/year
                 </div>
               )}
-              {selectedPlan === 'yearly' && (
+              {selectedPlan === 'yearly' && !isFreeWithCoupon() && (
                 <div className="savings-callout">
                   You save ${((5.99 * 12) - 59.99).toFixed(2)} per year!
                 </div>
@@ -271,17 +331,19 @@ const Checkout = () => {
             )}
             
             <button className="checkout-button" onClick={startCheckout}>
-              Get Access Now
+              {isFreeWithCoupon() ? 'Get Free Access Now' : 'Get Access Now'}
             </button>
             
-            <div className="payment-methods">
-              <div className="payment-icons">
-                <span className="payment-icon">💳</span>
-                <span className="payment-icon">💰</span>
-                <span className="payment-icon">🔒</span>
+            {!isFreeWithCoupon() && (
+              <div className="payment-methods">
+                <div className="payment-icons">
+                  <span className="payment-icon">💳</span>
+                  <span className="payment-icon">💰</span>
+                  <span className="payment-icon">🔒</span>
+                </div>
+                <p className="secure-payment">Secure payment processing</p>
               </div>
-              <p className="secure-payment">Secure payment processing</p>
-            </div>
+            )}
             
             <p className="guarantee">
               7-day money-back guarantee. No questions asked.
@@ -417,25 +479,25 @@ const Checkout = () => {
   };
 
   // Render confirmation step
-const renderConfirmation = () => {
-  return (
-    <div className="confirmation-container">
-      <div className="confirmation-icon">✅</div>
-      <h2>Payment Successful!</h2>
-      <p>Thank you for your purchase. You now have access to PremedCheatsheet.</p>
-      <p>A receipt has been sent to your email address.</p>
-      {orderId && (
-        <p className="order-id">Order ID: #{orderId}</p>
-      )}
-      <button 
-        className="continue-button"
-        onClick={() => navigate('/profile')}
-      >
-        Start Exploring Profiles
-      </button>
-    </div>
-  );
-};
+  const renderConfirmation = () => {
+    return (
+      <div className="confirmation-container">
+        <div className="confirmation-icon">✅</div>
+        <h2>Access Granted!</h2>
+        <p>Thank you! You now have access to PremedCheatsheet.</p>
+        {!isFreeWithCoupon() && <p>A receipt has been sent to your email address.</p>}
+        {orderId && (
+          <p className="order-id">Order ID: #{orderId}</p>
+        )}
+        <button 
+          className="continue-button"
+          onClick={() => navigate('/profile')}
+        >
+          Start Exploring Profiles
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="checkout-page">
