@@ -5,7 +5,12 @@ import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
 import { onAuthChange } from '../../firebase/authService';
-import { loadProfiles } from '../../utils/profilesData';
+import { 
+  loadProfiles, 
+  extractSchools, 
+  getProfilesForSchool, 
+  normalizeSchoolName 
+} from '../../utils/profilesData';
 import './SchoolProfilePage.scss';
 
 const SchoolProfilePage = () => {
@@ -38,41 +43,45 @@ const SchoolProfilePage = () => {
   useEffect(() => {
     const fetchSchoolData = async () => {
       try {
+        setLoading(true);
+        
         // Load all profiles
         const allProfiles = await loadProfiles();
         
+        // Extract all schools with their stats
+        const allSchools = extractSchools(allProfiles);
+        
         // Find the school by ID
-        const schools = await fetch('/data/schools.json')
-          .then(res => res.json())
-          .catch(() => []);
+        const foundSchool = allSchools.find(s => s.id === schoolId);
         
-        const foundSchool = schools.find(s => s.id === schoolId) || {
-          id: schoolId,
-          name: 'Harvard Medical School',
-          logoUrl: 'https://hms.harvard.edu/themes/shared/harvardmedical/images/footer-logo.svg',
-          description: 'Harvard Medical School (HMS) is the graduate medical school of Harvard University and is located in the Longwood Medical Area of Boston, Massachusetts.',
-          acceptanceRate: '3.7%',
-          avgGPA: '3.9',
-          avgMCAT: '520',
-          website: 'https://hms.harvard.edu/'
-        };
+        if (foundSchool) {
+          setSchool(foundSchool);
+          
+          // Get profiles for this school
+          const schoolProfiles = getProfilesForSchool(allProfiles, schoolId, allSchools);
+          setProfiles(schoolProfiles);
+        } else {
+          // If school not found, use a default (for development/testing)
+          console.warn(`School with ID ${schoolId} not found, using default`);
+          
+          const defaultSchool = {
+            id: schoolId,
+            name: 'Harvard Medical School',
+            logoUrl: '/images/default-school-logo.png',
+            description: 'Harvard Medical School (HMS) is the graduate medical school of Harvard University and is located in the Longwood Medical Area of Boston, Massachusetts.',
+            acceptanceRate: '3.7%',
+            avgGPA: '3.9',
+            avgMCAT: '520',
+            website: 'https://hms.harvard.edu/',
+            count: 3
+          };
+          
+          setSchool(defaultSchool);
+          
+          // Just use first 3 profiles as a fallback
+          setProfiles(allProfiles.slice(0, 3));
+        }
         
-        // Filter profiles that got accepted to this school
-        const schoolProfiles = allProfiles.filter(profile => 
-          profile.acceptedSchools && 
-          profile.acceptedSchools.some(school => 
-            school.toLowerCase().includes(foundSchool.name.toLowerCase())
-          )
-        );
-        
-        // Update school with correct profile count
-        const profileCount = schoolProfiles.length > 0 ? schoolProfiles.length : 3;
-        setSchool({
-          ...foundSchool,
-          profileCount: profileCount
-        });
-        
-        setProfiles(schoolProfiles.length > 0 ? schoolProfiles : allProfiles.slice(0, 3));
         setLoading(false);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -128,27 +137,24 @@ const SchoolProfilePage = () => {
           
           <div className="school-info-card">
             <div className="school-header">
-              <div className="school-logo">
-                <img src={school.logoUrl || '/images/default-school-logo.png'} alt={school.name} />
-              </div>
               <div className="school-details">
                 <h1>{school.name}</h1>
-                <p className="school-description">{school.description}</p>
+                <p className="school-description">{school.description || `View comprehensive information about ${school.name} and student profiles who were accepted.`}</p>
               </div>
             </div>
             
             <div className="school-stats">
               <div className="stat-item">
                 <h3>Acceptance Rate</h3>
-                <p>{school.acceptanceRate}</p>
+                <p>{school.acceptanceRate || 'N/A'}</p>
               </div>
               <div className="stat-item">
                 <h3>Average GPA</h3>
-                <p>{school.avgGPA}</p>
+                <p>{school.avgGPA || 'N/A'}</p>
               </div>
               <div className="stat-item">
                 <h3>Average MCAT</h3>
-                <p>{school.avgMCAT}</p>
+                <p>{school.avgMCAT || 'N/A'}</p>
               </div>
               <div className="stat-item">
                 <h3>Profiles Available</h3>
@@ -157,7 +163,12 @@ const SchoolProfilePage = () => {
             </div>
             
             <div className="school-links">
-              <a href={school.website} target="_blank" rel="noopener noreferrer" className="website-link">
+              <a 
+                href={school.website || `https://www.google.com/search?q=${encodeURIComponent(school.name)}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="website-link"
+              >
                 Visit Official Website
               </a>
             </div>
@@ -182,51 +193,52 @@ const SchoolProfilePage = () => {
             </div>
           </div>
           
-          {viewMode === 'card' ? (
-            <div className="profile-card-view">
-              <div className="profile-navigation">
-                <button 
-                  className="nav-button"
-                  onClick={goToPrevProfile}
-                  disabled={currentProfileIndex === 0}
-                >
-                  &lt; Previous
-                </button>
-                <span className="profile-counter">
-                  Profile {currentProfileIndex + 1} of {profiles.length}
-                </span>
-                <button 
-                  className="nav-button"
-                  onClick={goToNextProfile}
-                  disabled={currentProfileIndex === profiles.length - 1}
-                >
-                  Next &gt;
-                </button>
-              </div>
-              
-              <div className="profile-display">
-                {profiles.length > 0 && profiles[currentProfileIndex] ? (
-                  <ProfileCard profile={profiles[currentProfileIndex]} />
-                ) : (
-                  <div className="no-profile">No profile data available</div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="profile-list-view">
-              {profiles.map((profile, index) => (
-                <div 
-                  key={profile.id || index} 
-                  className={`profile-list-item ${index === currentProfileIndex ? 'active' : ''}`}
-                  onClick={() => setCurrentProfileIndex(index)}
-                >
-                  <ProfileCard profile={profile} />
+          {profiles.length > 0 ? (
+            viewMode === 'card' ? (
+              <div className="profile-card-view">
+                <div className="profile-navigation">
+                  <button 
+                    className="nav-button"
+                    onClick={goToPrevProfile}
+                    disabled={currentProfileIndex === 0}
+                  >
+                    &lt; Previous
+                  </button>
+                  <span className="profile-counter">
+                    Profile {currentProfileIndex + 1} of {profiles.length}
+                  </span>
+                  <button 
+                    className="nav-button"
+                    onClick={goToNextProfile}
+                    disabled={currentProfileIndex === profiles.length - 1}
+                  >
+                    Next &gt;
+                  </button>
                 </div>
-              ))}
-              
-              {profiles.length === 0 && (
-                <div className="no-profiles">No profiles found for this school</div>
-              )}
+                
+                <div className="profile-display">
+                  {profiles[currentProfileIndex] && (
+                    <ProfileCard profile={profiles[currentProfileIndex]} />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="profile-list-view">
+                {profiles.map((profile, index) => (
+                  <div 
+                    key={profile.id || index} 
+                    className={`profile-list-item ${index === currentProfileIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentProfileIndex(index)}
+                  >
+                    <ProfileCard profile={profile} />
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="no-profiles">
+              <h3>No profiles found</h3>
+              <p>We don't have any student profiles for this school yet. Check back later for updates.</p>
             </div>
           )}
         </div>

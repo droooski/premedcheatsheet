@@ -3,6 +3,58 @@
  * Helper utility for loading and working with profile data
  */
 
+// Map of variations of school names to standardized names
+const schoolNameMap = {
+  'pittsburgh': 'University of Pittsburgh',
+  'pitt': 'University of Pittsburgh',
+  'upmc': 'University of Pittsburgh',
+  
+  'columbia': 'Columbia',
+  
+  'uva': 'UVA',
+  'university of virginia': 'UVA',
+  'university of virgnia': 'UVA',
+  
+  'new york medical college': 'New York Medical College',
+  'nymc': 'New York Medical College',
+  
+  'mcw': 'MCW',
+  
+  'tourocom': 'TouroCOM',
+  'touro': 'TouroCOM',
+  
+  'pcom': 'PCOM',
+  
+  'university of michigan': 'University of Michigan',
+  'michigan': 'University of Michigan',
+  
+  'feinberg': 'Feinberg school of medicine',
+  'northwestern': 'Feinberg school of medicine',
+  'northwestern feinberg': 'Feinberg school of medicine',
+  
+  'wake forest': 'Wake Forest University School of Medicine',
+  'wake forest university': 'Wake Forest University School of Medicine'
+};
+
+// Normalize school name to ensure consistent naming
+const normalizeSchoolName = (schoolName) => {
+  if (!schoolName) return '';
+  
+  const lowercaseName = schoolName.toLowerCase().trim();
+  
+  // Check for direct matches or partial matches in our mapping
+  for (const [key, value] of Object.entries(schoolNameMap)) {
+    if (lowercaseName === key || lowercaseName.includes(key)) {
+      return value;
+    }
+  }
+  
+  // If no match, return properly capitalized original
+  return schoolName.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 // Load the profiles data from JSON file
 export const loadProfiles = async () => {
   try {
@@ -15,9 +67,136 @@ export const loadProfiles = async () => {
     return data;
   } catch (error) {
     console.error('Error loading profiles:', error);
-    // Return an empty array as fallback
-    return [];
+    // Return hardcoded data as fallback
+    return getHardcodedProfiles();
   }
+};
+
+// Provide hardcoded profiles as a fallback
+export const getHardcodedProfiles = () => {
+  return [
+    {
+      id: "applicant-11",
+      matriculationYear: "2028",
+      stateOfResidency: "PA",
+      gender: "Male",
+      race: "White",
+      major: "General Biology, Environmental Science and Tech",
+      gpa: 3.62,
+      mcat: 520,
+      acceptedSchools: ["TouroCOM", "PCOM", "University of Michigan", "University of Pittsburgh"]
+    },
+    {
+      id: "applicant-12",
+      matriculationYear: "2021",
+      stateOfResidency: "Pennsylvania",
+      gender: "Male",
+      race: "White",
+      major: "Biology major, economic policy minor",
+      gpa: 3.99,
+      mcat: 518,
+      acceptedSchools: ["Feinberg school of medicine"]
+    },
+    {
+      id: "applicant-13",
+      matriculationYear: "2023",
+      stateOfResidency: "VA",
+      gender: null,
+      race: null,
+      major: "BA Neuroscience",
+      gpa: 3.95,
+      mcat: 516,
+      acceptedSchools: ["Pittsburgh"]
+    },
+    {
+      id: "applicant-14",
+      matriculationYear: "2021",
+      stateOfResidency: "Florida",
+      gender: "Ciswoman",
+      race: "Chinese-Jamaican",
+      major: "Major in Geography, minor in Mandarin",
+      gpa: 4.0,
+      mcat: 512,
+      acceptedSchools: ["University of Virginia"]
+    },
+    {
+      id: "applicant-15",
+      matriculationYear: "2023",
+      stateOfResidency: "PA",
+      gender: "Female",
+      race: "White",
+      major: "Psychology, Spanish Majors, Chemistry and Biology Minors",
+      gpa: 4.0,
+      mcat: 516,
+      acceptedSchools: ["University of Pittsburgh", "University of Rochester", "University of North Carolina"]
+    },
+    {
+      id: "applicant-16",
+      matriculationYear: "2023",
+      stateOfResidency: "Ohio",
+      gender: "Male",
+      race: "Asian",
+      major: "Biomedical Engineering",
+      gpa: 3.93,
+      mcat: 510,
+      acceptedSchools: ["Wake Forest University School of Medicine"]
+    },
+    {
+      id: "applicant-17",
+      matriculationYear: "2027",
+      stateOfResidency: "ny",
+      gender: "female",
+      race: "white",
+      major: "majors: german; molecular and cellular biology, no minors",
+      gpa: 3.7,
+      mcat: 521,
+      acceptedSchools: ["Columbia", "Cornell", "UMass", "Boston U", "USC", "SUNY downstate", "New York Medical College"]
+    },
+    {
+      id: "applicant-18",
+      matriculationYear: "2025",
+      stateOfResidency: "OH",
+      gender: "Male",
+      race: "Asian",
+      major: "BME and CS majors, Chemistry minor",
+      gpa: 4.0,
+      mcat: 527,
+      acceptedSchools: ["UVA", "Ohio State"]
+    },
+    {
+      id: "applicant-19",
+      matriculationYear: "2025",
+      stateOfResidency: "Virginia",
+      gender: "Female",
+      race: "White",
+      major: "Majors: Chemical Biology (BA), Chemistry (BA), Minors: Biology, Psychology",
+      gpa: 3.94,
+      mcat: 515,
+      acceptedSchools: ["New York Medical College"]
+    },
+    {
+      id: "applicant-20",
+      matriculationYear: "2024",
+      stateOfResidency: "NC",
+      gender: "Male",
+      race: "African American",
+      major: "Major in biology",
+      gpa: 3.9,
+      mcat: 515,
+      acceptedSchools: ["Mayo Clinic Alix School of Medicine (AZ/Fl)", "Northwestern Feinberg", "Wake Forest"]
+    },
+    {
+      id: "applicant-21",
+      matriculationYear: "2025",
+      stateOfResidency: "Wisconsin",
+      gender: "Female",
+      race: "Mixed (Asian and white)",
+      major: "Psychology and environmental studies double major, chemistry minor",
+      gpa: 3.975,
+      mcat: 510,
+      acceptedSchools: ["AT Stills", "DMUCOM", "CCOM", "UWSMPH", "MCW", "SLU"]
+    }
+  ];
 };
 
 // Filter profiles based on search criteria
@@ -38,24 +217,91 @@ export const filterProfiles = (profiles, searchTerm = '') => {
   });
 };
 
-// Extract all schools with their correct profile counts
-export const getSchoolsWithProfileCounts = (profiles) => {
-  const schoolCountMap = new Map();
+// Extract all schools from profiles
+export const extractSchools = (profiles) => {
+  const schoolsMap = new Map();
   
-  // Count profiles per school
   profiles.forEach(profile => {
     if (profile.acceptedSchools && Array.isArray(profile.acceptedSchools)) {
-      profile.acceptedSchools.forEach(schoolName => {
-        const normalizedName = schoolName.trim().toLowerCase();
+      profile.acceptedSchools.forEach(school => {
+        const normalizedName = normalizeSchoolName(school);
+        
         if (normalizedName) {
-          const count = schoolCountMap.get(normalizedName) || 0;
-          schoolCountMap.set(normalizedName, count + 1);
+          if (schoolsMap.has(normalizedName)) {
+            const schoolData = schoolsMap.get(normalizedName);
+            
+            // Add profile to this school if not already included
+            if (!schoolData.profiles.includes(profile.id)) {
+              schoolData.profiles.push(profile.id);
+              schoolData.count += 1;
+              
+              // Add GPA and MCAT for stats calculation
+              if (profile.gpa) schoolData.gpas.push(parseFloat(profile.gpa));
+              if (profile.mcat) schoolData.mcats.push(parseInt(profile.mcat));
+            }
+          } else {
+            // Create new school entry
+            schoolsMap.set(normalizedName, {
+              id: `school-${schoolsMap.size}`,
+              name: normalizedName,
+              count: 1,
+              profiles: [profile.id],
+              gpas: profile.gpa ? [parseFloat(profile.gpa)] : [],
+              mcats: profile.mcat ? [parseInt(profile.mcat)] : []
+            });
+          }
         }
       });
     }
   });
   
-  return schoolCountMap;
+  // Calculate statistics for each school
+  const schools = Array.from(schoolsMap.values()).map(school => {
+    // Calculate average GPA
+    const avgGPA = school.gpas.length > 0 
+      ? (school.gpas.reduce((sum, gpa) => sum + gpa, 0) / school.gpas.length).toFixed(2)
+      : "N/A";
+    
+    // Calculate average MCAT
+    const avgMCAT = school.mcats.length > 0
+      ? Math.round(school.mcats.reduce((sum, mcat) => sum + mcat, 0) / school.mcats.length)
+      : "N/A";
+    
+    // Use static acceptance rate for now (would need real data)
+    const acceptanceRate = "3.7%";
+    
+    // Remove calculation arrays from final object
+    const { gpas, mcats, ...schoolData } = school;
+    
+    return {
+      ...schoolData,
+      avgGPA,
+      avgMCAT,
+      acceptanceRate
+    };
+  });
+  
+  return schools;
+};
+
+// Get profiles for a specific school
+export const getProfilesForSchool = (profiles, schoolId, schools) => {
+  // Find the school by ID
+  const school = schools.find(s => s.id === schoolId);
+  
+  if (!school) return [];
+  
+  // Get the normalized school name
+  const schoolName = school.name;
+  
+  // Find all profiles accepted to this school
+  return profiles.filter(profile => 
+    profile.acceptedSchools && 
+    profile.acceptedSchools.some(acceptedSchool => {
+      const normalizedAcceptedSchool = normalizeSchoolName(acceptedSchool);
+      return normalizedAcceptedSchool === schoolName;
+    })
+  );
 };
 
 // Group profiles by type (biomedical, non-trad, etc.)
@@ -73,46 +319,11 @@ export const groupProfilesByType = (profiles) => {
   return groups;
 };
 
-// Extract all schools from profiles
-export const extractSchools = (profiles) => {
-  const schoolsMap = new Map();
-  
-  profiles.forEach(profile => {
-    if (profile.acceptedSchools && Array.isArray(profile.acceptedSchools)) {
-      profile.acceptedSchools.forEach(school => {
-        const schoolName = school.trim();
-        if (schoolName) {
-          if (schoolsMap.has(schoolName)) {
-            schoolsMap.set(
-              schoolName, 
-              { 
-                ...schoolsMap.get(schoolName),
-                count: schoolsMap.get(schoolName).count + 1,
-                profiles: [...schoolsMap.get(schoolName).profiles, profile.id]
-              }
-            );
-          } else {
-            schoolsMap.set(
-              schoolName, 
-              { 
-                id: `school-${schoolsMap.size}`,
-                name: schoolName,
-                count: 1,
-                profiles: [profile.id]
-              }
-            );
-          }
-        }
-      });
-    }
-  });
-  
-  return Array.from(schoolsMap.values());
-};
-
 export default {
   loadProfiles,
   filterProfiles,
   groupProfilesByType,
-  extractSchools
+  extractSchools,
+  getProfilesForSchool,
+  normalizeSchoolName
 };

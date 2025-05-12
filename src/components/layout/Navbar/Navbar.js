@@ -1,6 +1,6 @@
 // src/components/layout/Navbar/Navbar.js
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import logo from '../../../assets/icons/Icon.png';
@@ -13,6 +13,7 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const db = getFirestore();
 
   useEffect(() => {
@@ -104,67 +105,68 @@ const Navbar = () => {
     return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
   };
 
+  // Determine if a nav link is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className="navbar">
       <div className="container">
         <div className="navbar-content">
-          {/* Left side with logo and main nav links */}
+          {/* Left side with logo and brand name */}
           <div className="navbar-left">
             <Link to={user ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
               <img src={logo} alt="PremedCheatsheet" />
               <span>PremedCheatsheet</span>
             </Link>
-            
-            {/* Primary navigation items - different depending on auth state */}
-            {!user ? (
-              <ul className="primary-menu">
+          </div>
+          
+          {/* Center navigation - only shown when logged in */}
+          {(user || hasAccess()) && (
+            <div className="navbar-center">
+              <ul className="main-menu">
                 <li>
-                  <Link to="/" onClick={closeMobileMenu}>
-                    Home
+                  <Link 
+                    to="/profile" 
+                    className={isActive('/profile') ? 'active' : ''}
+                    onClick={closeMobileMenu}
+                  >
+                    Members
                   </Link>
                 </li>
                 <li>
-                  <Link to="/about" onClick={closeMobileMenu}>
-                    About
-                  </Link>
-                </li>
-              </ul>
-            ) : (
-              <ul className="primary-menu">
-                <li>
-                  <Link to="/profile" onClick={closeMobileMenu}>
-                    Dashboard
+                  <Link 
+                    to="/application-cheatsheet" 
+                    className={isActive('/application-cheatsheet') ? 'active' : ''}
+                    onClick={closeMobileMenu}
+                  >
+                    Application Cheatsheet
                   </Link>
                 </li>
                 {isAdmin && (
                   <li>
-                    <Link to="/admin" onClick={closeMobileMenu}>
+                    <Link 
+                      to="/admin" 
+                      className={isActive('/admin') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
                       Admin
                     </Link>
                   </li>
                 )}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
           
-          {/* Right side with login and CTA */}
+          {/* Right side with account or login links */}
           <div className="navbar-right">
-            {user ? (
-              <>
-                <span className="user-email">
-                  {userProfile ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}` : user.email}
-                </span>
-                <button onClick={handleLogout} className="logout-button">
-                  Sign Out
-                </button>
-              </>
-            ) : hasAccess() ? (
-              <>
-                <span className="user-status">Guest Access</span>
-                <button onClick={handleLogout} className="logout-button">
-                  Sign Out
-                </button>
-              </>
+            {user || hasAccess() ? (
+              <div className="account-menu">
+                <Link to="/account" className="account-button">
+                  Account
+                </Link>
+              </div>
             ) : (
               <>
                 <Link to="/checkout?mode=login" className="login-link">
@@ -189,44 +191,59 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              {!user ? (
+              {(user || hasAccess()) ? (
                 <>
                   <li>
-                    <Link to="/" onClick={closeMobileMenu}>
-                      Home
+                    <Link 
+                      to="/profile" 
+                      className={isActive('/profile') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Members
                     </Link>
                   </li>
                   <li>
-                    <Link to="/about" onClick={closeMobileMenu}>
-                      About
-                    </Link>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <Link to="/profile" onClick={closeMobileMenu}>
-                      Dashboard
+                    <Link 
+                      to="/application-cheatsheet" 
+                      className={isActive('/application-cheatsheet') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Application Cheatsheet
                     </Link>
                   </li>
                   {isAdmin && (
                     <li>
-                      <Link to="/admin" onClick={closeMobileMenu}>
+                      <Link 
+                        to="/admin" 
+                        className={isActive('/admin') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
                         Admin
                       </Link>
                     </li>
                   )}
+                  <li>
+                    <Link 
+                      to="/account" 
+                      className={isActive('/account') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Account
+                    </Link>
+                  </li>
                 </>
-              )}
-              
-              {user || hasAccess() ? (
-                <li>
-                  <button onClick={handleLogout} className="logout-button-mobile">
-                    Sign Out
-                  </button>
-                </li>
               ) : (
                 <>
+                  <li>
+                    <Link to="/" onClick={closeMobileMenu} className={isActive('/') ? 'active' : ''}>
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/about" onClick={closeMobileMenu} className={isActive('/about') ? 'active' : ''}>
+                      About
+                    </Link>
+                  </li>
                   <li>
                     <Link to="/checkout?mode=login" onClick={closeMobileMenu}>
                       Log in

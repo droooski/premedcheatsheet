@@ -32,7 +32,7 @@
     display: flex;
     justify-content: space-between; // This creates the expanding middle gap
     align-items: center;
-    padding: $spacing-5 0;
+    padding: $spacing-3 0;
     position: relative;
   }
   
@@ -40,27 +40,11 @@
   .navbar-left {
     display: flex;
     align-items: center;
-    
-    @media (max-width: $md) {
-      // On mobile, only show logo
-      .primary-menu {
-        display: none;
-      }
-    }
   }
   
   .logo {
     display: flex;
     align-items: center;
-    margin-right: $spacing-6;
-    
-    @media (min-width: $lg) {
-      margin-right: $spacing-8;
-    }
-    
-    @media (min-width: $xl) {
-      margin-right: $spacing-10;
-    }
     
     img {
       height: 30px;
@@ -90,67 +74,114 @@
     }
   }
   
-  // Primary horizontal menu (visible on desktop)
-  .primary-menu {
+  // Center navigation menu
+  .navbar-center {
+    flex: 1;
     display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    justify-content: center;
     
-    li {
-      margin-right: $spacing-6;
+    @media (max-width: $md) {
+      display: none; // Hide on mobile and small screens
+    }
+    
+    .main-menu {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
       
-      @media (min-width: $lg) {
-        margin-right: $spacing-8;
-      }
-      
-      @media (min-width: $xl) {
-        margin-right: $spacing-10;
-      }
-      
-      a {
-        color: $text-color;
-        font-weight: 500;
-        @include mix.transition(color);
-        font-size: 0.8rem;
+      li {
+        margin: 0 $spacing-4;
+        
+        @media (min-width: $lg) {
+          margin: 0 $spacing-5;
+        }
         
         @media (min-width: $xl) {
-          font-size: 1rem;
+          margin: 0 $spacing-6;
         }
         
-        @media (min-width: $xxl) {
-          font-size: 1.2rem;
-        }
-        
-        &:hover {
-          color: $primary-color;
+        a {
+          color: $text-color;
+          font-weight: 500;
+          @include mix.transition(color);
+          font-size: 0.95rem;
+          padding: $spacing-2 0;
+          position: relative;
+          
+          @media (min-width: $xl) {
+            font-size: 1.05rem;
+          }
+          
+          &:hover {
+            color: $primary-color;
+          }
+          
+          // Active state with underline
+          &.active {
+            font-weight: 600;
+            
+            &:after {
+              content: '';
+              position: absolute;
+              bottom: -3px;
+              left: 0;
+              width: 100%;
+              height: 2px;
+              background-color: $primary-color;
+            }
+          }
         }
       }
     }
   }
   
-  // Right side of navbar (login + try free)
+  // Right side of navbar (account + sign out)
   .navbar-right {
     display: flex;
     align-items: center;
     
     @media (max-width: $md) {
-      display: none; // Hide on mobile
+      display: none; // Hide on mobile and smaller screens
+    }
+    
+    .account-menu {
+      display: flex;
+      align-items: center;
+    }
+    
+    .account-button {
+      color: $text-color;
+      font-weight: 500;
+      padding: $spacing-2 $spacing-3;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      margin-right: $spacing-3;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem;
+        margin-right: $spacing-4;
+      }
     }
     
     .login-link {
       color: $text-color;
       font-weight: 500;
       margin-right: $spacing-4;
-      font-size: 0.8rem;
+      font-size: 0.95rem;
       
       @media (min-width: $xl) {
-        margin-right: $spacing-8;
+        margin-right: $spacing-6;
         font-size: 1rem;
       }
       
       @media (min-width: $xxl) {
-        font-size: 1.2rem;
+        font-size: 1.05rem;
       }
       
       &:hover {
@@ -158,20 +189,38 @@
       }
     }
     
+    .logout-button {
+      background: none;
+      border: none;
+      color: $text-color-light;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: $spacing-2 $spacing-3;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        color: $primary-color;
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 0.95rem;
+      }
+    }
 
     .try-free-button {
       @include mix.button-primary;
       padding: $spacing-2 $spacing-4;
-      font-size: 0.8rem;
-      border-radius: 10px; /* Added border radius */
+      font-size: 0.9rem;
+      border-radius: 6px; /* Added border radius */
       
       @media (min-width: $xl) {
-        padding: $spacing-3 $spacing-8;
-        font-size: 1rem;
+        padding: $spacing-2 $spacing-5;
+        font-size: 0.95rem;
       }
       
       @media (min-width: $xxl) {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
     }
   }
@@ -183,7 +232,7 @@
     z-index: 1000;
     
     @media (max-width: $md) {
-      display: block;
+      display: block; // Show at all smaller screen sizes
     }
   }
   
@@ -247,14 +296,15 @@
       display: block;
       position: fixed;
       top: 0;
-      right: -280px;
-      width: 280px;
+      right: -300px; // Start offscreen
+      width: 300px; // Slightly wider for better readability
       height: 100vh;
       background-color: $white;
       z-index: 999;
       padding: $spacing-12 $spacing-4;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15); // Stronger shadow
       transition: right 0.3s ease;
+      overflow-y: auto; // Allow scrolling if menu is tall
       
       &.open {
         right: 0;
@@ -268,15 +318,22 @@
     margin: 0;
     
     li {
-      margin-bottom: $spacing-6;
+      margin-bottom: $spacing-4;
       
       a {
         color: $text-color;
         font-weight: 500;
-        font-size: 1rem;
+        font-size: 1.1rem;
+        display: block;
+        padding: $spacing-2 $spacing-1;
         
         &:hover {
           color: $primary-color;
+        }
+        
+        &.active {
+          color: $primary-color;
+          font-weight: 600;
         }
       }
       
@@ -284,7 +341,27 @@
         @include mix.button-primary;
         display: inline-block;
         padding: $spacing-2 $spacing-4;
-        font-size: 0.875rem;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        width: 100%;
+        text-align: center;
+        margin-top: $spacing-2;
+      }
+      
+      .logout-button-mobile {
+        background: none;
+        border: none;
+        color: $text-color-light;
+        font-size: 1rem;
+        font-weight: 500;
+        padding: $spacing-2 $spacing-1;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        
+        &:hover {
+          color: $primary-color;
+        }
       }
     }
   }

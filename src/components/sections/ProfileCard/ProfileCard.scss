@@ -1,4 +1,4 @@
-// src/components/sections/ProfileCard/ProfileCard.scss
+// src/components/sections/ProfileCard/ProfileCard.scss - Updated with no outlines
 @use '../../../styles/variables' as *;
 
 .profile-card {
@@ -6,8 +6,10 @@
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  margin-bottom: $spacing-4;
+  margin-bottom: 0; /* Remove bottom margin causing the gap */
   border: 1px solid #E5E7EB;
+  /* Remove any potential outlines */
+  outline: none !important;
   
   .card-header {
     padding: $spacing-3 $spacing-4;
@@ -142,6 +144,9 @@
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 0.75rem;
+        /* No outlines on badges */
+        outline: none !important;
+        border: none !important;
       }
     }
   }

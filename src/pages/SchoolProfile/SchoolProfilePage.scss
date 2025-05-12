@@ -1,4 +1,4 @@
-// src/pages/SchoolProfile/SchoolProfilePage.scss
+/* src/pages/SchoolProfile/SchoolProfilePage.scss - Updated without logo */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -43,6 +43,7 @@
   }
 }
 
+/* Updated school info card without logo */
 .school-info-card {
   background-color: $white;
   border-radius: 8px;
@@ -51,40 +52,22 @@
   margin-bottom: $spacing-8;
   
   .school-header {
-    display: flex;
-    gap: $spacing-6;
     margin-bottom: $spacing-6;
     border-bottom: 1px solid $gray-200;
     padding-bottom: $spacing-6;
-    
-    @media (max-width: $md) {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    
-    .school-logo {
-      flex-shrink: 0;
-      width: 120px;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-      }
-    }
+    text-align: center;
     
     .school-details {
-      flex: 1;
-      
       h1 {
-        font-size: 1.75rem;
+        font-family: $font-family-mincho;
+        font-size: 2.5rem;
         font-weight: 600;
-        margin-bottom: $spacing-2;
+        margin-bottom: $spacing-4;
+        color: $text-color;
+        
+        @media (max-width: $md) {
+          font-size: 2rem;
+        }
         
         @media (max-width: $sm) {
           font-size: 1.5rem;
@@ -94,18 +77,34 @@
       .school-description {
         color: $text-color-light;
         line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+        
+        @media (max-width: $md) {
+          font-size: 1rem;
+        }
+        
+        @media (max-width: $sm) {
+          font-size: 0.9rem;
+        }
       }
     }
   }
   
   .school-stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: $spacing-4;
     margin-bottom: $spacing-6;
     
-    @media (min-width: $lg) {
-      grid-template-columns: repeat(4, 1fr);
+    @media (max-width: $md) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-6;
+    }
+    
+    @media (max-width: $sm) {
+      grid-template-columns: 1fr;
     }
     
     .stat-item {
@@ -119,9 +118,13 @@
       }
       
       p {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: $primary-color;
+        
+        @media (max-width: $md) {
+          font-size: 1.25rem;
+        }
       }
     }
   }
@@ -133,15 +136,16 @@
       display: inline-block;
       background-color: $primary-color;
       color: $white;
-      padding: $spacing-2 $spacing-4;
+      padding: $spacing-3 $spacing-6;
       border-radius: 4px;
       font-weight: 500;
-      font-size: 0.9rem;
-      transition: background-color 0.3s ease;
+      font-size: 1rem;
+      transition: background-color 0.3s ease, transform 0.2s ease;
       
       &:hover {
         background-color: darken($primary-color, 5%);
         text-decoration: none;
+        transform: translateY(-2px);
       }
     }
   }
@@ -156,6 +160,7 @@
   gap: $spacing-4;
   
   h2 {
+    font-family: $font-family-mincho;
     font-size: 1.5rem;
     font-weight: 600;
     
@@ -190,6 +195,7 @@
   }
 }
 
+/* Profile card view styles */
 .profile-card-view {
   .profile-navigation {
     display: flex;
@@ -208,7 +214,7 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
       
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: darken($primary-color, 5%);
       }
       
@@ -227,33 +233,82 @@
   .profile-display {
     display: flex;
     justify-content: center;
+    min-height: 500px; /* Add minimum height to ensure visibility */
+    padding: $spacing-6;
+    background-color: $white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 }
 
+/* Profile list view styles */
 .profile-list-view {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: $spacing-4;
   
-  @media (min-width: $md) {
+  @media (max-width: $lg) {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  @media (min-width: $lg) {
-    grid-template-columns: repeat(3, 1fr);
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
   }
   
   .profile-list-item {
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    border: none !important;
+    outline: none !important;
     
     &:hover {
       transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
     }
     
     &.active {
-      outline: 2px solid $primary-color;
-      border-radius: 8px;
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border: none !important;
+      outline: none !important;
+      
+      /* Apply a subtle background color to the card instead of a border */
+      background-color: #f9fafb;
+      
+      /* Inner elements styling */
+      .profile-card {
+        background-color: #f9fafb;
+        border: none !important;
+        outline: none !important;
+      }
     }
+    
+    /* Force no outlines or borders on any child elements */
+    * {
+      border: none !important;
+      outline: none !important;
+    }
+  }
+}
+
+.no-profiles {
+  text-align: center;
+  background-color: $white;
+  border-radius: 8px;
+  padding: $spacing-8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+  }
+  
+  p {
+    font-size: 1rem;
+    color: $text-color-light;
+    max-width: 600px;
+    margin: 0 auto;
   }
 }
