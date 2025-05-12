@@ -1,6 +1,6 @@
 // src/components/auth/AuthModal.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { registerUser, loginUser } from '../../firebase/authService';
 import './AuthModal.scss';
 
 const AuthModal = ({ isOpen, onClose, onSuccess }) => {
@@ -11,36 +11,55 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    if (!isLogin && password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    try {
+      // Validate form data
+      if (!isLogin && password !== confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
 
-    // Mock auth for now - would integrate with Firebase
-    if (isLogin) {
-      // Login logic
-      console.log('Logging in with:', email, password);
-      // Simulate successful login
-      onSuccess?.();
-      navigate('/checkout');
-    } else {
-      // Register logic
-      console.log('Registering with:', firstName, lastName, email, password);
-      // Simulate successful registration
-      onSuccess?.();
-      navigate('/checkout');
+      let result;
+      
+      if (isLogin) {
+        // Login with Firebase
+        result = await loginUser(email, password);
+      } else {
+        // Register with Firebase
+        result = await registerUser(email, password, firstName, lastName);
+      }
+
+      if (result.success) {
+        // Call the onSuccess callback with user data
+        onSuccess({
+          user: result.user,
+          email,
+          firstName,
+          lastName
+        });
+      } else {
+        throw new Error(result.error || 'Authentication failed');
+      }
+      
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const continueAsGuest = () => {
+    onSuccess(null); // Pass null to indicate guest checkout
   };
 
   if (!isOpen) return null;
@@ -52,13 +71,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
         
         <h2>
           {isLogin 
-            ? "Join Premed Cheatsheet" 
-            : "Create your account"}
+            ? "Sign in to your account" 
+            : "Create an account"}
         </h2>
         <p className="auth-subtitle">
           {isLogin 
-            ? "Sign in to unlock exclusive content." 
-            : "Create an account to unlock exclusive content."}
+            ? "Sign in to continue to checkout." 
+            : "Create an account to continue to checkout."}
         </p>
 
         {error && <div className="auth-error">{error}</div>}
@@ -99,7 +118,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="form-group">
             <input
               type="password"
-              placeholder={isLogin ? "Password" : "Create Password"}
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -110,7 +129,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
             <div className="form-group">
               <input
                 type="password"
-                placeholder="Re-type Password"
+                placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -118,21 +137,19 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {!isLogin && (
-            <p className="terms-text">
-              By joining, you may receive emails and updates related to your account. You can unsubscribe at anytime.
-            </p>
-          )}
-
-          <button type="submit" className="auth-button">
-            {isLogin ? "Sign in" : "Create account"}
+          <button 
+            type="submit" 
+            className="auth-button"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : (isLogin ? "Sign In" : "Create Account")}
           </button>
         </form>
 
         <div className="auth-footer">
           {isLogin ? (
             <p>
-              <a href="#" onClick={(e) => { e.preventDefault(); setError(''); }}>Forgot Password?</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); }}>Forgot Password?</a>
               {' | '}
               <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Create account</a>
             </p>
@@ -142,6 +159,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
               <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Sign in</a>
             </p>
           )}
+          
+          <button className="guest-button" onClick={continueAsGuest}>
+            Continue as guest
+          </button>
         </div>
       </div>
     </div>

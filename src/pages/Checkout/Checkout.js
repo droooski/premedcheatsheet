@@ -1,36 +1,64 @@
-import React, { useState } from 'react';
+// src/pages/Checkout/Checkout.js
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
+import AuthModal from '../../components/auth/AuthModal';
+import { onAuthChange, getCurrentUser } from '../../firebase/authService';
+import { processPayment } from '../../services/paymentService';
 import './Checkout.scss';
 
 const Checkout = () => {
+  // Basic state management
   const [selectedPlan, setSelectedPlan] = useState('monthly');
-  const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
+  const [discount, setDiscount] = useState(0);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'confirmation'
+  const [cardInfo, setCardInfo] = useState({
+    number: '',
+    expiry: '',
+    cvc: '',
+    name: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [orderId, setOrderId] = useState(null);
+  
+  const navigate = useNavigate();
 
+  // Check for authenticated user on component mount
+  useEffect(() => {
+    const unsubscribe = onAuthChange((currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Plan toggle function
   const togglePlan = (plan) => {
     setSelectedPlan(plan);
     // Reset coupon when plan changes
     setCouponApplied(false);
     setCouponCode('');
+    setDiscount(0);
   };
 
-  const handleCheckout = () => {
-    // Handle checkout process here
-    // This would typically integrate with a payment processor
-    alert('Processing your order. Redirecting to payment...');
-  };
-
+  // Coupon toggle function
   const toggleCouponInput = () => {
     setShowCouponInput(!showCouponInput);
   };
 
+  // Apply coupon function
   const applyCoupon = () => {
     if (couponCode.toLowerCase() === 'premedvip') {
       setCouponApplied(true);
+      setDiscount(10); // 10% discount
       alert('Coupon applied! 10% discount added to your order.');
     } else {
       alert('Invalid coupon code. Please try again.');
@@ -38,20 +66,343 @@ const Checkout = () => {
   };
 
   // Calculate prices including any discounts
-  const getPrice = () => {
-    let basePrice = selectedPlan === 'monthly' ? 19.99 : 191.90;
-    if (couponApplied) {
-      basePrice = basePrice * 0.9; // 10% discount
-      return basePrice.toFixed(2);
-    }
-    return selectedPlan === 'monthly' ? '19.99' : '191.90';
+  const getBasePrice = () => {
+    return selectedPlan === 'monthly' ? 5.99 : 59.99;
   };
 
-  // Calculate savings for yearly plan
-  const yearlySavings = () => {
-    const monthlyCost = 19.99 * 12;
-    const yearlyCost = 191.90;
-    return (monthlyCost - yearlyCost).toFixed(2);
+  const getDiscountAmount = () => {
+    const basePrice = getBasePrice();
+    return (basePrice * discount) / 100;
+  };
+
+  const getFinalPrice = () => {
+    const basePrice = getBasePrice();
+    if (couponApplied) {
+      return (basePrice - getDiscountAmount()).toFixed(2);
+    }
+    return basePrice.toFixed(2);
+  };
+
+  // Start checkout process
+  const startCheckout = () => {
+    if (user) {
+      // User is already authenticated, proceed to payment
+      setCheckoutStep('payment');
+    } else {
+      // Show authentication modal
+      setShowAuthModal(true);
+    }
+  };
+
+  // Handle authentication success
+  const handleAuthSuccess = (userData) => {
+    setUser(userData?.user || null);
+    setUserProfile(userData);
+    setShowAuthModal(false);
+    setCheckoutStep('payment');
+  };
+
+  // Handle card input changes
+  const handleCardInputChange = (e) => {
+    const { name, value } = e.target;
+    setCardInfo({
+      ...cardInfo,
+      [name]: value
+    });
+  };
+
+  // Process payment
+  const handleProcessPayment = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Basic validation
+      if (!cardInfo.number || !cardInfo.expiry || !cardInfo.cvc) {
+        throw new Error('Please fill in all required payment fields');
+      }
+
+      // Process payment
+      const result = await processPayment(
+        cardInfo,
+        user?.uid,
+        {
+          amount: parseFloat(getFinalPrice()),
+          plan: selectedPlan,
+          discount: discount,
+          couponCode: couponApplied ? couponCode : null
+        }
+      );
+
+      if (result.success) {
+        setOrderId(result.orderId);
+        setCheckoutStep('confirmation');
+      } else {
+        throw new Error(result.error || 'Payment processing failed');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Render different steps based on checkout progress
+  const renderCheckoutStep = () => {
+    switch (checkoutStep) {
+      case 'plan':
+        return renderPlanSelection();
+      case 'payment':
+        return renderPaymentForm();
+      case 'confirmation':
+        return renderConfirmation();
+      default:
+        return renderPlanSelection();
+    }
+  };
+
+  // Render plan selection step
+  const renderPlanSelection = () => {
+    return (
+      <>
+        <div className="checkout-header">
+          <h1>Get Full Access to PremedCheatsheet</h1>
+          <p>Join thousands of pre-med students who've found their path to medical school using our curated profiles database.</p>
+        </div>
+        
+        <div className="plan-selector">
+          <div className="plan-tabs">
+            <div 
+              className={`plan-tab ${selectedPlan === 'monthly' ? 'active' : ''}`}
+              onClick={() => togglePlan('monthly')}
+            >
+              Monthly
+            </div>
+            <div 
+              className={`plan-tab ${selectedPlan === 'yearly' ? 'active' : ''}`}
+              onClick={() => togglePlan('yearly')}
+            >
+              Yearly <span className="save-badge">Save 20%</span>
+            </div>
+          </div>
+          
+          <div className="price-card">
+            <div className="price-header">
+              <h3>{selectedPlan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}</h3>
+              <div className="price">
+                <span className="amount">${getFinalPrice()}</span>
+                <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
+              </div>
+              {selectedPlan === 'monthly' && (
+                <div className="yearly-equivalent">
+                  ${(parseFloat(getFinalPrice()) * 12).toFixed(2)}/year
+                </div>
+              )}
+              {selectedPlan === 'yearly' && (
+                <div className="savings-callout">
+                  You save ${((5.99 * 12) - 59.99).toFixed(2)} per year!
+                </div>
+              )}
+            </div>
+            
+            <ul className="features-list">
+              <li>Access to all accepted student profiles</li>
+              <li>Detailed stats: GPA, MCAT, extracurriculars</li>
+              <li>Application timelines and strategies</li>
+              <li>School selection insights</li>
+              <li>Personal statement guidance</li>
+              {selectedPlan === 'yearly' && <li className="premium-feature">Priority access to new profiles</li>}
+              {selectedPlan === 'yearly' && <li className="premium-feature">Download up to 50 profiles per month</li>}
+            </ul>
+            
+            {!showCouponInput ? (
+              <div className="coupon-prompt" onClick={toggleCouponInput}>
+                Have a coupon code? Enter it here
+              </div>
+            ) : (
+              <div className="coupon-input-group">
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  disabled={couponApplied}
+                />
+                <button 
+                  className="apply-coupon-btn"
+                  onClick={applyCoupon}
+                  disabled={couponApplied}
+                >
+                  {couponApplied ? 'Applied' : 'Apply'}
+                </button>
+              </div>
+            )}
+            
+            <button className="checkout-button" onClick={startCheckout}>
+              Get Access Now
+            </button>
+            
+            <div className="payment-methods">
+              <div className="payment-icons">
+                <span className="payment-icon">💳</span>
+                <span className="payment-icon">💰</span>
+                <span className="payment-icon">🔒</span>
+              </div>
+              <p className="secure-payment">Secure payment processing</p>
+            </div>
+            
+            <p className="guarantee">
+              7-day money-back guarantee. No questions asked.
+            </p>
+          </div>
+        </div>
+        
+        <div className="faq-section">
+          <h3>Frequently Asked Questions</h3>
+          <div className="faq-item">
+            <h4>Can I cancel my subscription?</h4>
+            <p>Yes, you can cancel at any time. If you cancel within the first 7 days, you'll receive a full refund.</p>
+          </div>
+          <div className="faq-item">
+            <h4>How frequently is new content added?</h4>
+            <p>We add new successful applicant profiles every month, with major updates at the beginning of each application cycle.</p>
+          </div>
+          <div className="faq-item">
+            <h4>Will this help me if I'm a non-traditional applicant?</h4>
+            <p>Absolutely! We have profiles from all types of applicants, including many non-traditional success stories.</p>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // Render payment form step
+  const renderPaymentForm = () => {
+    return (
+      <div className="payment-form-container">
+        <div className="payment-header">
+          <h2>Complete your purchase</h2>
+          <p>You're almost done! Just enter your payment details below.</p>
+        </div>
+        
+        <div className="order-summary">
+          <h3>Order Summary</h3>
+          <div className="order-details">
+            <div className="order-item">
+              <span>PremedCheatsheet {selectedPlan === 'monthly' ? 'Monthly' : 'Annual'} Plan</span>
+              <span>${getBasePrice().toFixed(2)}</span>
+            </div>
+            {couponApplied && (
+              <div className="order-item discount">
+                <span>Discount ({discount}%)</span>
+                <span>-${getDiscountAmount().toFixed(2)}</span>
+              </div>
+            )}
+            <div className="order-item total">
+              <span>Total</span>
+              <span>${getFinalPrice()}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="payment-form">
+          <h3>Payment Details</h3>
+          
+          {error && <div className="payment-error">{error}</div>}
+          
+          <div className="form-group">
+            <label>Card Number</label>
+            <input
+              type="text"
+              name="number"
+              placeholder="1234 1234 1234 1234"
+              value={cardInfo.number}
+              onChange={handleCardInputChange}
+              required
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label>Expiration Date</label>
+              <input
+                type="text"
+                name="expiry"
+                placeholder="MM/YY"
+                value={cardInfo.expiry}
+                onChange={handleCardInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>CVC</label>
+              <input
+                type="text"
+                name="cvc"
+                placeholder="123"
+                value={cardInfo.cvc}
+                onChange={handleCardInputChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Name on Card</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="John Doe"
+              value={cardInfo.name}
+              onChange={handleCardInputChange}
+            />
+          </div>
+          
+          <div className="billing-address-option">
+            <input
+              type="checkbox"
+              id="same-address"
+              defaultChecked
+            />
+            <label htmlFor="same-address">Billing address is the same as account address</label>
+          </div>
+          
+          <button 
+            className="payment-button" 
+            onClick={handleProcessPayment}
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : `Pay $${getFinalPrice()}`}
+          </button>
+          
+          <div className="payment-security">
+            <span>🔒</span>
+            <p>Your payment information is secure and encrypted.</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render confirmation step
+  const renderConfirmation = () => {
+    return (
+      <div className="confirmation-container">
+        <div className="confirmation-icon">✅</div>
+        <h2>Payment Successful!</h2>
+        <p>Thank you for your purchase. You now have access to PremedCheatsheet.</p>
+        <p>A receipt has been sent to your email address.</p>
+        {orderId && (
+          <p className="order-id">Order ID: #{orderId}</p>
+        )}
+        <button 
+          className="continue-button"
+          onClick={() => navigate('/profile')}
+        >
+          Start Exploring Profiles
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -61,152 +412,16 @@ const Checkout = () => {
       <div className="checkout-content">
         <div className="container">
           <div className="checkout-wrapper">
-            <div className="checkout-header">
-              <h1>Get Full Access to PremedCheatsheet</h1>
-              <p>Join thousands of pre-med students who've found their path to medical school using our curated profiles database.</p>
-            </div>
-            
-            <div className="plan-selector">
-              <div className="plan-tabs">
-                <div 
-                  className={`plan-tab ${selectedPlan === 'monthly' ? 'active' : ''}`}
-                  onClick={() => togglePlan('monthly')}
-                >
-                  Monthly
-                </div>
-                <div 
-                  className={`plan-tab ${selectedPlan === 'yearly' ? 'active' : ''}`}
-                  onClick={() => togglePlan('yearly')}
-                >
-                  Yearly <span className="save-badge">Save 20%</span>
-                </div>
-              </div>
-              
-              <div className="price-card">
-                <div className="price-header">
-                  <h3>{selectedPlan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}</h3>
-                  <div className="price">
-                    <span className="amount">${getPrice()}</span>
-                    <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
-                  </div>
-                  {selectedPlan === 'monthly' && (
-                    <div className="yearly-equivalent">
-                      ${(getPrice() * 12).toFixed(2)}/year
-                    </div>
-                  )}
-                  {selectedPlan === 'yearly' && (
-                    <div className="savings-callout">
-                      You save ${yearlySavings()} per year!
-                    </div>
-                  )}
-                </div>
-                
-                <ul className="features-list">
-                  <li>Access to all accepted student profiles</li>
-                  <li>Detailed stats: GPA, MCAT, extracurriculars</li>
-                  <li>Application timelines and strategies</li>
-                  <li>School selection insights</li>
-                  <li>Personal statement guidance</li>
-                  {selectedPlan === 'yearly' && <li className="premium-feature">Priority access to new profiles</li>}
-                  {selectedPlan === 'yearly' && <li className="premium-feature">Download up to 50 profiles per month</li>}
-                </ul>
-                
-                {/* {!showCouponInput ? (
-                  <div className="coupon-prompt" onClick={toggleCouponInput}>
-                    Have a coupon code? Enter it here
-                  </div>
-                ) : (
-                  <div className="coupon-input-group">
-                    <input
-                      type="text"
-                      placeholder="Enter coupon code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      disabled={couponApplied}
-                    />
-                    <button 
-                      className="apply-coupon-btn"
-                      onClick={applyCoupon}
-                      disabled={couponApplied}
-                    >
-                      {couponApplied ? 'Applied' : 'Apply'}
-                    </button>
-                  </div>
-                )} */}
-                
-                <button className="checkout-button" onClick={handleCheckout}>
-                  Get Access Now
-                </button>
-                
-                <div className="payment-methods">
-                  <div className="payment-icons">
-                    <span className="payment-icon">💳</span>
-                    <span className="payment-icon">💰</span>
-                    <span className="payment-icon">🔒</span>
-                  </div>
-                  <p className="secure-payment">Secure payment processing</p>
-                </div>
-                
-                <p className="guarantee">
-                  7-day money-back guarantee. No questions asked.
-                </p>
-              </div>
-            </div>
-            
-            {/* <div className="trust-elements">
-              <div className="trust-element">
-                <div className="trust-icon">👨‍⚕️</div>
-                <div className="trust-text">
-                  <h4>Created by med students</h4>
-                  <p>Built by a team who've been in your shoes</p>
-                </div>
-              </div>
-              <div className="trust-element">
-                <div className="trust-icon">🔄</div>
-                <div className="trust-text">
-                  <h4>Updated regularly</h4>
-                  <p>New profiles added every month</p>
-                </div>
-              </div>
-              <div className="trust-element">
-                <div className="trust-icon">👍</div>
-                <div className="trust-text">
-                  <h4>Trusted by thousands</h4>
-                  <p>Used by pre-meds nationwide</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="testimonials">
-              <div className="testimonial">
-                <p>"PremedCheatsheet was a game-changer for my application. Seeing what actually worked for others helped me focus my efforts and ultimately get accepted to my top-choice school."</p>
-                <div className="author">- Sarah K., Stanford Medical School</div>
-              </div>
-              
-              <div className="testimonial">
-                <p>"I was struggling with my extracurriculars until I found this site. The profiles showed me exactly what successful applicants were doing, and I modeled my approach after them."</p>
-                <div className="author">- Michael T., Johns Hopkins School of Medicine</div>
-              </div>
-            </div> */}
-            
-            <div className="faq-section">
-              <h3>Frequently Asked Questions</h3>
-              <div className="faq-item">
-                <h4>Can I cancel my subscription?</h4>
-                <p>Yes, you can cancel at any time. If you cancel within the first 7 days, you'll receive a full refund.</p>
-              </div>
-              <div className="faq-item">
-                <h4>How frequently is new content added?</h4>
-                <p>We add new successful applicant profiles every month, with major updates at the beginning of each application cycle.</p>
-              </div>
-              <div className="faq-item">
-                <h4>Will this help me if I'm a non-traditional applicant?</h4>
-                <p>Absolutely! We have profiles from all types of applicants, including many non-traditional success stories.</p>
-              </div>
-            </div>
+            {renderCheckoutStep()}
           </div>
         </div>
       </div>
+      
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
       
       <Footer />
     </div>
