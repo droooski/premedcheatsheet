@@ -49,7 +49,7 @@ const SchoolProfilePage = () => {
         const foundSchool = schools.find(s => s.id === schoolId) || {
           id: schoolId,
           name: 'Harvard Medical School',
-          logoUrl: '/images/harvard.png',
+          logoUrl: 'https://hms.harvard.edu/themes/shared/harvardmedical/images/footer-logo.svg',
           description: 'Harvard Medical School (HMS) is the graduate medical school of Harvard University and is located in the Longwood Medical Area of Boston, Massachusetts.',
           acceptanceRate: '3.7%',
           avgGPA: '3.9',
