@@ -1,6 +1,6 @@
 // src/pages/Checkout/Checkout.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import AuthModal from '../../components/auth/AuthModal';
@@ -9,13 +9,15 @@ import { processPayment } from '../../services/paymentService';
 import './Checkout.scss';
 
 const Checkout = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const mode = queryParams.get('mode');
   // Basic state management
   const [selectedPlan, setSelectedPlan] = useState('monthly');
   const [couponCode, setCouponCode] = useState('');
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'confirmation'
@@ -33,6 +35,8 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [orderId, setOrderId] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(mode === 'login');
+  const [isLoginMode, setIsLoginMode] = useState(mode === 'login');
   
   const navigate = useNavigate();
 
@@ -449,6 +453,7 @@ const renderConfirmation = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
+        initialMode={isLoginMode ? 'login' : 'signup'}
       />
       
       <Footer />

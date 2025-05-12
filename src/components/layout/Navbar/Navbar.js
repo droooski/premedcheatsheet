@@ -105,9 +105,9 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className="login-link">
-                  Log in
-                </Link>
+              <Link to="/checkout?mode=login" className="login-link">
+                Log in
+              </Link>
                 <Link to="/signup" className="try-free-button">
                   Try it Free
                 </Link>

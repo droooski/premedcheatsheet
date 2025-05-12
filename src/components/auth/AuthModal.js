@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { registerUser, loginUser } from '../../firebase/authService';
 import './AuthModal.scss';
 
-const AuthModal = ({ isOpen, onClose, onSuccess }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
