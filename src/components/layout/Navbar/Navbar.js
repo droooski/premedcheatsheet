@@ -110,38 +110,41 @@ const Navbar = () => {
         <div className="navbar-content">
           {/* Left side with logo and main nav links */}
           <div className="navbar-left">
-            <Link to="/" className="logo" onClick={closeMobileMenu}>
+            <Link to={user ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
               <img src={logo} alt="PremedCheatsheet" />
               <span>PremedCheatsheet</span>
             </Link>
             
-            {/* Primary navigation items */}
-            <ul className="primary-menu">
-              <li>
-                <Link to="/" onClick={closeMobileMenu}>
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" onClick={closeMobileMenu}>
-                  About
-                </Link>
-              </li>
-              {(user || hasAccess()) && (
+            {/* Primary navigation items - different depending on auth state */}
+            {!user ? (
+              <ul className="primary-menu">
+                <li>
+                  <Link to="/" onClick={closeMobileMenu}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" onClick={closeMobileMenu}>
+                    About
+                  </Link>
+                </li>
+              </ul>
+            ) : (
+              <ul className="primary-menu">
                 <li>
                   <Link to="/profile" onClick={closeMobileMenu}>
                     Dashboard
                   </Link>
                 </li>
-              )}
-              {isAdmin && (
-                <li>
-                  <Link to="/admin" onClick={closeMobileMenu}>
-                    Admin
-                  </Link>
-                </li>
-              )}
-            </ul>
+                {isAdmin && (
+                  <li>
+                    <Link to="/admin" onClick={closeMobileMenu}>
+                      Admin
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
           
           {/* Right side with login and CTA */}
@@ -186,30 +189,36 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              <li>
-                <Link to="/" onClick={closeMobileMenu}>
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" onClick={closeMobileMenu}>
-                  About
-                </Link>
-              </li>
-              {(user || hasAccess()) && (
-                <li>
-                  <Link to="/profile" onClick={closeMobileMenu}>
-                    Dashboard
-                  </Link>
-                </li>
+              {!user ? (
+                <>
+                  <li>
+                    <Link to="/" onClick={closeMobileMenu}>
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/about" onClick={closeMobileMenu}>
+                      About
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/profile" onClick={closeMobileMenu}>
+                      Dashboard
+                    </Link>
+                  </li>
+                  {isAdmin && (
+                    <li>
+                      <Link to="/admin" onClick={closeMobileMenu}>
+                        Admin
+                      </Link>
+                    </li>
+                  )}
+                </>
               )}
-              {isAdmin && (
-                <li>
-                  <Link to="/admin" onClick={closeMobileMenu}>
-                    Admin
-                  </Link>
-                </li>
-              )}
+              
               {user || hasAccess() ? (
                 <li>
                   <button onClick={handleLogout} className="logout-button-mobile">

@@ -8,14 +8,14 @@ import ViewToggle from '../../components/ViewToggle/ViewToggle';
 import SchoolFilters from '../../components/SchoolFilters/SchoolFilters';
 import ProfileSearch from '../../components/ProfileSearch/ProfileSearch';
 import ProfileNavigation from '../../components/ProfileNavigation/ProfileNavigation';
-import { getFirestore, collection, getDocs, query, where, limit } from 'firebase/firestore';
-import { onAuthChange } from '../../firebase/authService';
+import { onAuthChange, logoutUser } from '../../firebase/authService';
+import { loadProfilesFromCSV, extractSchoolsFromProfiles, filterProfiles, filterAndSortSchools } from '../../utils/csvParser';
 import './ProfilePage.scss';
 
 const ProfilePage = () => {
   // State management
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('schools');
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,27 +23,41 @@ const ProfilePage = () => {
   const [schools, setSchools] = useState([]);
   const [filteredSchools, setFilteredSchools] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   
+  // New state for enhanced features
+  const [showPremedCheatsheet, setShowPremedCheatsheet] = useState(true); // Default to showing Premed Cheatsheet
+  const [showApplicationCheatsheet, setShowApplicationCheatsheet] = useState(false);
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
+  const [filterCriteria, setFilterCriteria] = useState({
+    majors: [],
+    gpaRanges: [],
+    mcatRanges: []
+  });
+  
   const navigate = useNavigate();
-  const db = getFirestore();
 
-  // Check authentication and load user data
+  // Check authentication
   useEffect(() => {
-    const unsubscribe = onAuthChange(async (currentUser) => {
+    const unsubscribe = onAuthChange((currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        
-        // Fetch user profile from Firestore
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            setProfile(userDoc.data());
-          }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
+        // For demo, we'll simulate a user profile
+        setUserProfile({
+          firstName: currentUser.displayName?.split(' ')[0] || 'User',
+          lastName: currentUser.displayName?.split(' ').slice(1).join(' ') || '',
+          email: currentUser.email,
+          subscriptions: [
+            {
+              plan: 'monthly',
+              active: true,
+              startDate: new Date().toISOString(),
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            }
+          ]
+        });
       } else {
         // Redirect to home page if not authenticated
         navigate('/');
@@ -53,85 +67,52 @@ const ProfilePage = () => {
     });
 
     return () => unsubscribe();
-  }, [navigate, db]);
+  }, [navigate]);
 
-  // Load school data
+  // Load data from CSV file
   useEffect(() => {
-    const fetchSchools = async () => {
+    const fetchData = async () => {
       try {
-        // Get schools from Firestore
-        const schoolsSnapshot = await getDocs(collection(db, 'schools'));
-        const schoolsData = schoolsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        console.log('Fetching data from CSV...');
+        // Load profiles from CSV
+        const profilesData = await loadProfilesFromCSV();
+        console.log(`Loaded ${profilesData.length} profiles from CSV`);
         
+        // Extract schools from profiles
+        const schoolsData = extractSchoolsFromProfiles(profilesData);
+        console.log(`Extracted ${schoolsData.length} schools from profiles`);
+        
+        setProfiles(profilesData);
+        setFilteredProfiles(profilesData);
         setSchools(schoolsData);
         setFilteredSchools(schoolsData);
       } catch (error) {
-        console.error('Error fetching schools:', error);
+        console.error('Error loading data:', error);
+        // Use mock data as fallback if needed
       }
     };
     
-    fetchSchools();
-  }, [db]);
-
-  // Load profile data
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      try {
-        // Get profiles from Firestore
-        const profilesSnapshot = await getDocs(collection(db, 'profiles'));
-        const profilesData = profilesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setProfiles(profilesData);
-      } catch (error) {
-        console.error('Error fetching profiles:', error);
-      }
-    };
-    
-    fetchProfiles();
-  }, [db]);
-
-  // Filter and sort schools based on search query and sort option
-  useEffect(() => {
-    let filtered = [...schools];
-    
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(school => 
-        school.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    // Only fetch data if user is authenticated
+    if (!loading && user) {
+      fetchData();
     }
-    
-    // Apply sorting
-    if (sortOption === 'alphabetical') {
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortOption === 'alphabetical-reverse') {
-      filtered.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sortOption === 'profiles-desc') {
-      filtered.sort((a, b) => (b.profileCount || 0) - (a.profileCount || 0));
-    } else if (sortOption === 'profiles-asc') {
-      filtered.sort((a, b) => (a.profileCount || 0) - (b.profileCount || 0));
-    } else if (sortOption === 'acceptance-desc') {
-      filtered.sort((a, b) => {
-        const aRate = parseFloat(a.acceptanceRate?.replace('%', '') || 0);
-        const bRate = parseFloat(b.acceptanceRate?.replace('%', '') || 0);
-        return bRate - aRate;
-      });
-    } else if (sortOption === 'acceptance-asc') {
-      filtered.sort((a, b) => {
-        const aRate = parseFloat(a.acceptanceRate?.replace('%', '') || 0);
-        const bRate = parseFloat(b.acceptanceRate?.replace('%', '') || 0);
-        return aRate - bRate;
-      });
-    }
-    
+  }, [user, loading]);
+
+  // Update filtered schools when search or sort changes
+  useEffect(() => {
+    if (schools.length === 0) return;
+    const filtered = filterAndSortSchools(schools, searchQuery, sortOption);
     setFilteredSchools(filtered);
   }, [searchQuery, sortOption, schools]);
+
+  // Update filtered profiles when search or filters change
+  useEffect(() => {
+    if (profiles.length === 0) return;
+    const filtered = filterProfiles(profiles, searchQuery, filterCriteria);
+    setFilteredProfiles(filtered);
+    // Reset current profile index when filters change
+    setCurrentProfileIndex(0);
+  }, [searchQuery, filterCriteria, profiles]);
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -145,7 +126,7 @@ const ProfilePage = () => {
 
   // Navigate to next profile
   const goToNextProfile = () => {
-    if (currentProfileIndex < profiles.length - 1) {
+    if (currentProfileIndex < filteredProfiles.length - 1) {
       setCurrentProfileIndex(currentProfileIndex + 1);
     }
   };
@@ -159,14 +140,87 @@ const ProfilePage = () => {
 
   // Go to specific profile
   const goToProfileIndex = (index) => {
-    if (index >= 0 && index < profiles.length) {
+    if (index >= 0 && index < filteredProfiles.length) {
       setCurrentProfileIndex(index);
     }
   };
 
   // View profiles for a specific school
   const viewSchoolProfiles = (schoolId) => {
-    navigate(`/school/${schoolId}`);
+    const school = schools.find(s => s.id === schoolId);
+    if (school) {
+      // Filter profiles by this school
+      const schoolProfiles = profiles.filter(profile => 
+        profile.acceptedSchools.some(s => s === school.name)
+      );
+      
+      if (schoolProfiles.length > 0) {
+        // Navigate to profiles view with filtered profiles
+        setActiveView('profiles');
+        setFilteredProfiles(schoolProfiles);
+        setCurrentProfileIndex(0);
+      } else {
+        // No profiles for this school
+        alert(`No profiles found for ${school.name}. Please check back later.`);
+      }
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (type, value, checked) => {
+    setFilterCriteria(prev => {
+      const updatedCriteria = { ...prev };
+      
+      if (checked) {
+        // Add filter value
+        updatedCriteria[type] = [...updatedCriteria[type], value];
+      } else {
+        // Remove filter value
+        updatedCriteria[type] = updatedCriteria[type].filter(item => item !== value);
+      }
+      
+      return updatedCriteria;
+    });
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterCriteria({
+      majors: [],
+      gpaRanges: [],
+      mcatRanges: []
+    });
+    setSearchQuery('');
+  };
+
+  // Toggle feature views
+  const togglePremedCheatsheet = () => {
+    setShowPremedCheatsheet(true);
+    setShowApplicationCheatsheet(false);
+    setShowAccountDetails(false);
+    setActiveView('schools'); // Set default tab for schools
+  };
+
+  const toggleApplicationCheatsheet = () => {
+    setShowPremedCheatsheet(false);
+    setShowApplicationCheatsheet(true);
+    setShowAccountDetails(false);
+  };
+
+  const toggleAccountDetails = () => {
+    setShowPremedCheatsheet(false);
+    setShowApplicationCheatsheet(false);
+    setShowAccountDetails(true);
   };
 
   if (loading) {
@@ -183,36 +237,179 @@ const ProfilePage = () => {
     );
   }
 
+  // Main menu view (we're skipping this and going directly to Premed Cheatsheet)
+  if (!showPremedCheatsheet && !showApplicationCheatsheet && !showAccountDetails) {
+    return (
+      <div className="profile-page main-menu">
+        <Navbar />
+        <div className="profile-content">
+          <div className="container">
+            <div className="dashboard-header">
+              <h1>Welcome to PremedCheatsheet</h1>
+              <p className="subtitle">Discover profiles from successful med school applicants</p>
+            </div>
+            
+            <div className="main-menu-grid">
+              <div className="menu-card" onClick={togglePremedCheatsheet}>
+                <h2>Premed Cheatsheet Member</h2>
+                <p>Browse medical school profiles of successful applicants</p>
+                <span className="chevron-icon">›</span>
+              </div>
+              
+              <div className="menu-card" onClick={toggleApplicationCheatsheet}>
+                <h2>Application Cheatsheet</h2>
+                <p>Get insights on application strategies</p>
+                <span className="chevron-icon">›</span>
+              </div>
+              
+              <div className="menu-card" onClick={toggleAccountDetails}>
+                <h2>Account</h2>
+                <p>Manage your profile and subscription</p>
+                <span className="chevron-icon">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Account details view
+  if (showAccountDetails) {
+    return (
+      <div className="profile-page account-page">
+        <Navbar />
+        <div className="profile-content">
+          <div className="container">
+            <div className="page-header">
+              <button className="back-button" onClick={() => {
+                setShowAccountDetails(false);
+                setShowPremedCheatsheet(true);
+              }}>
+                ← Back
+              </button>
+              <h1>Account</h1>
+            </div>
+            
+            <div className="account-notice">
+              <p>Your account is not verified yet. A verification email has been sent to {user?.email}.</p>
+              <button className="resend-button">Resend Verification Email</button>
+            </div>
+            
+            <div className="account-greeting">
+              <h2>Hi, {userProfile?.firstName || user?.email?.split('@')[0]}</h2>
+              <button className="sign-out-button" onClick={handleLogout}>Sign out</button>
+            </div>
+            
+            <div className="account-details-grid">
+              <div className="account-section">
+                <h3>Digital Products</h3>
+                <p className="section-info">2 Active Digital Products</p>
+              </div>
+              
+              <div className="account-section">
+                <h3>Orders</h3>
+                <p className="section-info">Last order #00650 is completed</p>
+              </div>
+              
+              <div className="account-section">
+                <h3>Payment</h3>
+                <p className="section-info">No saved payments</p>
+              </div>
+              
+              <div className="account-section">
+                <h3>Address</h3>
+                <p className="section-info">No saved addresses</p>
+              </div>
+              
+              <div className="account-section">
+                <h3>Profile</h3>
+                <p className="section-info">{user?.email}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Application Cheatsheet view
+  if (showApplicationCheatsheet) {
+    return (
+      <div className="profile-page application-cheatsheet">
+        <Navbar />
+        <div className="profile-content">
+          <div className="container">
+            <div className="page-header">
+              <button className="back-button" onClick={() => {
+                setShowApplicationCheatsheet(false);
+                setShowPremedCheatsheet(true);
+              }}>
+                ← Back
+              </button>
+              <h1>Application Cheatsheet</h1>
+            </div>
+            
+            <div className="account-notice">
+              <p>Your account is not verified yet. A verification email has been sent to {user?.email}.</p>
+              <button className="resend-button">Resend Verification Email</button>
+            </div>
+            
+            <div className="search-bar">
+              <input type="text" placeholder="Search application topics..." value={searchQuery} onChange={handleSearchChange} />
+            </div>
+            
+            <div className="application-content">
+              <h2>Application Guide</h2>
+              <p>Our comprehensive guide to medical school applications</p>
+              
+              <div className="application-sections">
+                <div className="section-item">
+                  <h3>Personal Statement</h3>
+                  <p>Tips and examples for crafting your personal statement</p>
+                </div>
+                <div className="section-item">
+                  <h3>Activities & Experiences</h3>
+                  <p>How to present your experiences effectively</p>
+                </div>
+                <div className="section-item">
+                  <h3>Secondary Applications</h3>
+                  <p>Strategies for secondary essays and prompts</p>
+                </div>
+                <div className="section-item">
+                  <h3>Interviews</h3>
+                  <p>Preparation tips for traditional and MMI interviews</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Premed Cheatsheet view (schools and profiles)
   return (
-    <div className="profile-page">
+    <div className="profile-page premed-cheatsheet">
       <Navbar />
       
       <div className="profile-content">
         <div className="container">
-          <div className="dashboard-header">
-            <h1>Welcome to PremedCheatsheet</h1>
-            <p className="subtitle">Discover profiles from successful med school applicants</p>
+          <div className="page-header">
+            <h1>Premed Cheatsheet Member</h1>
+            <div className="header-actions">
+              <button className="account-button" onClick={toggleAccountDetails}>
+                Account Settings
+              </button>
+            </div>
           </div>
           
-          <div className="user-info-card">
-            <div className="user-info">
-              <h3>Account Information</h3>
-              <p><strong>Name:</strong> {profile?.firstName} {profile?.lastName}</p>
-              <p><strong>Email:</strong> {profile?.email}</p>
-            </div>
-            
-            <div className="subscription-info">
-              <h3>Subscription</h3>
-              {profile?.subscriptions?.length > 0 ? (
-                <>
-                  <p><strong>Plan:</strong> {profile.subscriptions[0].plan === 'monthly' ? 'Monthly' : 'Annual'}</p>
-                  <p><strong>Status:</strong> <span className="active-status">Active</span></p>
-                  <p><strong>Renewal Date:</strong> {new Date(profile.subscriptions[0].endDate).toLocaleDateString()}</p>
-                </>
-              ) : (
-                <p>No active subscription found.</p>
-              )}
-            </div>
+          <div className="account-notice">
+            <p>Your account is not verified yet. A verification email has been sent to {user?.email}.</p>
+            <button className="resend-button">Resend Verification Email</button>
           </div>
           
           <ViewToggle activeView={activeView} setActiveView={setActiveView} />
@@ -236,6 +433,12 @@ const ProfilePage = () => {
                       <div className="school-info">
                         <h3>{school.name}</h3>
                         <p>{school.profileCount || 0} Accepted Profiles</p>
+                        {school.avgGPA !== 'N/A' && (
+                          <p>Avg GPA: {school.avgGPA}</p>
+                        )}
+                        {school.avgMCAT !== 'N/A' && (
+                          <p>Avg MCAT: {school.avgMCAT}</p>
+                        )}
                       </div>
                       <button 
                         className="view-profiles-button"
@@ -255,6 +458,16 @@ const ProfilePage = () => {
             </>
           ) : (
             <div className="profiles-container">
+              <div className="profiles-header">
+                <button 
+                  className="back-to-schools"
+                  onClick={() => setActiveView('schools')}
+                >
+                  ← Back to Schools
+                </button>
+                <h2>Applicant Profiles</h2>
+              </div>
+
               <ProfileSearch 
                 searchQuery={searchQuery}
                 handleSearchChange={handleSearchChange}
@@ -262,27 +475,119 @@ const ProfilePage = () => {
                 setFilters={setShowFilters}
               />
               
-              <ProfileNavigation 
-                currentIndex={currentProfileIndex}
-                totalProfiles={profiles.length}
-                goToPrev={goToPrevProfile}
-                goToNext={goToNextProfile}
-                goToIndex={goToProfileIndex}
-              />
-              
-              <div className="profile-display">
-                {profiles.length > 0 ? (
-                  <ProfileCard 
-                    type={profiles[currentProfileIndex]?.type || "biomedical"}
-                    profile={profiles[currentProfileIndex]}
-                    showBookmark={true}
-                    size="large"
-                  />
-                ) : (
-                  <div className="no-profiles">
-                    <p>No profiles available. Please check back later.</p>
+              {showFilters && (
+                <div className="filter-panel">
+                  <div className="filter-groups">
+                    <div className="filter-group">
+                      <h4>Major</h4>
+                      <div className="filter-options">
+                        {['biomedical', 'biology', 'chemistry', 'neuroscience', 'psychology', 'non-trad'].map(major => (
+                          <label key={major}>
+                            <input 
+                              type="checkbox" 
+                              checked={filterCriteria.majors.includes(major)}
+                              onChange={(e) => handleFilterChange('majors', major, e.target.checked)}
+                            /> 
+                            {major.charAt(0).toUpperCase() + major.slice(1)}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="filter-group">
+                      <h4>GPA Range</h4>
+                      <div className="filter-options">
+                        {['3.9-4.0', '3.7-3.89', '3.5-3.69', '3.0-3.49', '0-2.99'].map(range => (
+                          <label key={range}>
+                            <input 
+                              type="checkbox" 
+                              checked={filterCriteria.gpaRanges.includes(range)}
+                              onChange={(e) => handleFilterChange('gpaRanges', range, e.target.checked)}
+                            /> 
+                            {range}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="filter-group">
+                      <h4>MCAT Range</h4>
+                      <div className="filter-options">
+                        {['520+', '515-519', '510-514', '505-509', '500-504', '0-499'].map(range => (
+                          <label key={range}>
+                            <input 
+                              type="checkbox" 
+                              checked={filterCriteria.mcatRanges.includes(range)}
+                              onChange={(e) => handleFilterChange('mcatRanges', range, e.target.checked)}
+                            /> 
+                            {range}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                )}
+                  
+                  <div className="filter-actions">
+                    <button className="clear-filters" onClick={clearFilters}>
+                      Clear All Filters
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              <div className="profile-flashcards">
+                <div className="flashcard-nav">
+                  <button 
+                    className="nav-button prev"
+                    onClick={goToPrevProfile}
+                    disabled={currentProfileIndex === 0 || filteredProfiles.length === 0}
+                  >
+                    Previous Profile
+                  </button>
+                  
+                  <span className="counter">
+                    {filteredProfiles.length > 0 
+                      ? `Profile ${currentProfileIndex + 1} of ${filteredProfiles.length}` 
+                      : 'No profiles found'}
+                  </span>
+                  
+                  <button 
+                    className="nav-button next"
+                    onClick={goToNextProfile}
+                    disabled={currentProfileIndex === filteredProfiles.length - 1 || filteredProfiles.length === 0}
+                  >
+                    Next Profile
+                  </button>
+                </div>
+                
+                <div className="profile-display">
+                  {filteredProfiles.length > 0 ? (
+                    <ProfileCard 
+                      profile={filteredProfiles[currentProfileIndex]}
+                      showBookmark={true}
+                      size="large"
+                      flippable={true}
+                    />
+                  ) : (
+                    <div className="no-profiles">
+                      <p>No profiles match your current filters.</p>
+                      <button onClick={clearFilters}>Clear All Filters</button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="indicator-dots">
+                  {filteredProfiles.length > 0 && Array.from({ length: Math.min(filteredProfiles.length, 10) }, (_, i) => (
+                    <span 
+                      key={i} 
+                      className={`dot ${i === currentProfileIndex ? 'active' : ''}`} 
+                      onClick={() => goToProfileIndex(i)}
+                    />
+                  ))}
+                  {filteredProfiles.length > 10 && (
+                    <span className="more-dots">...</span>
+                  )}
+                </div>
               </div>
             </div>
           )}

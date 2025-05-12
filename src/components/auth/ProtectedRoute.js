@@ -33,6 +33,8 @@ const ProtectedRoute = ({ children }) => {
     // Check if user is logged in or has guest access
     const unsubscribe = onAuthChange((user) => {
       const hasGuestAccess = checkGuestAccess();
+      
+      // User is authenticated if they're logged in OR have guest access
       setAuthenticated(!!user || hasGuestAccess);
       setLoading(false);
       
@@ -61,6 +63,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  // If not authenticated, redirect to checkout
   return authenticated ? children : <Navigate to="/checkout" />;
 };
 
