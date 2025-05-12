@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
-import { onAuthChange, getUserProfile } from '../../firebase/authService';
+import ViewToggle from '../../components/ViewToggle/ViewToggle';
+import SchoolFilters from '../../components/SchoolFilters/SchoolFilters';
+import ProfileSearch from '../../components/ProfileSearch/ProfileSearch';
+import ProfileNavigation from '../../components/ProfileNavigation/ProfileNavigation';
+import { getFirestore, collection, getDocs, query, where, limit } from 'firebase/firestore';
+import { onAuthChange } from '../../firebase/authService';
 import './ProfilePage.scss';
 
 const ProfilePage = () => {
@@ -12,13 +17,17 @@ const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('schools'); // 'schools' or 'profiles'
+  const [activeView, setActiveView] = useState('schools');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('alphabetical');
   const [schools, setSchools] = useState([]);
   const [filteredSchools, setFilteredSchools] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
   
   const navigate = useNavigate();
+  const db = getFirestore();
 
   // Check authentication and load user data
   useEffect(() => {
@@ -26,11 +35,13 @@ const ProfilePage = () => {
       if (currentUser) {
         setUser(currentUser);
         
-        // Fetch user profile
-        const { profile, error } = await getUserProfile(currentUser.uid);
-        if (profile) {
-          setProfile(profile);
-        } else if (error) {
+        // Fetch user profile from Firestore
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          if (userDoc.exists()) {
+            setProfile(userDoc.data());
+          }
+        } catch (error) {
           console.error('Error fetching user profile:', error);
         }
       } else {
@@ -42,31 +53,48 @@ const ProfilePage = () => {
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, db]);
 
   // Load school data
   useEffect(() => {
     const fetchSchools = async () => {
-      // Simulated school data - in a real app, this would come from Firestore
-      const schoolData = [
-        { id: '1', name: 'Harvard Medical School', logoUrl: '/images/harvard.png', profiles: 15 },
-        { id: '2', name: 'Johns Hopkins University School of Medicine', logoUrl: '/images/johns-hopkins.png', profiles: 12 },
-        { id: '3', name: 'Stanford University School of Medicine', logoUrl: '/images/stanford.png', profiles: 10 },
-        { id: '4', name: 'UCSF School of Medicine', logoUrl: '/images/ucsf.png', profiles: 8 },
-        { id: '5', name: 'NYU Grossman School of Medicine', logoUrl: '/images/nyu.png', profiles: 7 },
-        { id: '6', name: 'Mayo Clinic Alix School of Medicine', logoUrl: '/images/mayo.png', profiles: 6 },
-        { id: '7', name: 'Columbia University Vagelos College', logoUrl: '/images/columbia.png', profiles: 9 },
-        { id: '8', name: 'University of Pennsylvania Perelman', logoUrl: '/images/upenn.png', profiles: 11 },
-        { id: '9', name: 'Washington University School of Medicine', logoUrl: '/images/wustl.png', profiles: 5 },
-        { id: '10', name: 'Yale School of Medicine', logoUrl: '/images/yale.png', profiles: 8 },
-      ];
-      
-      setSchools(schoolData);
-      setFilteredSchools(schoolData);
+      try {
+        // Get schools from Firestore
+        const schoolsSnapshot = await getDocs(collection(db, 'schools'));
+        const schoolsData = schoolsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setSchools(schoolsData);
+        setFilteredSchools(schoolsData);
+      } catch (error) {
+        console.error('Error fetching schools:', error);
+      }
     };
     
     fetchSchools();
-  }, []);
+  }, [db]);
+
+  // Load profile data
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        // Get profiles from Firestore
+        const profilesSnapshot = await getDocs(collection(db, 'profiles'));
+        const profilesData = profilesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setProfiles(profilesData);
+      } catch (error) {
+        console.error('Error fetching profiles:', error);
+      }
+    };
+    
+    fetchProfiles();
+  }, [db]);
 
   // Filter and sort schools based on search query and sort option
   useEffect(() => {
@@ -82,10 +110,24 @@ const ProfilePage = () => {
     // Apply sorting
     if (sortOption === 'alphabetical') {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === 'alphabetical-reverse') {
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
     } else if (sortOption === 'profiles-desc') {
-      filtered.sort((a, b) => b.profiles - a.profiles);
+      filtered.sort((a, b) => (b.profileCount || 0) - (a.profileCount || 0));
     } else if (sortOption === 'profiles-asc') {
-      filtered.sort((a, b) => a.profiles - b.profiles);
+      filtered.sort((a, b) => (a.profileCount || 0) - (b.profileCount || 0));
+    } else if (sortOption === 'acceptance-desc') {
+      filtered.sort((a, b) => {
+        const aRate = parseFloat(a.acceptanceRate?.replace('%', '') || 0);
+        const bRate = parseFloat(b.acceptanceRate?.replace('%', '') || 0);
+        return bRate - aRate;
+      });
+    } else if (sortOption === 'acceptance-asc') {
+      filtered.sort((a, b) => {
+        const aRate = parseFloat(a.acceptanceRate?.replace('%', '') || 0);
+        const bRate = parseFloat(b.acceptanceRate?.replace('%', '') || 0);
+        return aRate - bRate;
+      });
     }
     
     setFilteredSchools(filtered);
@@ -99,6 +141,27 @@ const ProfilePage = () => {
   // Handle sort option change
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
+  };
+
+  // Navigate to next profile
+  const goToNextProfile = () => {
+    if (currentProfileIndex < profiles.length - 1) {
+      setCurrentProfileIndex(currentProfileIndex + 1);
+    }
+  };
+
+  // Navigate to previous profile
+  const goToPrevProfile = () => {
+    if (currentProfileIndex > 0) {
+      setCurrentProfileIndex(currentProfileIndex - 1);
+    }
+  };
+
+  // Go to specific profile
+  const goToProfileIndex = (index) => {
+    if (index >= 0 && index < profiles.length) {
+      setCurrentProfileIndex(index);
+    }
   };
 
   // View profiles for a specific school
@@ -152,82 +215,74 @@ const ProfilePage = () => {
             </div>
           </div>
           
-          <div className="view-toggle">
-            <button 
-              className={`toggle-button ${activeTab === 'schools' ? 'active' : ''}`}
-              onClick={() => setActiveTab('schools')}
-            >
-              Medical Schools
-            </button>
-            <button 
-              className={`toggle-button ${activeTab === 'profiles' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profiles')}
-            >
-              All Profiles
-            </button>
-          </div>
+          <ViewToggle activeView={activeView} setActiveView={setActiveView} />
           
-          <div className="filter-sort-bar">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder={activeTab === 'schools' ? "Search medical schools..." : "Search profiles..."}
-                value={searchQuery}
-                onChange={handleSearchChange}
+          {activeView === 'schools' ? (
+            <>
+              <SchoolFilters 
+                sortOption={sortOption} 
+                handleSortChange={handleSortChange}
+                searchQuery={searchQuery}
+                handleSearchChange={handleSearchChange}
               />
-            </div>
-            
-            <div className="sort-options">
-              <label>Sort By:</label>
-              <select value={sortOption} onChange={handleSortChange}>
-                <option value="alphabetical">Alphabetical (A-Z)</option>
-                <option value="profiles-desc">Most Profiles</option>
-                <option value="profiles-asc">Fewest Profiles</option>
-              </select>
-            </div>
-          </div>
-          
-          {activeTab === 'schools' ? (
-            <div className="schools-grid">
-              {filteredSchools.length > 0 ? (
-                filteredSchools.map(school => (
-                  <div className="school-card" key={school.id}>
-                    <div className="school-logo">
-                      <img src={school.logoUrl || '/images/default-school-logo.png'} alt={school.name} />
+              
+              <div className="schools-grid">
+                {filteredSchools.length > 0 ? (
+                  filteredSchools.map(school => (
+                    <div className="school-card" key={school.id}>
+                      <div className="school-logo">
+                        <img src={school.logoUrl || '/images/default-school-logo.png'} alt={school.name} />
+                      </div>
+                      <div className="school-info">
+                        <h3>{school.name}</h3>
+                        <p>{school.profileCount || 0} Accepted Profiles</p>
+                      </div>
+                      <button 
+                        className="view-profiles-button"
+                        onClick={() => viewSchoolProfiles(school.id)}
+                      >
+                        View Profiles
+                      </button>
                     </div>
-                    <div className="school-info">
-                      <h3>{school.name}</h3>
-                      <p>{school.profiles} Accepted Profiles</p>
-                    </div>
-                    <button 
-                      className="view-profiles-button"
-                      onClick={() => viewSchoolProfiles(school.id)}
-                    >
-                      View Profiles
-                    </button>
+                  ))
+                ) : (
+                  <div className="no-results">
+                    <p>No medical schools found matching "{searchQuery}"</p>
+                    <button onClick={() => setSearchQuery('')}>Clear Search</button>
                   </div>
-                ))
-              ) : (
-                <div className="no-results">
-                  <p>No medical schools found matching "{searchQuery}"</p>
-                  <button onClick={() => setSearchQuery('')}>Clear Search</button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </>
           ) : (
             <div className="profiles-container">
-              <div className="profile-navigation">
-                <button className="nav-button">&lt; Previous</button>
-                <span className="profile-counter">Profile 1 of 82</span>
-                <button className="nav-button">Next &gt;</button>
-              </div>
+              <ProfileSearch 
+                searchQuery={searchQuery}
+                handleSearchChange={handleSearchChange}
+                filters={showFilters}
+                setFilters={setShowFilters}
+              />
+              
+              <ProfileNavigation 
+                currentIndex={currentProfileIndex}
+                totalProfiles={profiles.length}
+                goToPrev={goToPrevProfile}
+                goToNext={goToNextProfile}
+                goToIndex={goToProfileIndex}
+              />
               
               <div className="profile-display">
-                <ProfileCard 
-                  type="biomedical"
-                  showBookmark={true}
-                  size="large"
-                />
+                {profiles.length > 0 ? (
+                  <ProfileCard 
+                    type={profiles[currentProfileIndex]?.type || "biomedical"}
+                    profile={profiles[currentProfileIndex]}
+                    showBookmark={true}
+                    size="large"
+                  />
+                ) : (
+                  <div className="no-profiles">
+                    <p>No profiles available. Please check back later.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

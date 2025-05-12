@@ -1,0 +1,32 @@
+// src/components/GoogleDocEmbed/GoogleDocEmbed.scss
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.google-doc-embed {
+  margin-bottom: $spacing-8;
+  
+  .doc-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    
+    @media (min-width: $lg) {
+      font-size: 1.5rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.125rem;
+    }
+  }
+  
+  .doc-container {
+    border: 1px solid $gray-300;
+    border-radius: 8px;
+    overflow: hidden;
+    
+    iframe {
+      display: block;
+      border: none;
+    }
+  }
+}

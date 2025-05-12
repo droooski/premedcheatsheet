@@ -3,29 +3,31 @@ import React from 'react';
 import './ProfileCard.scss';
 
 const ProfileCard = ({ 
+  profile,
   type = "biomedical", 
   showBookmark = true,
   size = "large"
 }) => {
-  const isBiomedical = type === "biomedical";
+  // If a profile object is provided, use its data
+  // Otherwise, use default data based on the type
   
-  // Data based on type
-  const data = {
-    title: isBiomedical 
+  // Default data based on type
+  const defaultData = {
+    title: type === "biomedical" 
       ? "Biomedical Engineering Student" 
       : "Non-Trad Applicant with Research Focus",
     gender: "Male",
     ethnicity: "Taiwanese",
     state: "New Jersey",
     year: "2024",
-    gpa: isBiomedical ? "3.94" : "3.84",
+    gpa: type === "biomedical" ? "3.94" : "3.84",
     sgpa: "3.91",
     mcat: "513",
     mcatBreakdown: "127, 129, 131, 129",
-    acceptedSchools: isBiomedical 
+    acceptedSchools: type === "biomedical" 
       ? ["Einstein School of Medicine (Accepted)", "Rutgers New Jersey Medical School"] 
       : ["Stanford Medical School", "UCSF Medical School"],
-    backgroundItems: isBiomedical 
+    backgroundItems: type === "biomedical" 
       ? [
           "Major: Biomedical Engineering",
           "Research: 1000+ hours (including 100+ per year)"
@@ -35,6 +37,25 @@ const ProfileCard = ({
           "Research: 2000+ hours with multiple publications"
         ]
   };
+  
+  // Combine provided profile data with defaults
+  const data = profile ? {
+    title: profile.type === "biomedical" 
+      ? "Biomedical Engineering Student" 
+      : profile.type === "non-trad"
+        ? "Non-Traditional Applicant"
+        : `${profile.type.charAt(0).toUpperCase() + profile.type.slice(1)} Major`,
+    gender: profile.gender,
+    ethnicity: profile.ethnicity,
+    state: profile.state,
+    year: profile.year,
+    gpa: profile.gpa,
+    sgpa: profile.sgpa,
+    mcat: profile.mcat,
+    mcatBreakdown: profile.mcatBreakdown,
+    acceptedSchools: profile.acceptedSchools,
+    backgroundItems: profile.backgroundItems
+  } : defaultData;
   
   return (
     <div className={`profile-card ${size}`}>
@@ -50,7 +71,7 @@ const ProfileCard = ({
       </div>
       
       <div className="profile-details">
-        <div className="grid-layout">
+        <div className="detail-row">
           <div className="detail-group">
             <span className="label">Gender</span>
             <span className="value">{data.gender}</span>
@@ -69,10 +90,14 @@ const ProfileCard = ({
           </div>
         </div>
 
-        <div className="grid-layout">
+        <div className="detail-row">
           <div className="detail-group">
             <span className="label">GPA</span>
             <span className="value">{data.gpa}</span>
+          </div>
+          <div className="detail-group">
+            <span className="label">Science GPA</span>
+            <span className="value">{data.sgpa}</span>
           </div>
           <div className="detail-group">
             <span className="label">MCAT</span>

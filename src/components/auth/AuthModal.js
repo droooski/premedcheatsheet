@@ -173,9 +173,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
             </p>
           )}
           
-          <button className="guest-button" onClick={continueAsGuest}>
+            <button className="guest-button" onClick={continueAsGuest}>
             Continue as guest
-          </button>
+            </button>
         </div>
       </div>
     </div>

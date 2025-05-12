@@ -1,11 +1,13 @@
-// src/App.js - Updated with ProtectedRoute
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
 import Checkout from './pages/Checkout/Checkout';
 import ProfilePage from './pages/Profile/ProfilePage';
 import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
+import AdminPanel from './pages/Admin/AdminPanel';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute'; // Create this component for admin-only access
 import './styles/main.scss';
 
 function App() {
@@ -24,6 +26,11 @@ function App() {
           <ProtectedRoute>
             <SchoolProfilePage />
           </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>
         } />
         <Route path="/about" element={<HomePage />} />
         <Route path="/contact" element={<HomePage />} />

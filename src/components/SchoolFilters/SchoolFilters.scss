@@ -1,0 +1,58 @@
+// src/components/SchoolFilters/SchoolFilters.scss
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.filter-sort-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+  
+  @media (max-width: $sm) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    flex: 1;
+    
+    input {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+  
+  .sort-options {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    
+    label {
+      font-size: 0.9rem;
+      color: $text-color-light;
+      white-space: nowrap;
+    }
+    
+    select {
+      padding: $spacing-2 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: $white;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+}

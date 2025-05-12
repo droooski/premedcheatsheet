@@ -1,0 +1,32 @@
+// src/components/ViewToggle/ViewToggle.scss
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.view-toggle {
+  display: flex;
+  margin-bottom: $spacing-6;
+  
+  .toggle-button {
+    flex: 1;
+    padding: $spacing-3 0;
+    border: none;
+    background-color: $gray-200;
+    color: $text-color;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    &.active {
+      background-color: $primary-color;
+      color: $white;
+    }
+  }
+}

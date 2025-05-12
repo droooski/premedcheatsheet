@@ -1,18 +1,21 @@
 // src/firebase/authService.js
 import { 
+  getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut,
   sendPasswordResetEmail,
   onAuthStateChanged
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './config';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import app from './config';
+
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Register a new user
 export const registerUser = async (email, password, firstName, lastName) => {
   try {
-    // Create the user in Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
     // Create user profile in Firestore
@@ -27,10 +30,7 @@ export const registerUser = async (email, password, firstName, lastName) => {
     return { user: userCredential.user, success: true };
   } catch (error) {
     console.error("Error registering user:", error);
-    return { 
-      error: error.message,
-      success: false
-    };
+    return { error: error.message, success: false };
   }
 };
 
@@ -38,16 +38,10 @@ export const registerUser = async (email, password, firstName, lastName) => {
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return { 
-      user: userCredential.user,
-      success: true
-    };
+    return { user: userCredential.user, success: true };
   } catch (error) {
     console.error("Error signing in:", error);
-    return { 
-      error: error.message,
-      success: false
-    };
+    return { error: error.message, success: false };
   }
 };
 
@@ -58,10 +52,7 @@ export const logoutUser = async () => {
     return { success: true };
   } catch (error) {
     console.error("Error signing out:", error);
-    return { 
-      error: error.message,
-      success: false
-    };
+    return { error: error.message, success: false };
   }
 };
 
@@ -72,43 +63,33 @@ export const resetPassword = async (email) => {
     return { success: true };
   } catch (error) {
     console.error("Error resetting password:", error);
-    return { 
-      error: error.message,
-      success: false
-    };
+    return { error: error.message, success: false };
   }
 };
 
-// Get current user profile
+// Get user profile from Firestore
 export const getUserProfile = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
-      return { 
-        profile: userDoc.data(),
-        success: true
-      };
+      return { profile: userDoc.data(), success: true };
     } else {
-      return { 
-        error: "User profile not found",
-        success: false
-      };
+      return { error: "User profile not found", success: false };
     }
   } catch (error) {
     console.error("Error getting user profile:", error);
-    return { 
-      error: error.message,
-      success: false
-    };
+    return { error: error.message, success: false };
   }
 };
 
-// Get current authenticated user
+// Get current user
 export const getCurrentUser = () => {
   return auth.currentUser;
 };
 
-// Listen for auth state changes
+// Auth state change listener
 export const onAuthChange = (callback) => {
   return onAuthStateChanged(auth, callback);
 };
+
+export { auth, db };

@@ -25,6 +25,11 @@ const Checkout = () => {
     cvc: '',
     name: ''
   });
+  const [discountCodes, setDiscountCodes] = useState({
+  'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
+  'STUDENT2025': { rate: 20, description: 'Student Discount' },
+  'PARTNER': { rate: 100, description: 'Partnership' }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [orderId, setOrderId] = useState(null);
@@ -90,7 +95,9 @@ const Checkout = () => {
   const getFinalPrice = () => {
     const basePrice = getBasePrice();
     if (couponApplied) {
-      return (basePrice - getDiscountAmount()).toFixed(2);
+      const discountAmount = getDiscountAmount();
+      const finalPrice = basePrice - discountAmount;
+      return finalPrice <= 0 ? 0 : finalPrice.toFixed(2);
     }
     return basePrice.toFixed(2);
   };
@@ -104,6 +111,16 @@ const Checkout = () => {
       // Show authentication modal
       setShowAuthModal(true);
     }
+  };
+
+  // Function to continue as guest
+  const continueAsGuest = () => {
+    // Set a cookie or localStorage item to track guest access
+    localStorage.setItem('guestAccess', 'true');
+    localStorage.setItem('guestAccessExpiry', Date.now() + (24 * 60 * 60 * 1000)); // 24 hours
+    
+    // Redirect to profile page
+    navigate('/profile');
   };
 
   // Handle authentication success

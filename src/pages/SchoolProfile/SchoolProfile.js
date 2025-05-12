@@ -5,6 +5,7 @@ import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
 import { onAuthChange } from '../../firebase/authService';
+import GoogleDocEmbed from '../../components/GoogleDocEmbed/GoogleDocEmbed';
 import './SchoolProfilePage.scss';
 
 const SchoolProfilePage = () => {
