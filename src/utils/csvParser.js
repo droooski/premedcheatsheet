@@ -36,15 +36,15 @@ export const processProfileData = (rawData) => {
   return rawData.map((row, index) => {
     // Extract accepted schools into an array
     const acceptedSchools = [];
-    if (row['What medical schools did you get accepted to?']) {
-      const schoolsText = row['What medical schools did you get accepted to?'];
+    if (row['Medical school(s) accepted into']) {
+      const schoolsText = row['Medical school(s) accepted into'];
       // Split by commas or line breaks
       const schools = schoolsText.split(/,|\n/).map(s => s.trim()).filter(s => s);
       acceptedSchools.push(...schools);
     }
 
     // Determine major
-    const major = row['Major'] || 'Not specified';
+    const major = row['Majors and minors during college'] || 'Not specified';
     
     // Determine profile type based on major
     let type = 'other';
@@ -55,49 +55,46 @@ export const processProfileData = (rawData) => {
       else if (majorLower.includes('chem')) type = 'chemistry';
       else if (majorLower.includes('neuro')) type = 'neuroscience';
       else if (majorLower.includes('psych')) type = 'psychology';
-      else if (row['Did you apply as a non-traditional applicant?'] === 'Yes') type = 'non-trad';
+      // For non-trad, check how many gap years they had
+      else if (row['How many gap years?'] && parseInt(row['How many gap years?']) > 0) type = 'non-trad';
     }
     
     // Build background items
     const backgroundItems = [];
     if (major) backgroundItems.push(`Major: ${major}`);
     
-    if (row['Research Experience']) {
-      backgroundItems.push(`Research: ${row['Research Experience']}`);
+    if (row['List research experiences and approximate hours']) {
+      backgroundItems.push(`Research: ${row['List research experiences and approximate hours']}`);
     }
     
-    if (row['Clinical Experience']) {
-      backgroundItems.push(`Clinical Experience: ${row['Clinical Experience']}`);
+    if (row['List paid medical employment activities and approximate hours']) {
+      backgroundItems.push(`Clinical Experience: ${row['List paid medical employment activities and approximate hours']}`);
     }
     
-    if (row['Shadowing Experience']) {
-      backgroundItems.push(`Shadowing: ${row['Shadowing Experience']}`);
+    if (row['List shadowing experiences and approximate hours']) {
+      backgroundItems.push(`Shadowing: ${row['List shadowing experiences and approximate hours']}`);
     }
     
-    if (row['Volunteering Experience (Medical)']) {
-      backgroundItems.push(`Medical Volunteering: ${row['Volunteering Experience (Medical)']}`);
+    if (row['List medical volunteer activities and approximate hours']) {
+      backgroundItems.push(`Medical Volunteering: ${row['List medical volunteer activities and approximate hours']}`);
     }
     
-    if (row['Volunteering Experience (Non-Medical)']) {
-      backgroundItems.push(`Non-Medical Volunteering: ${row['Volunteering Experience (Non-Medical)']}`);
+    if (row['List non-medical volunteer activities and approximate hours']) {
+      backgroundItems.push(`Non-Medical Volunteering: ${row['List non-medical volunteer activities and approximate hours']}`);
     }
     
-    if (row['Leadership Experience']) {
-      backgroundItems.push(`Leadership: ${row['Leadership Experience']}`);
+    if (row['List leadership activities and approximate hours']) {
+      backgroundItems.push(`Leadership: ${row['List leadership activities and approximate hours']}`);
     }
     
-    if (row['Awards']) {
-      backgroundItems.push(`Awards: ${row['Awards']}`);
+    if (row['List any awards/honors/scholarships/publications earned in UG']) {
+      backgroundItems.push(`Awards: ${row['List any awards/honors/scholarships/publications earned in UG']}`);
     }
     
     // Extract reflections
     const reflections = [];
-    if (row['What do you believe helped you get accepted?']) {
-      reflections.push(row['What do you believe helped you get accepted?']);
-    }
-    
-    if (row['What would you have done differently?']) {
-      reflections.push(row['What would you have done differently?']);
+    if (row['Reflections during the pre-med process and things you learned']) {
+      reflections.push(row['Reflections during the pre-med process and things you learned']);
     }
     
     // Create the profile object
@@ -106,13 +103,13 @@ export const processProfileData = (rawData) => {
       type,
       title: type === 'non-trad' ? 'Non-Traditional Applicant' : `${major} Student`,
       gender: row['Gender'] || 'Not specified',
-      ethnicity: row['Race/Ethnicity'] || 'Not specified',
-      state: row['State of Residence'] || 'Not specified',
-      year: row['Application Year'] || new Date().getFullYear().toString(),
-      gpa: typeof row['Overall GPA'] === 'number' ? row['Overall GPA'].toFixed(2) : (row['Overall GPA'] || 'N/A'),
-      sgpa: typeof row['Science GPA'] === 'number' ? row['Science GPA'].toFixed(2) : (row['Science GPA'] || 'N/A'),
-      mcat: row['MCAT Score'] ? row['MCAT Score'].toString() : 'N/A',
-      mcatBreakdown: row['MCAT Section Breakdown'] || 'N/A',
+      ethnicity: row['Racial Self-Identification'] || 'Not specified',
+      state: row['State of residency during application process'] || 'Not specified',
+      year: row['Medical school matriculation year'] || new Date().getFullYear().toString(),
+      gpa: typeof row['Undergraduate GPA'] === 'number' ? row['Undergraduate GPA'].toFixed(2) : (row['Undergraduate GPA'] || 'N/A'),
+      sgpa: 'N/A', // Science GPA isn't directly in your CSV
+      mcat: row['Cumulative MCAT Score'] ? row['Cumulative MCAT Score'].toString() : 'N/A',
+      mcatBreakdown: row['MCAT Subsection Scores (If remember)'] || 'N/A',
       acceptedSchools,
       backgroundItems,
       reflections
@@ -126,8 +123,10 @@ export const processProfileData = (rawData) => {
  */
 export const loadProfilesFromCSV = async () => {
   try {
-    // Path to the CSV file
+    // Path to the CSV file - this should be the correct public path
     const csvPath = '/assets/data/Copy of Applicant Profiles (Responses) - Reimbursed Responses.csv';
+    
+    console.log("Attempting to fetch CSV from:", csvPath);
     
     // Fetch the CSV file
     const response = await fetch(csvPath);
@@ -137,6 +136,10 @@ export const loadProfilesFromCSV = async () => {
     }
     
     const csvText = await response.text();
+    console.log("CSV file fetched successfully, length:", csvText.length);
+    
+    // Add debug log to see first part of CSV
+    console.log("CSV preview:", csvText.substring(0, 200));
     
     // Parse the CSV text
     return new Promise((resolve, reject) => {
@@ -146,8 +149,20 @@ export const loadProfilesFromCSV = async () => {
         skipEmptyLines: true,
         complete: (results) => {
           try {
-            console.log('CSV Parse Results:', results);
+            console.log('CSV Parse Results - Headers:', results.meta.fields);
+            console.log('CSV Parse Results - Row count:', results.data.length);
+            
+            if (results.data.length === 0) {
+              console.warn("CSV parsed but no data rows found");
+              resolve([]);
+              return;
+            }
+            
+            // Log the first row to help debug field mapping
+            console.log('First data row sample:', JSON.stringify(results.data[0]).substring(0, 300));
+            
             const profiles = processProfileData(results.data);
+            console.log(`Processed ${profiles.length} profiles from CSV`);
             resolve(profiles);
           } catch (error) {
             console.error('Error processing CSV data:', error);
