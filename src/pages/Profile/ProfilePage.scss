@@ -20,12 +20,25 @@
   @media (max-width: $sm) {
     padding: $spacing-4 0;
   }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 1.25rem;
+  color: $text-color-light;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: $spacing-8;
   
   h1 {
     font-family: $font-family-mincho;
     font-size: 2.5rem;
-    margin-bottom: $spacing-8;
-    text-align: center;
+    margin-bottom: $spacing-2;
     
     @media (max-width: $md) {
       font-size: 2rem;
@@ -33,53 +46,145 @@
     
     @media (max-width: $sm) {
       font-size: 1.75rem;
-      margin-bottom: $spacing-6;
+    }
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+    color: $text-color-light;
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
     }
   }
 }
 
-.profile-section {
+.user-info-card {
   background-color: $white;
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: $spacing-6;
-  margin-bottom: $spacing-6;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: $spacing-8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-6;
   
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: $spacing-4;
-    font-weight: 600;
-    border-bottom: 1px solid $gray-200;
-    padding-bottom: $spacing-2;
-    
-    @media (max-width: $sm) {
-      font-size: 1.25rem;
-    }
+  @media (max-width: $md) {
+    flex-direction: column;
   }
   
-  .profile-info, .subscription-info {
+  .user-info, .subscription-info {
+    flex: 1;
+    min-width: 250px;
+    
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-4;
+      padding-bottom: $spacing-2;
+      border-bottom: 1px solid $gray-200;
+    }
+    
     p {
       margin-bottom: $spacing-2;
-      font-size: 1rem;
       
       strong {
         font-weight: 600;
         margin-right: $spacing-2;
       }
+      
+      .active-status {
+        color: $green-500;
+        font-weight: 500;
+      }
     }
   }
 }
 
-.loading-spinner {
+.view-toggle {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 1.25rem;
-  color: $text-color-light;
+  margin-bottom: $spacing-6;
+  
+  .toggle-button {
+    flex: 1;
+    padding: $spacing-3 0;
+    border: none;
+    background-color: $gray-200;
+    color: $text-color;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    &.active {
+      background-color: $primary-color;
+      color: $white;
+    }
+  }
 }
 
-.school-list {
+.filter-sort-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  gap: $spacing-4;
+  flex-wrap: wrap;
+  
+  @media (max-width: $sm) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    flex: 1;
+    
+    input {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+  
+  .sort-options {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    
+    label {
+      font-size: 0.9rem;
+      color: $text-color-light;
+    }
+    
+    select {
+      padding: $spacing-2 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: $white;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+}
+
+.schools-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: $spacing-4;
@@ -91,39 +196,130 @@
   @media (min-width: $lg) {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  .school-card {
+    background-color: $white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: $spacing-4;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .school-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: $spacing-4;
+      height: 100px;
+      
+      img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+      }
+    }
+    
+    .school-info {
+      text-align: center;
+      margin-bottom: $spacing-4;
+      
+      h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: $spacing-2;
+      }
+      
+      p {
+        font-size: 0.9rem;
+        color: $text-color-light;
+      }
+    }
+    
+    .view-profiles-button {
+      margin-top: auto;
+      background-color: $primary-color;
+      color: $white;
+      border: none;
+      border-radius: 4px;
+      padding: $spacing-2 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background-color: darken($primary-color, 5%);
+      }
+    }
+  }
 }
 
-.school-item {
-  background-color: $gray-100;
-  border-radius: 6px;
-  padding: $spacing-4;
-  display: flex;
-  flex-direction: column;
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: $spacing-10;
   
-  h3 {
-    font-size: 1.125rem;
-    margin-bottom: $spacing-3;
-    font-weight: 600;
+  p {
+    font-size: 1.1rem;
+    color: $text-color-light;
+    margin-bottom: $spacing-4;
+  }
+  
+  button {
+    background-color: $gray-200;
+    border: none;
+    border-radius: 4px;
+    padding: $spacing-2 $spacing-4;
+    font-size: 0.9rem;
+    cursor: pointer;
     
-    @media (max-width: $sm) {
-      font-size: 1rem;
+    &:hover {
+      background-color: $gray-300;
+    }
+  }
+}
+
+.profiles-container {
+  .profile-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-6;
+    
+    .nav-button {
+      background-color: $primary-color;
+      color: $white;
+      border: none;
+      border-radius: 4px;
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background-color: darken($primary-color, 5%);
+      }
+      
+      &:disabled {
+        background-color: $gray-300;
+        cursor: not-allowed;
+      }
+    }
+    
+    .profile-counter {
+      font-size: 0.9rem;
+      color: $text-color-light;
     }
   }
   
-  .view-profiles-btn {
-    margin-top: auto;
-    background-color: $primary-color;
-    color: $white;
-    border: none;
-    border-radius: 4px;
-    padding: $spacing-2 $spacing-3;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    
-    &:hover {
-      background-color: darken($primary-color, 5%);
-    }
+  .profile-display {
+    display: flex;
+    justify-content: center;
   }
 }
