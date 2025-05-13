@@ -568,6 +568,26 @@ html body .hero {
     font-family: $font-family-sans !important;
     font-weight: 400 !important;
     color: $text-color-light !important;
+    margin-bottom: $spacing-32 !important; /* Less space on small screens */
+
+    @media (min-width: $md) {
+      font-size: 0.9rem !important;
+    }
+
+    @media (min-width: $lg) {
+      font-size: 1rem !important;
+      line-height: 1.7 !important;
+    }
+
+    @media (max-width: $sm) {
+      font-size: 0.85rem !important;
+      margin-bottom: $spacing-2 !important; /* Less space on small screens */
+    }
+
+    @media (max-width: $md) {
+      font-size: 0.9rem !important;
+      margin-bottom: $spacing-8 !important; /* Less space on medium screens */
+    }
   }
   
   /* CRITICAL FIX: Adjusted spacing for small to medium screens */
@@ -577,9 +597,15 @@ html body .hero {
     width: 90% !important;
     max-width: 500px !important;
     margin: 0 auto !important;
+    margin-bottom: 150px !important; /* More space below subheading */
     
     /* FIXED: Proper vertical gap for mobile */
     gap: 1px !important; /* Using explicit pixel value for predictability */
+
+    @media (max-width: $sm) {
+      width: 100% !important;
+      padding: 0 $spacing-4 !important; /* Add padding on both sides */
+    }
     
     @media (min-width: $md) {
       grid-template-columns: repeat(2, 1fr) !important;
@@ -600,24 +626,34 @@ html body .hero {
     }
   }
   
-  /* ASPECT RATIO FIX */
+  /* Profile card with transparent background and proper scaling */
   .profile-card-with-image {
     /* Use the exact aspect ratios specified */
-    aspect-ratio: 3/3.45 !important; /* Default aspect ratio */
+    aspect-ratio: 2/3 !important; /* Default aspect ratio */
     overflow: hidden !important;
     border-radius: 18px !important;
     transform: scale(0.8) !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+    background-color: transparent !important; /* Removed white background */
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
     
     /* Subtle hover effect */
     &:hover {
       transform: scale(0.81) !important; /* Just slightly larger */
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Responsive adjustments */
+
+    @media (max-width: $sm) {
+      aspect-ratio: 2/3 !important; /* Default aspect ratio for small screens */
+      transform: scale(0.75) !important; /* Slightly smaller on small screens */
+      
+      &:hover {
+        transform: scale(0.76) !important; /* Subtle hover */
+      }
     }
     
     @media (min-width: $md) {
-      aspect-ratio: 13.29/15.2 !important; /* Slightly taller on medium screens */
+      aspect-ratio: 5/8 !important; /* Slightly taller on medium screens */
       
       &:hover {
         transform: scale(0.81) !important; /* Subtle hover */
@@ -630,12 +666,11 @@ html body .hero {
     }
     
     @media (min-width: $xl) {
-      aspect-ratio: 19/22 !important; /* Taller aspect ratio for XL */
+      aspect-ratio: 11/24.8 !important; /* Taller aspect ratio for XL */
       transform: scale(1.08) !important; /* Make slightly larger */
       
       &:hover {
         transform: scale(1.10) !important; /* Moderate hover effect */
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
       }
     }
     
@@ -646,7 +681,13 @@ html body .hero {
       img {
         width: 100% !important;
         height: 100% !important;
-        object-fit: contain !important; /* Show full image without cropping */
+        object-fit: cover !important; /* Changed to cover to avoid distortion */
+        border-radius: 18px !important; /* Match container radius */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important; /* Apply shadow to image */
+        
+        &:hover {
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+        }
         
         @media (min-width: $xl) {
           /* Optional: Subtle enhancement for XL images */

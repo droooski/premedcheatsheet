@@ -1,6 +1,6 @@
 // src/components/sections/Hero/Hero.js
 import { useNavigate } from 'react-router-dom';
-import heroImage from '../../../assets/images/heroImage.png'; // Make sure this path is correct
+import heroImage from '../../../assets/images/newhero.png'; // Make sure this path is correct
 import './Hero.scss';
 
 const Hero = () => {
