@@ -1,4 +1,4 @@
-/* src/pages/About/AboutPage.scss - Updated with contact section styles */
+/* src/pages/About/AboutPage.scss - Pixel perfect with responsive design */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -28,6 +28,7 @@
       
       @media (max-width: $sm) {
         padding: 0 $spacing-4;
+        max-width: 90%;
       }
     }
   }
@@ -116,7 +117,7 @@
     }
   }
   
-  /* Contact section - Updated styles */
+  /* Contact section - Updated styles for a row layout */
   .contact-section {
     margin: $spacing-16 0;
     width: 100%;
@@ -159,18 +160,21 @@
     }
   }
   
-  .contact-links {
+  /* Social media links in a row layout */
+  .social-media-row {
     display: flex;
-    flex-direction: column;
-    gap: $spacing-6;
-    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: $spacing-12;
     
     @media (max-width: $md) {
-      gap: $spacing-5;
+      gap: $spacing-4;
     }
     
     @media (max-width: $sm) {
-      gap: $spacing-4;
+      flex-direction: column;
+      align-items: center;
+      gap: $spacing-3;
     }
     
     .contact-link {
@@ -210,6 +214,29 @@
         svg {
           width: 28px;
           height: 28px;
+          
+          @media (min-width: $xl) {
+            width: 32px;
+            height: 32px;
+          }
+          
+          @media (max-width: $md) {
+            width: 24px;
+            height: 24px;
+          }
+          
+          @media (max-width: $sm) {
+            width: 20px;
+            height: 20px;
+          }
+        }
+        
+        /* TikTok icon placeholder */
+        .tiktok-icon-placeholder {
+          width: 28px;
+          height: 28px;
+          background-image: url('../../../public/images/tiktok.jpg');
+          background-size: cover;
           
           @media (min-width: $xl) {
             width: 32px;
@@ -490,7 +517,7 @@
     font-size: clamp(0.95rem, 1.1vw, 1rem);
     margin-bottom: $spacing-6;
     color: $text-color;
-    text-align: left;
+    text-align: center;
     
     @media (max-width: $sm) {
       font-size: clamp(0.9rem, 1vw, 0.95rem);
@@ -711,7 +738,7 @@
     
     .checkbox-group {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: $spacing-6;
       
       @media (min-width: $xl) {
@@ -729,6 +756,7 @@
       input[type="checkbox"] {
         width: auto;
         margin-right: $spacing-2;
+        margin-top: 0.25rem;
         cursor: pointer;
         
         @media (max-width: $sm) {
@@ -763,16 +791,8 @@
       cursor: pointer;
       transition: all 0.3s ease;
       display: block;
-      
-      .forms-container & {
-        width: 100%;
-        margin: 0;
-      }
-      
-      &:not(.forms-container &) {
-        margin: 0 auto;
-        min-width: 180px;
-      }
+      margin: 0 auto;
+      min-width: 180px;
       
       &:hover {
         background-color: darken($black, 10%);
@@ -788,29 +808,20 @@
         padding: $spacing-4 $spacing-10;
         font-size: clamp(1.1rem, 1.3vw, 1.2rem);
         border-radius: 10px;
-        
-        &:not(.forms-container &) {
-          min-width: 220px;
-        }
+        min-width: 220px;
       }
       
       @media (max-width: $md) {
         padding: $spacing-3 $spacing-6;
         font-size: clamp(0.95rem, 1.1vw, 1.05rem);
-        
-        &:not(.forms-container &) {
-          min-width: 160px;
-        }
+        min-width: 160px;
       }
       
       @media (max-width: $sm) {
         padding: $spacing-2 $spacing-5;
         font-size: clamp(0.9rem, 1vw, 1rem);
         border-radius: 6px;
-        
-        &:not(.forms-container &) {
-          min-width: 140px;
-        }
+        min-width: 140px;
       }
     }
     

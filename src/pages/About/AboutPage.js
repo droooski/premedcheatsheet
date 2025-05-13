@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ApplicantProfileSubmission from '../../components/ApplicantProfileSubmission/ApplicantProfileSubmission';
+// Import TikTok icon from assets folder instead of public
 import './AboutPage.scss';
 
 const AboutPage = () => {
@@ -75,10 +76,10 @@ const AboutPage = () => {
             </p>
           </div>
           
-          {/* Contact section with social media links */}
+          {/* Contact section with social media links in a row */}
           <div className="contact-section">
             <h2 className="contact-header">CONTACT</h2>
-            <div className="contact-links">
+            <div className="social-media-row">
               <a href="mailto:staff@premedcheatsheet.com" className="contact-link">
                 <span className="contact-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -102,11 +103,8 @@ const AboutPage = () => {
               
               <a href="https://www.tiktok.com/@orthrobro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" className="contact-link">
                 <span className="contact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path>
-                    <path d="M15 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
-                    <path d="M15 8v8a4 4 0 1 1-4-4"></path>
-                  </svg>
+                  {/* Placeholder for TikTok icon - will be added via CSS background-image */}
+                  <div className="tiktok-icon-placeholder"></div>
                 </span>
                 <span className="contact-text">@orthrobro</span>
               </a>
