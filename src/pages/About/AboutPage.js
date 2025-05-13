@@ -77,24 +77,24 @@ const AboutPage = () => {
             </p>
           </div>
           
-          <div className="contact-section">
+          {/* <div className="contact-section">
             <h2 className="contact-header">CONTACT</h2>
             <div className="contact-links">
               <a href="mailto:staff@premedcheatsheet.com" className="contact-link">EMAIL</a>
               <a href="https://instagram.com/premedcheatsheet" target="_blank" rel="noopener noreferrer" className="contact-link">INSTAGRAM</a>
               <a href="https://tiktok.com/@premedcheatsheet" target="_blank" rel="noopener noreferrer" className="contact-link">TIKTOK</a>
             </div>
-          </div>
+          </div> */}
           
           <div className="profile-submission">
-            <h2 className="submission-header">Submit Your Applicant Profile</h2>
+            <h2 className="submission-header">Join the Premed Creator Team</h2>
             
             <p className="submission-description">
-              Are you a medical student or incoming medical student with a passion to help premeds? Help spread our mission by submitting your applicant profile below.
+              Are you a premed interested in making engaging, helpful, and relatable content for TikTok and Instagram reels? Help spread our mission through short, viral videos and get PAID for it.
             </p>
             
             <div className="payment-info">
-              <p>We are currently paying $2 for your profile and any profiles you refer.</p>
+              <p>We are currently paying $15 for each 5-10 second video you make on a new account.</p>
             </div>
             
             <div className="contact-form">
