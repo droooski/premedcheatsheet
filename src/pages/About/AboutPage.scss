@@ -1,4 +1,4 @@
-/* src/pages/About/AboutPage.scss */
+/* src/pages/About/AboutPage.scss - Updated with contact section styles */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -20,7 +20,7 @@
       padding: $spacing-8 0;
     }
     
-  .container {
+    .container {
       max-width: 80%;
       margin: 0 auto;
       padding: 0 $spacing-6;
@@ -116,35 +116,28 @@
     }
   }
   
-  /* Contact section */
+  /* Contact section - Updated styles */
   .contact-section {
-    margin-top: $spacing-20;
-    margin-bottom: $spacing-20;
+    margin: $spacing-16 0;
     width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
     
     @media (min-width: $xl) {
-      margin-top: $spacing-24;
-      margin-bottom: $spacing-24;
+      margin: $spacing-20 0;
     }
     
     @media (max-width: $md) {
-      margin-top: $spacing-16;
-      margin-bottom: $spacing-16;
+      margin: $spacing-12 0;
     }
     
     @media (max-width: $sm) {
-      margin-top: $spacing-12;
-      margin-bottom: $spacing-12;
+      margin: $spacing-8 0;
     }
   }
   
   .contact-header {
     font-family: $font-family-mincho !important;
     font-weight: 400 !important;
-    font-size: clamp(2rem, 4vw, 3.5rem) !important;
+    font-size: clamp(2rem, 4vw, 3rem) !important;
     color: $text-color;
     margin-bottom: $spacing-8;
     letter-spacing: 0.02em !important;
@@ -169,15 +162,24 @@
   .contact-links {
     display: flex;
     flex-direction: column;
-    gap: $spacing-4;
+    gap: $spacing-6;
     align-items: center;
     
+    @media (max-width: $md) {
+      gap: $spacing-5;
+    }
+    
+    @media (max-width: $sm) {
+      gap: $spacing-4;
+    }
+    
     .contact-link {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       font-size: clamp(1rem, 1.5vw, 1.3rem);
       font-weight: 500;
       color: $text-color;
-      text-decoration: underline;
+      text-decoration: none;
       transition: color 0.3s ease;
       
       @media (min-width: $xl) {
@@ -195,27 +197,108 @@
       &:hover {
         color: $primary-color;
       }
+      
+      .contact-icon {
+        margin-right: $spacing-4;
+        display: flex;
+        align-items: center;
+        
+        @media (max-width: $md) {
+          margin-right: $spacing-3;
+        }
+        
+        svg {
+          width: 28px;
+          height: 28px;
+          
+          @media (min-width: $xl) {
+            width: 32px;
+            height: 32px;
+          }
+          
+          @media (max-width: $md) {
+            width: 24px;
+            height: 24px;
+          }
+          
+          @media (max-width: $sm) {
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+      
+      .contact-text {
+        font-weight: 400;
+      }
+    }
+  }
+  
+  /* Two-column layout for forms */
+  .forms-container {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-8;
+    margin-top: $spacing-16;
+    margin-bottom: $spacing-16;
+    
+    @media (min-width: $xl) {
+      gap: $spacing-12;
+      margin-top: $spacing-24;
+      margin-bottom: $spacing-24;
+    }
+    
+    @media (max-width: $lg) {
+      flex-direction: column;
+      gap: $spacing-16;
+    }
+    
+    @media (max-width: $md) {
+      gap: $spacing-12;
+      margin-top: $spacing-12;
+      margin-bottom: $spacing-12;
+    }
+    
+    @media (max-width: $sm) {
+      gap: $spacing-8;
+      margin-top: $spacing-8;
+      margin-bottom: $spacing-8;
+    }
+    
+    .form-column {
+      flex: 1;
+      
+      @media (max-width: $lg) {
+        width: 100%;
+      }
     }
   }
   
   /* Profile submission section */
   .profile-submission {
-    margin-top: $spacing-24;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
     max-width: 100%;
     
-    @media (min-width: $xl) {
-      margin-top: $spacing-32;
+    .form-column & {
+      margin-top: 0;
     }
     
-    @media (max-width: $md) {
-      margin-top: $spacing-20;
-    }
-    
-    @media (max-width: $sm) {
-      margin-top: $spacing-16;
+    &:not(.form-column &) {
+      margin-top: $spacing-24;
+      
+      @media (min-width: $xl) {
+        margin-top: $spacing-32;
+      }
+      
+      @media (max-width: $md) {
+        margin-top: $spacing-20;
+      }
+      
+      @media (max-width: $sm) {
+        margin-top: $spacing-16;
+      }
     }
   }
   
@@ -227,7 +310,24 @@
     margin-bottom: $spacing-8;
     letter-spacing: 0.02em !important;
     line-height: 1.2 !important;
-    text-align: center;
+    
+    .forms-container & {
+      font-size: clamp(1.75rem, 2.5vw, 2.5rem) !important;
+      text-align: left;
+      margin-bottom: $spacing-6;
+      
+      @media (min-width: $xl) {
+        font-size: clamp(2rem, 3vw, 3rem) !important;
+      }
+      
+      @media (max-width: $md) {
+        font-size: clamp(1.6rem, 2vw, 2rem) !important;
+      }
+    }
+    
+    &:not(.forms-container &) {
+      text-align: center;
+    }
     
     @media (min-width: $xl) {
       margin-bottom: $spacing-10;
@@ -249,32 +349,52 @@
     line-height: 1.6;
     color: $text-color;
     margin-bottom: $spacing-8;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 80%;
+    
+    .forms-container & {
+      text-align: left;
+      max-width: 100%;
+    }
+    
+    &:not(.forms-container &) {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 80%;
+    }
     
     @media (min-width: $xl) {
       font-size: clamp(1.1rem, 1.6vw, 1.3rem);
-      max-width: 85%;
+      
+      &:not(.forms-container &) {
+        max-width: 85%;
+      }
+      
       line-height: 1.7;
     }
     
     @media (min-width: $xxl) {
-      max-width: 90%;
+      &:not(.forms-container &) {
+        max-width: 90%;
+      }
     }
     
     @media (max-width: $md) {
       font-size: clamp(0.95rem, 1.4vw, 1.1rem);
       margin-bottom: $spacing-6;
-      max-width: 90%;
+      
+      &:not(.forms-container &) {
+        max-width: 90%;
+      }
     }
     
     @media (max-width: $sm) {
       font-size: clamp(0.9rem, 1.3vw, 1rem);
       margin-bottom: $spacing-4;
       line-height: 1.5;
-      max-width: 100%;
+      
+      &:not(.forms-container &) {
+        max-width: 100%;
+      }
     }
   }
   
@@ -283,30 +403,62 @@
     border-left: 3px solid $primary-color;
     padding: $spacing-4 $spacing-6;
     margin-bottom: $spacing-8;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 80%;
     
-    @media (min-width: $xl) {
-      max-width: 85%;
-      padding: $spacing-5 $spacing-8;
-      margin-bottom: $spacing-10;
-    }
-    
-    @media (min-width: $xxl) {
-      max-width: 90%;
-    }
-    
-    @media (max-width: $md) {
-      max-width: 90%;
-      padding: $spacing-4 $spacing-5;
+    .forms-container & {
+      max-width: 100%;
+      padding: $spacing-4;
       margin-bottom: $spacing-6;
     }
     
+    &:not(.forms-container &) {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 80%;
+    }
+    
+    @media (min-width: $xl) {
+      &:not(.forms-container &) {
+        max-width: 85%;
+        padding: $spacing-5 $spacing-8;
+        margin-bottom: $spacing-10;
+      }
+      
+      .forms-container & {
+        padding: $spacing-5;
+        margin-bottom: $spacing-8;
+      }
+    }
+    
+    @media (min-width: $xxl) {
+      &:not(.forms-container &) {
+        max-width: 90%;
+      }
+    }
+    
+    @media (max-width: $md) {
+      &:not(.forms-container &) {
+        max-width: 90%;
+        padding: $spacing-4 $spacing-5;
+        margin-bottom: $spacing-6;
+      }
+      
+      .forms-container & {
+        padding: $spacing-3;
+        margin-bottom: $spacing-5;
+      }
+    }
+    
     @media (max-width: $sm) {
-      padding: $spacing-3 $spacing-4;
-      margin-bottom: $spacing-5;
-      max-width: 100%;
+      &:not(.forms-container &) {
+        padding: $spacing-3 $spacing-4;
+        margin-bottom: $spacing-5;
+        max-width: 100%;
+      }
+      
+      .forms-container & {
+        padding: $spacing-2 $spacing-3;
+        margin-bottom: $spacing-4;
+      }
     }
     
     p {
@@ -314,7 +466,14 @@
       line-height: 1.5;
       color: $text-color;
       margin: 0;
-      text-align: center;
+      
+      .forms-container & {
+        text-align: left;
+      }
+      
+      &:not(.forms-container &) {
+        text-align: center;
+      }
       
       @media (min-width: $xl) {
         font-size: clamp(1rem, 1.5vw, 1.2rem);
@@ -327,38 +486,80 @@
     }
   }
   
+  .form-instruction {
+    font-size: clamp(0.95rem, 1.1vw, 1rem);
+    margin-bottom: $spacing-6;
+    color: $text-color;
+    text-align: left;
+    
+    @media (max-width: $sm) {
+      font-size: clamp(0.9rem, 1vw, 0.95rem);
+      margin-bottom: $spacing-4;
+    }
+  }
+  
   /* Contact form */
   .contact-form {
     background-color: $white;
     border-radius: 12px;
     padding: $spacing-8 $spacing-6;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 80%;
-    margin-bottom: $spacing-16;
+    
+    .forms-container & {
+      max-width: 100%;
+      padding: $spacing-6;
+      margin-bottom: 0;
+    }
+    
+    &:not(.forms-container &) {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 80%;
+      margin-bottom: $spacing-16;
+    }
     
     @media (min-width: $xl) {
-      max-width: 85%;
-      padding: $spacing-10 $spacing-8;
-      margin-bottom: $spacing-20;
+      &:not(.forms-container &) {
+        max-width: 85%;
+        padding: $spacing-10 $spacing-8;
+        margin-bottom: $spacing-20;
+      }
+      
+      .forms-container & {
+        padding: $spacing-8;
+      }
     }
     
     @media (min-width: $xxl) {
-      max-width: 90%;
+      &:not(.forms-container &) {
+        max-width: 90%;
+      }
     }
     
     @media (max-width: $md) {
-      max-width: 90%;
-      padding: $spacing-6;
-      margin-bottom: $spacing-12;
+      &:not(.forms-container &) {
+        max-width: 90%;
+        padding: $spacing-6;
+        margin-bottom: $spacing-12;
+      }
+      
+      .forms-container & {
+        padding: $spacing-5;
+      }
     }
     
     @media (max-width: $sm) {
-      padding: $spacing-4;
-      margin-bottom: $spacing-8;
-      border-radius: 8px;
-      max-width: 100%;
+      &:not(.forms-container &) {
+        padding: $spacing-4;
+        margin-bottom: $spacing-8;
+        border-radius: 8px;
+        max-width: 100%;
+      }
+      
+      .forms-container & {
+        padding: $spacing-4;
+        border-radius: 8px;
+      }
     }
     
     h3 {
@@ -382,6 +583,27 @@
       @media (max-width: $sm) {
         font-size: clamp(1.1rem, 1.6vw, 1.4rem);
         margin-bottom: $spacing-4;
+      }
+    }
+    
+    .form-field-group {
+      margin-bottom: $spacing-6;
+      
+      @media (max-width: $md) {
+        margin-bottom: $spacing-4;
+      }
+      
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: $spacing-2;
+        font-size: 0.95rem;
+        color: $text-color;
+        
+        .required {
+          color: #e53e3e;
+          margin-left: $spacing-1;
+        }
       }
     }
     
@@ -541,8 +763,16 @@
       cursor: pointer;
       transition: all 0.3s ease;
       display: block;
-      margin: 0 auto;
-      min-width: 180px;
+      
+      .forms-container & {
+        width: 100%;
+        margin: 0;
+      }
+      
+      &:not(.forms-container &) {
+        margin: 0 auto;
+        min-width: 180px;
+      }
       
       &:hover {
         background-color: darken($black, 10%);
@@ -558,20 +788,29 @@
         padding: $spacing-4 $spacing-10;
         font-size: clamp(1.1rem, 1.3vw, 1.2rem);
         border-radius: 10px;
-        min-width: 220px;
+        
+        &:not(.forms-container &) {
+          min-width: 220px;
+        }
       }
       
       @media (max-width: $md) {
         padding: $spacing-3 $spacing-6;
         font-size: clamp(0.95rem, 1.1vw, 1.05rem);
-        min-width: 160px;
+        
+        &:not(.forms-container &) {
+          min-width: 160px;
+        }
       }
       
       @media (max-width: $sm) {
         padding: $spacing-2 $spacing-5;
         font-size: clamp(0.9rem, 1vw, 1rem);
         border-radius: 6px;
-        min-width: 140px;
+        
+        &:not(.forms-container &) {
+          min-width: 140px;
+        }
       }
     }
     
