@@ -1,9 +1,11 @@
 // src/components/sections/SneakPeek/SneakPeek.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './SneakPeek.scss';
 
 const SneakPeek = ({ onTimeExpired }) => {
   const [timeLeft, setTimeLeft] = useState(30);
+  const navigate = useNavigate();
 
   // Timer effect that triggers callback when time expires
   useEffect(() => {
@@ -23,9 +25,7 @@ const SneakPeek = ({ onTimeExpired }) => {
   }, [timeLeft, onTimeExpired]);
 
   const handleUpgradeClick = () => {
-    if (onTimeExpired) {
-      onTimeExpired();
-    }
+    navigate('/pricing');
   };
 
   return (

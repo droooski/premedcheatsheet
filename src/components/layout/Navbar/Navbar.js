@@ -18,6 +18,14 @@ const Navbar = () => {
   const location = useLocation();
   const db = getFirestore();
 
+  // Check for guest access
+  const isGuest = () => {
+    const guestAccess = localStorage.getItem('guestAccess');
+    const guestExpiry = localStorage.getItem('guestAccessExpiry');
+    
+    return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthChange(async (currentUser) => {
       console.log("Navbar - Auth state changed:", currentUser);
@@ -44,18 +52,13 @@ const Navbar = () => {
           setIsAdmin(false);
         }
       } else {
-        // Check if guest access is enabled
-        const guestAccess = localStorage.getItem('guestAccess');
-        const guestExpiry = localStorage.getItem('guestAccessExpiry');
-        
-        if (guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now()) {
+        // Check if guest access is still valid
+        if (isGuest()) {
           console.log("Guest access active");
         } else {
           // Clear guest access if expired
-          if (guestAccess) {
-            localStorage.removeItem('guestAccess');
-            localStorage.removeItem('guestAccessExpiry');
-          }
+          localStorage.removeItem('guestAccess');
+          localStorage.removeItem('guestAccessExpiry');
         }
         
         setUserProfile(null);
@@ -101,28 +104,18 @@ const Navbar = () => {
     console.log("Auth success in navbar:", userData);
     setShowAuthModal(false);
     
-    // If we're already on checkout page, refresh the component
-    if (location.pathname.includes('/checkout')) {
-      window.location.reload();
-    }
+    navigate('/profile');
   };
 
-  // Check if user has active subscription or guest access
-  const hasAccess = () => {
+  // Check if user has active subscription
+  const hasSubscription = () => {
     if (userProfile && userProfile.subscriptions && userProfile.subscriptions.length > 0) {
       // Check if any subscription is active
-      const hasActiveSubscription = userProfile.subscriptions.some(sub => {
+      return userProfile.subscriptions.some(sub => {
         return sub.active && new Date(sub.endDate) > new Date();
       });
-      
-      return hasActiveSubscription;
     }
-    
-    // Check for guest access
-    const guestAccess = localStorage.getItem('guestAccess');
-    const guestExpiry = localStorage.getItem('guestAccessExpiry');
-    
-    return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
+    return false;
   };
 
   // Determine if a nav link is active
@@ -130,8 +123,9 @@ const Navbar = () => {
     return location.pathname === path;
   };
   
-  // Check if user is authenticated or has access
-  const isAuthenticated = user || hasAccess();
+  // Separate guest status from auth status
+  const isAuthenticated = !!user;
+  const hasGuestAccess = isGuest();
 
   return (
     <nav className="navbar">
@@ -144,8 +138,8 @@ const Navbar = () => {
               <span>PremedCheatsheet</span>
             </Link>
             
-            {/* Primary navigation (Home, About, Pricing) - Only show when NOT logged in */}
-            {!isAuthenticated && (
+            {/* Primary navigation (Home, About, Pricing) - Show when NOT logged in or is a guest */}
+            {(!isAuthenticated || hasGuestAccess) && (
               <ul className="primary-menu">
                 <li>
                   <Link to="/" className={isActive('/') ? 'active' : ''} onClick={closeMobileMenu}>
@@ -166,8 +160,8 @@ const Navbar = () => {
             )}
           </div>
           
-          {/* Center navigation - only shown when logged in */}
-          {isAuthenticated && (
+          {/* Center navigation - only shown when logged in AND not a guest */}
+          {isAuthenticated && !hasGuestAccess && (
             <div className="navbar-center">
               <ul className="main-menu">
                 <li>
@@ -206,12 +200,25 @@ const Navbar = () => {
           {/* Right side with account or login links */}
           <div className="navbar-right">
             {isAuthenticated ? (
+              // For registered users
               <div className="account-menu">
                 <Link to="/account" className="account-button">
                   Account
                 </Link>
+                <button onClick={handleLogout} className="logout-button">
+                  Log out
+                </button>
+              </div>
+            ) : hasGuestAccess ? (
+              // For guest users
+              <div className="guest-menu">
+                {/* Show an upgrade button for guests */}
+                <Link to="/pricing" className="try-free-button">
+                  Upgrade
+                </Link>
               </div>
             ) : (
+              // For non-authenticated users
               <>
                 <a href="#" onClick={handleLoginClick} className="login-link">
                   Log in
@@ -235,7 +242,8 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              {isAuthenticated ? (
+              {isAuthenticated && !hasGuestAccess ? (
+                // For registered users
                 <>
                   <li>
                     <Link 
@@ -275,8 +283,14 @@ const Navbar = () => {
                       Account
                     </Link>
                   </li>
+                  <li>
+                    <button onClick={handleLogout} className="logout-button-mobile">
+                      Log out
+                    </button>
+                  </li>
                 </>
               ) : (
+                // For guest users and non-authenticated users
                 <>
                   <li>
                     <Link to="/" onClick={closeMobileMenu} className={isActive('/') ? 'active' : ''}>
@@ -293,16 +307,32 @@ const Navbar = () => {
                       Pricing
                     </Link>
                   </li>
-                  <li>
-                    <a href="#" onClick={handleLoginClick}>
-                      Log in
-                    </a>
-                  </li>
-                  <li>
-                    <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>
-                      Try it Free
-                    </Link>
-                  </li>
+                  {hasGuestAccess ? (
+                    // For guest users, show upgrade option
+                    <li>
+                      <Link to="/pricing" className="try-free-mobile" onClick={closeMobileMenu}>
+                        Upgrade
+                      </Link>
+                    </li>
+                  ) : (
+                    // For non-authenticated users
+                    <>
+                      <li>
+                        <a href="#" onClick={(e) => {
+                          e.preventDefault();
+                          closeMobileMenu();
+                          setShowAuthModal(true);
+                        }}>
+                          Log in
+                        </a>
+                      </li>
+                      <li>
+                        <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>
+                          Try it Free
+                        </Link>
+                      </li>
+                    </>
+                  )}
                 </>
               )}
             </ul>

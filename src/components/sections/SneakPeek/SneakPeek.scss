@@ -32,6 +32,7 @@
       flex-direction: column;
       align-items: flex-start;
       gap: $spacing-3;
+      padding: $spacing-3;
     }
     
     .timer-icon-container {
@@ -78,33 +79,58 @@
     }
     
     h2 {
-      font-family: $font-family-serif;
-      font-size: 2.5rem;
-      font-weight: 400;
+      /* IMPROVED: Using BIZ UDPMincho font with larger size */
+      font-family: $font-family-mincho !important;
+      font-weight: 400 !important;
+      font-size: 4rem !important; /* Much larger */
       color: $text-color;
-      margin-bottom: $spacing-4;
+      margin-bottom: $spacing-6;
+      letter-spacing: 0.02em !important;
+      line-height: 1.2 !important;
+      
+      /* Responsive sizing */
+      @media (min-width: $xl) {
+        font-size: 5rem !important;
+        letter-spacing: 0.025em !important;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 5.5rem !important;
+      }
       
       @media (max-width: $md) {
-        font-size: 2rem;
+        font-size: 3.5rem !important;
+        margin-bottom: $spacing-4;
       }
       
       @media (max-width: $sm) {
-        font-size: 1.5rem;
+        font-size: 2.5rem !important;
+        margin-bottom: $spacing-3;
       }
     }
     
     p {
       color: $text-color-light;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       max-width: 800px;
       margin: 0 auto;
+      line-height: 1.6;
+      
+      @media (min-width: $xl) {
+        font-size: 1.3rem;
+        max-width: 900px;
+      }
+      
+      @media (min-width: $xxl) {
+        font-size: 1.4rem;
+      }
       
       @media (max-width: $md) {
-        font-size: 1rem;
+        font-size: 1.1rem;
       }
       
       @media (max-width: $sm) {
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
     }
   }
@@ -330,41 +356,89 @@
     margin-left: auto;
     margin-right: auto;
     padding: 0 $spacing-4;
+    /* INCREASED bottom padding for the entire section */
+    padding-bottom: $spacing-20;
+    
+    @media (min-width: $xl) {
+      padding-bottom: $spacing-24; /* Even more on large screens */
+    }
+    
+    @media (max-width: $md) {
+      padding-bottom: $spacing-16; /* Still substantial on medium screens */
+    }
+    
+    @media (max-width: $sm) {
+      padding-bottom: $spacing-12; /* Good padding even on mobile */
+    }
     
     h3 {
-      font-family: $font-family-mincho;
-      font-size: 1.5rem;
-      font-weight: 400;
-      margin-bottom: $spacing-2;
+      /* IMPROVED: Using BIZ UDPMincho font */
+      font-family: $font-family-mincho !important;
+      font-size: 2rem !important;
+      font-weight: 400 !important;
+      margin-bottom: $spacing-4;
       color: $text-color;
+      letter-spacing: 0.015em !important;
+      
+      @media (min-width: $xl) {
+        font-size: 2.5rem !important;
+      }
       
       @media (max-width: $md) {
-        font-size: 1.25rem;
+        font-size: 1.75rem !important;
+      }
+      
+      @media (max-width: $sm) {
+        font-size: 1.5rem !important;
+        margin-bottom: $spacing-3;
       }
     }
     
     p {
       color: $text-color-light;
-      font-size: 1rem;
-      margin-bottom: $spacing-6;
-      max-width: 600px;
+      font-size: 1.1rem;
+      margin-bottom: $spacing-8;
+      max-width: 800px;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.6;
+      
+      @media (min-width: $xl) {
+        font-size: 1.2rem;
+        max-width: 800px;
+      }
       
       @media (max-width: $sm) {
-        font-size: 0.9rem;
+        font-size: 1rem;
+        margin-bottom: $spacing-6;
       }
     }
     
     .cta-button {
       @include mix.button-primary;
-      padding: $spacing-2 $spacing-5;
-      font-size: 0.9rem;
-      border-radius: 4px;
+      padding: $spacing-3 $spacing-8;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      /* Added HUGE margin-bottom for the button */
+      margin-bottom: $spacing-16;
+      
+      @media (min-width: $xl) {
+        padding: $spacing-4 $spacing-10;
+        font-size: 1.2rem;
+        margin-bottom: $spacing-32; /* Even bigger on large screens */
+      }
+      
+      @media (max-width: $sm) {
+        padding: $spacing-3 $spacing-6;
+        font-size: 1rem;
+        margin-bottom: $spacing-8; /* Still significant on mobile */
+      }
       
       &:hover {
         background-color: darken($black, 10%);
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
     }
   }

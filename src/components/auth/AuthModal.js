@@ -1,5 +1,6 @@
 // src/components/auth/AuthModal.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
 import './AuthModal.scss';
 
@@ -12,6 +13,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Update login mode when initialMode prop changes
   useEffect(() => {
@@ -84,13 +86,23 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
         }
         
         // Call onSuccess callback with user data and profile
-        onSuccess({
-          user: result.user,
-          profile: userProfile,
-          email,
-          firstName,
-          lastName
-        });
+        if (onSuccess) {
+          onSuccess({
+            user: result.user,
+            profile: userProfile,
+            email,
+            firstName,
+            lastName
+          });
+        }
+        
+        // Close the modal first
+        onClose();
+        
+        // Navigate to profile page after successful authentication
+        setTimeout(() => {
+          navigate('/profile');
+        }, 100);
       } else {
         throw new Error(result.error || 'Authentication failed');
       }
@@ -109,8 +121,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
     localStorage.setItem('guestAccess', 'true');
     localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
     
-    onSuccess(null); // Pass null to indicate guest checkout
-    onClose(); // Make sure to close the modal
+    // Close the modal
+    onClose();
+    
+    // IMPROVED: Navigate to guest-preview page for guest access
+    setTimeout(() => {
+      navigate('/guest-preview');
+    }, 100);
   };
 
   if (!isOpen) return null;

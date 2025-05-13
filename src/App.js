@@ -7,7 +7,7 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
 import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
-import GuestPage from './pages/Guest/GuestPage'; // Import the GuestPage component
+import GuestPage from './pages/Guest/GuestPage'; 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import { onAuthChange } from './firebase/authService';
@@ -40,26 +40,33 @@ function App() {
     return <div className="loading-container">Loading...</div>;
   }
 
-  // Check if user is authenticated or has guest access
-  const isAuthenticated = !!user || hasGuestAccess();
+  // Check if user is authenticated
+  const isAuthenticated = !!user;
+  
+  // Check if user is guest (separate from authenticated)
+  const isGuest = hasGuestAccess() && !user;
 
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={user ? <Navigate to="/profile" /> : <HomePage />} />
+        <Route path="/" element={isAuthenticated ? <Navigate to="/profile" /> : <HomePage />} />
+        
+        {/* Authentication and purchase routes */}
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/signup" element={<Checkout />} />
-        <Route path="/login" element={<Checkout mode="login" />} />
-        <Route path="/pricing" element={<Checkout />} /> {/* Added pricing route */}
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/profile" /> : <Checkout mode="login" />} />
+        <Route path="/pricing" element={<Checkout />} />
         
-        {/* Guest preview route */}
+        {/* Guest preview route - explicit route for guest viewers */}
         <Route path="/guest-preview" element={<GuestPage />} />
         
-        {/* Protected routes with guest access check */}
+        {/* Protected routes with different handling for guests */}
         <Route path="/profile" element={
           isAuthenticated ? (
-            hasGuestAccess() ? <GuestPage /> : <ProfilePage />
+            <ProfilePage />
+          ) : isGuest ? (
+            <GuestPage />
           ) : (
             <Navigate to="/" />
           )
@@ -67,7 +74,9 @@ function App() {
         
         <Route path="/school/:schoolId" element={
           isAuthenticated ? (
-            hasGuestAccess() ? <GuestPage /> : <SchoolProfilePage />
+            <SchoolProfilePage />
+          ) : isGuest ? (
+            <GuestPage />
           ) : (
             <Navigate to="/" />
           )
@@ -92,7 +101,9 @@ function App() {
         {/* Application cheatsheet route */}
         <Route path="/application-cheatsheet" element={
           isAuthenticated ? (
-            hasGuestAccess() ? <GuestPage /> : <ProfilePage />
+            <ProfilePage />
+          ) : isGuest ? (
+            <GuestPage />
           ) : (
             <Navigate to="/" />
           )
