@@ -1,11 +1,14 @@
 // src/components/auth/ProtectedRoute.js
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { onAuthChange } from '../../firebase/authService';
+import AuthModal from './AuthModal';
 
 const ProtectedRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // Check for guest access
@@ -35,18 +38,32 @@ const ProtectedRoute = ({ children }) => {
       const hasGuestAccess = checkGuestAccess();
       
       // User is authenticated if they're logged in OR have guest access
-      setAuthenticated(!!user || hasGuestAccess);
+      const isAuthenticated = !!user || hasGuestAccess;
+      setAuthenticated(isAuthenticated);
+      
+      // If not authenticated, show the auth modal
+      if (!isAuthenticated) {
+        setShowAuthModal(true);
+      }
+      
       setLoading(false);
       
       console.log("Protected route auth check:", { 
         user: !!user, 
-        hasGuestAccess, 
-        authenticated: !!user || hasGuestAccess
+        hasGuestAccess,
+        authenticated: isAuthenticated
       });
     });
 
     return () => unsubscribe();
   }, []);
+
+  // Handle successful authentication
+  const handleAuthSuccess = (userData) => {
+    console.log("Auth success in protected route:", userData);
+    setShowAuthModal(false);
+    setAuthenticated(true);
+  };
 
   if (loading) {
     return (
@@ -63,8 +80,23 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // If not authenticated, redirect to checkout
-  return authenticated ? children : <Navigate to="/checkout" />;
+  // If not authenticated, show auth modal instead of redirecting immediately
+  if (!authenticated) {
+    return (
+      <>
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          initialMode="login"
+        />
+        <Navigate to="/" state={{ from: location }} replace />
+      </>
+    );
+  }
+
+  // If authenticated, render the children
+  return children;
 };
 
 export default ProtectedRoute;

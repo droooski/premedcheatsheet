@@ -45,6 +45,7 @@
   .logo {
     display: flex;
     align-items: center;
+    margin-right: $spacing-6; // Add margin between logo and primary menu
     
     img {
       height: 30px;
@@ -70,6 +71,62 @@
       
       @media (min-width: $xxl) {
         font-size: 1.8rem;
+      }
+    }
+  }
+  
+  // Primary menu (Home, About, Pricing) - NEW
+  .primary-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    
+    @media (max-width: $md) {
+      display: none; // Hide on mobile and small screens
+    }
+    
+    li {
+      margin-right: $spacing-4;
+      
+      @media (min-width: $lg) {
+        margin-right: $spacing-5;
+      }
+      
+      @media (min-width: $xl) {
+        margin-right: $spacing-6;
+      }
+      
+      a {
+        color: $text-color;
+        font-weight: 500;
+        @include mix.transition(color);
+        font-size: 0.95rem;
+        padding: $spacing-2 0;
+        position: relative;
+        
+        @media (min-width: $xl) {
+          font-size: 1.05rem;
+        }
+        
+        &:hover {
+          color: $primary-color;
+        }
+        
+        // Active state with underline
+        &.active {
+          font-weight: 600;
+          
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: $primary-color;
+          }
+        }
       }
     }
   }

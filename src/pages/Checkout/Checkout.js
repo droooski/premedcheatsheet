@@ -55,7 +55,19 @@ const Checkout = () => {
     });
 
     return () => unsubscribe();
-  }, [checkoutStep, orderId]);
+  }, [checkoutStep, orderId, navigate]);
+
+  // Handle URL parameters for authentication mode
+  useEffect(() => {
+    // Parse the query parameter to see if we should show login modal
+    if (mode === 'login') {
+      setShowAuthModal(true);
+      setIsLoginMode(true);
+    } else if (mode === 'signup') {
+      setShowAuthModal(true);
+      setIsLoginMode(false);
+    }
+  }, [mode]);
 
   useEffect(() => {
     // If user has completed payment, redirect to profile page
@@ -541,6 +553,7 @@ const Checkout = () => {
         </div>
       </div>
       
+      {/* Auth Modal - Now we'll handle showing/hiding it directly */}
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}

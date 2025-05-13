@@ -18,6 +18,23 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
     setIsLogin(initialMode === 'login');
   }, [initialMode]);
 
+  // Reset form when modal is opened/closed
+  useEffect(() => {
+    if (isOpen) {
+      // When opening, just reset error
+      setError('');
+    } else {
+      // When closing, reset all fields
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setFirstName('');
+      setLastName('');
+      setError('');
+      setLoading(false);
+    }
+  }, [isOpen]);
+
   // Toggle between login and signup modes
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
@@ -93,6 +110,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
     localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
     
     onSuccess(null); // Pass null to indicate guest checkout
+    onClose(); // Make sure to close the modal
   };
 
   if (!isOpen) return null;
@@ -109,8 +127,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
         </h2>
         <p className="auth-subtitle">
           {isLogin 
-            ? "Sign in to continue to checkout." 
-            : "Create an account to continue to checkout."}
+            ? "Sign in to continue to PremedCheatsheet." 
+            : "Create an account to continue to PremedCheatsheet."}
         </p>
 
         {error && <div className="auth-error">{error}</div>}

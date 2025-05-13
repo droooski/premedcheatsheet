@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import AuthModal from '../../auth/AuthModal';
 import logo from '../../../assets/icons/Icon.png';
 import './Navbar.scss';
 
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const db = getFirestore();
@@ -87,6 +89,24 @@ const Navbar = () => {
     }
   };
 
+  // Function to handle login button click
+  const handleLoginClick = (e) => {
+    e.preventDefault();
+    setShowAuthModal(true);
+    closeMobileMenu();
+  };
+
+  // Handle auth modal success
+  const handleAuthSuccess = (userData) => {
+    console.log("Auth success in navbar:", userData);
+    setShowAuthModal(false);
+    
+    // If we're already on checkout page, refresh the component
+    if (location.pathname.includes('/checkout')) {
+      window.location.reload();
+    }
+  };
+
   // Check if user has active subscription or guest access
   const hasAccess = () => {
     if (userProfile && userProfile.subscriptions && userProfile.subscriptions.length > 0) {
@@ -109,21 +129,45 @@ const Navbar = () => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+  
+  // Check if user is authenticated or has access
+  const isAuthenticated = user || hasAccess();
 
   return (
     <nav className="navbar">
       <div className="container">
         <div className="navbar-content">
-          {/* Left side with logo and brand name */}
+          {/* Left side with logo, brand name, and primary navigation */}
           <div className="navbar-left">
-            <Link to={user ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
+            <Link to={isAuthenticated ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
               <img src={logo} alt="PremedCheatsheet" />
               <span>PremedCheatsheet</span>
             </Link>
+            
+            {/* Primary navigation (Home, About, Pricing) - Only show when NOT logged in */}
+            {!isAuthenticated && (
+              <ul className="primary-menu">
+                <li>
+                  <Link to="/" className={isActive('/') ? 'active' : ''} onClick={closeMobileMenu}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className={isActive('/about') ? 'active' : ''} onClick={closeMobileMenu}>
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/pricing" className={isActive('/pricing') ? 'active' : ''} onClick={closeMobileMenu}>
+                    Pricing
+                  </Link>
+                </li>
+              </ul>
+            )}
           </div>
           
           {/* Center navigation - only shown when logged in */}
-          {(user || hasAccess()) && (
+          {isAuthenticated && (
             <div className="navbar-center">
               <ul className="main-menu">
                 <li>
@@ -161,7 +205,7 @@ const Navbar = () => {
           
           {/* Right side with account or login links */}
           <div className="navbar-right">
-            {user || hasAccess() ? (
+            {isAuthenticated ? (
               <div className="account-menu">
                 <Link to="/account" className="account-button">
                   Account
@@ -169,9 +213,9 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/checkout?mode=login" className="login-link">
+                <a href="#" onClick={handleLoginClick} className="login-link">
                   Log in
-                </Link>
+                </a>
                 <Link to="/signup" className="try-free-button">
                   Try it Free
                 </Link>
@@ -191,7 +235,7 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              {(user || hasAccess()) ? (
+              {isAuthenticated ? (
                 <>
                   <li>
                     <Link 
@@ -245,9 +289,14 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/checkout?mode=login" onClick={closeMobileMenu}>
-                      Log in
+                    <Link to="/pricing" onClick={closeMobileMenu} className={isActive('/pricing') ? 'active' : ''}>
+                      Pricing
                     </Link>
+                  </li>
+                  <li>
+                    <a href="#" onClick={handleLoginClick}>
+                      Log in
+                    </a>
                   </li>
                   <li>
                     <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>
@@ -265,6 +314,14 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>
       )}
+      
+      {/* Auth Modal for login */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode="login"
+      />
     </nav>
   );
 };

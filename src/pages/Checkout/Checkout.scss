@@ -41,7 +41,7 @@
 
 .checkout-header {
   text-align: center;
-  margin-bottom: $spacing-10;
+  margin-bottom: calc($spacing-32 + $spacing-4);
   
   h1 {
     font-family: $font-family-mincho;
@@ -61,7 +61,7 @@
   
   p {
     color: $text-color-light;
-    max-width: 600px;
+    max-width: 1300px;
     margin: 0 auto;
     font-size: 1.125rem;
     line-height: 1.6;
@@ -79,7 +79,7 @@
 .plan-tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: $spacing-6;
+  margin-bottom: $spacing-12;
   
   .plan-tab {
     padding: $spacing-3 $spacing-6;
@@ -132,7 +132,7 @@
 
 .price-card {
   background-color: $white;
-  border-radius: 8px;
+  border-radius: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: $spacing-8;
   
@@ -239,7 +239,7 @@
     flex: 1;
     padding: $spacing-2 $spacing-3;
     border: 1px solid $gray-300;
-    border-radius: 4px 0 0 4px;
+    border-radius: 8px 0 0 8px;
     font-size: 0.875rem;
     
     &:focus {
@@ -257,7 +257,7 @@
     background-color: $primary-color;
     color: white;
     border: none;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 8px 8px 0;
     cursor: pointer;
     font-weight: 500;
     
@@ -279,7 +279,7 @@
   background-color: #1A3A34;
   color: $white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   padding: $spacing-4;
   font-size: 1rem;
   font-weight: 600;

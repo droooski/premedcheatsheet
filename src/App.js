@@ -37,7 +37,9 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={user ? <Navigate to="/profile" /> : <HomePage />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/signup" element={user ? <Navigate to="/profile" /> : <Checkout />} />
+        <Route path="/signup" element={<Checkout />} />
+        <Route path="/login" element={<Checkout mode="login" />} />
+        <Route path="/pricing" element={<Checkout />} /> {/* Added pricing route */}
         
         {/* Protected routes */}
         <Route path="/profile" element={

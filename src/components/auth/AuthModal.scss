@@ -12,7 +12,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; // Higher z-index to be above navbar
+  padding: 0 $spacing-4;
 }
 
 .auth-modal {
