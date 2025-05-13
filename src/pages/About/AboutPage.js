@@ -180,6 +180,8 @@ const AboutPage = () => {
               )}
             </div>
           </div>
+
+          <ApplicantProfileSubmission />
         </div>
       </div>
       

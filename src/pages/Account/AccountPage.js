@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
+import ApplicantProfileSubmission from '../../components/ApplicantProfileSubmission/ApplicantProfileSubmission';
 import Footer from '../../components/sections/Footer/Footer';
 import { onAuthChange, logoutUser, getUserProfile } from '../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
