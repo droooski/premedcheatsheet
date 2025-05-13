@@ -1,0 +1,332 @@
+/* src/pages/About/AboutPage.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.about-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+  
+  .about-content {
+    flex: 1;
+    padding: $spacing-12 0;
+    
+    @media (max-width: $md) {
+      padding: $spacing-8 0;
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-4 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 $spacing-4;
+      
+      @media (max-width: $sm) {
+        padding: 0 $spacing-3;
+      }
+    }
+  }
+  
+  .about-header {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    font-size: 4.5rem !important;
+    color: $text-color;
+    margin-bottom: $spacing-8;
+    letter-spacing: 0.02em !important;
+    line-height: 1.2 !important;
+    text-align: left;
+    
+    @media (min-width: $xl) {
+      font-size: 5rem !important;
+      letter-spacing: 0.025em !important;
+    }
+    
+    @media (min-width: $xxl) {
+      font-size: 5.5rem !important;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 3.5rem !important;
+      margin-bottom: $spacing-6;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 2.5rem !important;
+      margin-bottom: $spacing-4;
+    }
+  }
+  
+  .about-paragraph {
+    font-size: 1.3rem;
+    line-height: 1.7;
+    color: $text-color;
+    margin-bottom: $spacing-8;
+    max-width: 900px;
+    
+    /* Responsive text sizes */
+    @media (min-width: $xl) {
+      font-size: 1.4rem;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 1.2rem;
+      margin-bottom: $spacing-6;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
+      margin-bottom: $spacing-5;
+      line-height: 1.6;
+    }
+  }
+  
+  /* Contact section */
+  .contact-section {
+    margin-top: $spacing-16;
+    margin-bottom: $spacing-16;
+    
+    @media (max-width: $md) {
+      margin-top: $spacing-12;
+      margin-bottom: $spacing-12;
+    }
+    
+    @media (max-width: $sm) {
+      margin-top: $spacing-8;
+      margin-bottom: $spacing-8;
+    }
+  }
+  
+  .contact-header {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    font-size: 3rem !important;
+    color: $text-color;
+    margin-bottom: $spacing-6;
+    letter-spacing: 0.02em !important;
+    line-height: 1.2 !important;
+    text-align: left;
+    
+    @media (max-width: $md) {
+      font-size: 2.5rem !important;
+      margin-bottom: $spacing-4;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 2rem !important;
+      margin-bottom: $spacing-3;
+    }
+  }
+  
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+    
+    .contact-link {
+      display: inline-block;
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: $text-color;
+      text-decoration: underline;
+      
+      @media (max-width: $md) {
+        font-size: 1.2rem;
+      }
+      
+      @media (max-width: $sm) {
+        font-size: 1.1rem;
+      }
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+  
+  /* Profile submission section */
+  .profile-submission {
+    margin-top: $spacing-20;
+    
+    @media (max-width: $md) {
+      margin-top: $spacing-16;
+    }
+    
+    @media (max-width: $sm) {
+      margin-top: $spacing-12;
+    }
+  }
+  
+  .submission-header {
+    font-family: $font-family-mincho !important;
+    font-weight: 400 !important;
+    font-size: 3rem !important;
+    color: $text-color;
+    margin-bottom: $spacing-6;
+    letter-spacing: 0.02em !important;
+    line-height: 1.2 !important;
+    text-align: left;
+    
+    @media (max-width: $md) {
+      font-size: 2.5rem !important;
+      margin-bottom: $spacing-4;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 2rem !important;
+      margin-bottom: $spacing-3;
+    }
+  }
+  
+  .submission-description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: $text-color;
+    margin-bottom: $spacing-6;
+    max-width: 800px;
+    
+    @media (max-width: $md) {
+      font-size: 1.1rem;
+      margin-bottom: $spacing-5;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
+      margin-bottom: $spacing-4;
+    }
+  }
+  
+  .payment-info {
+    background-color: rgba($primary-color, 0.05);
+    border-left: 3px solid $primary-color;
+    padding: $spacing-4;
+    margin-bottom: $spacing-6;
+    max-width: 800px;
+    
+    p {
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: $text-color;
+      margin: 0;
+      
+      @media (max-width: $sm) {
+        font-size: 0.95rem;
+      }
+    }
+  }
+  
+  /* Contact form */
+  .contact-form {
+    background-color: $white;
+    border-radius: 8px;
+    padding: $spacing-8;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    margin-bottom: $spacing-12;
+    
+    @media (max-width: $md) {
+      padding: $spacing-6;
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-4;
+    }
+    
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: $spacing-6;
+      text-align: center;
+      
+      @media (max-width: $sm) {
+        font-size: 1.3rem;
+        margin-bottom: $spacing-4;
+      }
+    }
+    
+    .form-group {
+      margin-bottom: $spacing-6;
+      
+      @media (max-width: $sm) {
+        margin-bottom: $spacing-4;
+      }
+      
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: $spacing-2;
+        font-size: 1rem;
+        
+        .required {
+          color: #e53e3e;
+          margin-left: $spacing-1;
+        }
+      }
+      
+      input, 
+      textarea {
+        width: 100%;
+        padding: $spacing-3;
+        border: 1px solid $gray-300;
+        border-radius: 4px;
+        font-size: 1rem;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
+      }
+      
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+    }
+    
+    .name-inputs {
+      display: flex;
+      gap: $spacing-4;
+      
+      @media (max-width: $sm) {
+        flex-direction: column;
+        gap: $spacing-4;
+      }
+      
+      .form-group {
+        flex: 1;
+      }
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: $spacing-6;
+      
+      input[type="checkbox"] {
+        width: auto;
+        margin-right: $spacing-2;
+      }
+    }
+    
+    .submit-button {
+      background-color: $black;
+      color: $white;
+      border: none;
+      border-radius: 4px;
+      padding: $spacing-3 $spacing-8;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: block;
+      
+      &:hover {
+        background-color: darken($black, 10%);
+      }
+    }
+  }
+}

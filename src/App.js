@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.js - updated to include the new About route
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
@@ -7,7 +7,8 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
 import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
-import GuestPage from './pages/Guest/GuestPage'; 
+import GuestPage from './pages/Guest/GuestPage';
+import AboutPage from './pages/About/AboutPage'; // Import the new About page
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import { onAuthChange } from './firebase/authService';
@@ -58,6 +59,9 @@ function App() {
         <Route path="/login" element={isAuthenticated ? <Navigate to="/profile" /> : <Checkout mode="login" />} />
         <Route path="/pricing" element={<Checkout />} />
         
+        {/* About page route */}
+        <Route path="/about" element={<AboutPage />} />
+        
         {/* Guest preview route - explicit route for guest viewers */}
         <Route path="/guest-preview" element={<GuestPage />} />
         
@@ -93,8 +97,7 @@ function App() {
         } />
         
         {/* Common routes - redirect based on auth status */}
-        <Route path="/about" element={<HomePage />} />
-        <Route path="/contact" element={<HomePage />} />
+        <Route path="/contact" element={<AboutPage />} />
         <Route path="/privacy" element={<HomePage />} />
         <Route path="/terms" element={<HomePage />} />
         
