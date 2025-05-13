@@ -1,9 +1,11 @@
-// src/pages/About/AboutPage.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import './AboutPage.scss';
+
+// Make sure BIZ UDPMincho font is properly imported
+// Note: This font should already be imported in public/index.html or src/styles/main.scss
 
 const AboutPage = () => {
   const [formData, setFormData] = useState({
@@ -57,21 +59,23 @@ const AboutPage = () => {
         <div className="container">
           <h1 className="about-header">About</h1>
           
-          <p className="about-paragraph">
-            We have gone through the pre-med process and understand how hard it is to know what extra-curriculars are worth pursuing, how many hours of shadowing are needed, and how much focus should be put on academics.
-          </p>
-          
-          <p className="about-paragraph">
-            That's why we created the Premed Cheatsheet.
-          </p>
-          
-          <p className="about-paragraph">
-            The Cheatsheet is your big bro who has gone through the process. It's a role model that shows the many flavors of students that make up a medical school.
-          </p>
-          
-          <p className="about-paragraph">
-            We hope the Premed Cheatsheet can help many of you on the journey towards becoming a physician.
-          </p>
+          <div className="about-text-container">
+            <p className="about-paragraph">
+              We have gone through the pre-med process and understand how hard it is to know what extra-curriculars are worth pursuing, how many hours of shadowing are needed, and how much focus should be put on academics.
+            </p>
+            
+            <p className="about-paragraph">
+              That's why we created the Premed Cheatsheet.
+            </p>
+            
+            <p className="about-paragraph">
+              The Cheatsheet is your big bro who has gone through the process. It's a role model that shows the many flavors of students that make up a medical school.
+            </p>
+            
+            <p className="about-paragraph">
+              We hope the Premed Cheatsheet can help many of you on the journey towards becoming a physician.
+            </p>
+          </div>
           
           <div className="contact-section">
             <h2 className="contact-header">CONTACT</h2>
