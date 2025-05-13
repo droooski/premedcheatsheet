@@ -118,9 +118,9 @@
     @include mix.button-primary;
     margin-top: clamp(#{$spacing-6}, 4vw, #{$spacing-12});
     margin-bottom: $spacing-12; /* Space between button and image */
-    padding: $spacing-3 $spacing-8;
+    padding: $spacing-3 $spacing-6;
     font-weight: 500;
-    font-size: 0.4rem;
+    font-size: 0.8rem;
     border-radius: 5px;
     
     @media (min-width: $xl) {
