@@ -1,0 +1,218 @@
+// src/components/layout/GuestNavbar/GuestNavbar.scss
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
+
+.guest-navbar {
+  background-color: $background-color;
+  border-bottom: 0.5px solid $black;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 $spacing-4;
+    
+    @media (min-width: $lg) {
+      padding: 0 $spacing-8;
+    }
+    
+    @media (min-width: $xl) {
+      padding: 0 $spacing-12;
+    }
+    
+    @media (min-width: $xxl) {
+      padding: 0 $spacing-16;
+    }
+  }
+  
+  .navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-3 0;
+    position: relative;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    
+    .logo-icon {
+      font-size: 2rem;
+      margin-right: $spacing-2;
+    }
+    
+    .logo-text {
+      font-family: $font-family-serif;
+      font-weight: 500;
+      font-size: 1.7rem;
+      color: $text-color;
+    }
+  }
+  
+  .primary-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    
+    @media (max-width: $md) {
+      display: none;
+    }
+    
+    li {
+      margin-right: $spacing-8;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+      
+      a {
+        color: $text-color;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: $spacing-2 0;
+        position: relative;
+        text-decoration: none;
+        
+        &:hover {
+          color: $primary-color;
+        }
+        
+        &.active {
+          font-weight: 600;
+          
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: $primary-color;
+          }
+        }
+      }
+    }
+    
+    .try-free-button {
+      @include mix.button-primary;
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      margin-left: $spacing-8;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: darken($black, 10%);
+        transform: translateY(-1px);
+      }
+    }
+  }
+  
+  .mobile-menu-toggle {
+    display: none;
+    cursor: pointer;
+    z-index: 1000;
+    
+    @media (max-width: $md) {
+      display: block;
+    }
+    
+    .hamburger {
+      width: 24px;
+      height: 18px;
+      position: relative;
+      
+      span {
+        display: block;
+        position: absolute;
+        height: 2px;
+        width: 100%;
+        background-color: $text-color;
+        border-radius: 2px;
+        opacity: 1;
+        left: 0;
+        transition: 0.25s ease-in-out;
+        
+        &:nth-child(1) {
+          top: 0px;
+        }
+        
+        &:nth-child(2) {
+          top: 8px;
+        }
+        
+        &:nth-child(3) {
+          top: 16px;
+        }
+      }
+    }
+  }
+  
+  .mobile-menu {
+    display: none;
+    
+    &.open {
+      display: block;
+    }
+    
+    @media (max-width: $md) {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: $white;
+      z-index: 999;
+      padding: $spacing-16 $spacing-4 $spacing-4;
+      box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+      
+      .mobile-menu-items {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-6;
+        
+        a {
+          color: $text-color;
+          font-weight: 500;
+          font-size: 1.1rem;
+          text-decoration: none;
+          
+          &:hover {
+            color: $primary-color;
+          }
+        }
+        
+        .try-free-button {
+          @include mix.button-primary;
+          display: inline-block;
+          padding: $spacing-2 $spacing-4;
+          font-size: 0.95rem;
+          width: 100%;
+          text-align: center;
+          margin-top: $spacing-4;
+          cursor: pointer;
+          
+          &:hover {
+            background-color: darken($black, 10%);
+          }
+        }
+      }
+    }
+  }
+  
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  }
+}

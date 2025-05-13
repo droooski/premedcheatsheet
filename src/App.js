@@ -7,10 +7,19 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
 import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
+import GuestPage from './pages/Guest/GuestPage'; // Import the GuestPage component
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import { onAuthChange } from './firebase/authService';
 import './styles/main.scss';
+
+// Function to check if user has guest access
+const hasGuestAccess = () => {
+  const guestAccess = localStorage.getItem('guestAccess');
+  const guestExpiry = localStorage.getItem('guestAccessExpiry');
+  
+  return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
+};
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,6 +40,9 @@ function App() {
     return <div className="loading-container">Loading...</div>;
   }
 
+  // Check if user is authenticated or has guest access
+  const isAuthenticated = !!user || hasGuestAccess();
+
   return (
     <Router>
       <Routes>
@@ -41,22 +53,30 @@ function App() {
         <Route path="/login" element={<Checkout mode="login" />} />
         <Route path="/pricing" element={<Checkout />} /> {/* Added pricing route */}
         
-        {/* Protected routes */}
+        {/* Guest preview route */}
+        <Route path="/guest-preview" element={<GuestPage />} />
+        
+        {/* Protected routes with guest access check */}
         <Route path="/profile" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
+          isAuthenticated ? (
+            hasGuestAccess() ? <GuestPage /> : <ProfilePage />
+          ) : (
+            <Navigate to="/" />
+          )
         } />
+        
         <Route path="/school/:schoolId" element={
-          <ProtectedRoute>
-            <SchoolProfilePage />
-          </ProtectedRoute>
+          isAuthenticated ? (
+            hasGuestAccess() ? <GuestPage /> : <SchoolProfilePage />
+          ) : (
+            <Navigate to="/" />
+          )
         } />
+        
         <Route path="/account" element={
-          <ProtectedRoute>
-            <AccountPage />
-          </ProtectedRoute>
+          user ? <AccountPage /> : <Navigate to="/" />
         } />
+        
         <Route path="/admin" element={
           <AdminRoute>
             <AdminPanel />
@@ -71,9 +91,11 @@ function App() {
         
         {/* Application cheatsheet route */}
         <Route path="/application-cheatsheet" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
+          isAuthenticated ? (
+            hasGuestAccess() ? <GuestPage /> : <ProfilePage />
+          ) : (
+            <Navigate to="/" />
+          )
         } />
         
         {/* Fallback route */}
