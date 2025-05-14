@@ -1,4 +1,4 @@
-// src/App.js - updated to include the new About route
+// src/App.js with payment verification added
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
@@ -8,9 +8,9 @@ import SchoolProfilePage from './pages/SchoolProfile/SchoolProfile';
 import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
 import GuestPage from './pages/Guest/GuestPage';
-import AboutPage from './pages/About/AboutPage'; // Import the new About page
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import AboutPage from './pages/About/AboutPage';
 import AdminRoute from './components/auth/AdminRoute';
+import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute'; // Add this import
 import { onAuthChange } from './firebase/authService';
 import './styles/main.scss';
 
@@ -65,10 +65,12 @@ function App() {
         {/* Guest preview route - explicit route for guest viewers */}
         <Route path="/guest-preview" element={<GuestPage />} />
         
-        {/* Protected routes with different handling for guests */}
+        {/* UPDATED: Protected routes with payment verification */}
         <Route path="/profile" element={
           isAuthenticated ? (
-            <ProfilePage />
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <ProfilePage />
+            </PaymentVerifiedRoute>
           ) : isGuest ? (
             <GuestPage />
           ) : (
@@ -78,7 +80,9 @@ function App() {
         
         <Route path="/school/:schoolId" element={
           isAuthenticated ? (
-            <SchoolProfilePage />
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <SchoolProfilePage />
+            </PaymentVerifiedRoute>
           ) : isGuest ? (
             <GuestPage />
           ) : (
@@ -104,7 +108,9 @@ function App() {
         {/* Application cheatsheet route */}
         <Route path="/application-cheatsheet" element={
           isAuthenticated ? (
-            <ProfilePage />
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <ProfilePage />
+            </PaymentVerifiedRoute>
           ) : isGuest ? (
             <GuestPage />
           ) : (

@@ -48,6 +48,11 @@ const Checkout = () => {
     type: 'monthly', // or 'yearly'
     price: 5.99     // Default price
   });
+  const [expandedFaq, setExpandedFaq] = useState(null);
+
+  const toggleFaq = (index) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
+  };
   
   const navigate = useNavigate();
 
@@ -477,42 +482,62 @@ useEffect(() => {
   };
 
   // Process payment
-  const handleProcessPayment = async () => {
-    setLoading(true);
-    setError('');
+const handleProcessPayment = async () => {
+  setLoading(true);
+  setError('');
 
-    try {
-      // Validate user authentication
-      if (!user || !user.uid) {
-        throw new Error('You must be logged in to complete this purchase');
-      }
-      
-      // Check if purchase is free with 100% discount coupon
-      if (isFreeWithCoupon()) {
-        return processFreePurchase();
-      }
-      
-      // In a real production environment, this is where you would:
-      // 1. Call your backend API to create a payment intent
-      // 2. Confirm the payment with the paymentMethodId from cardInfo.id
-      
-      // For development/demo, simulate a successful payment
-      console.log("Processing payment with payment method:", cardInfo.id);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulate a successful payment response
-      const simulatedOrderId = `order_${Math.random().toString(36).substring(2, 10)}`;
-      setOrderId(simulatedOrderId);
-      changeCheckoutStep('confirmation');
-    } catch (error) {
-      console.error("Payment processing error:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+  try {
+    // Validate user authentication
+    if (!user || !user.uid) {
+      throw new Error('You must be logged in to complete this purchase');
     }
-  };
+    
+    // Check if purchase is free with 100% discount coupon
+    if (isFreeWithCoupon()) {
+      return processFreePurchase();
+    }
+    
+    // Process the payment first before granting access
+    const paymentResult = await processPayment(
+      cardInfo,
+      user.uid,
+      {
+        amount: parseFloat(getFinalPrice()),
+        plan: selectedPlan,
+        discount: discount,
+        couponCode: couponCode
+      }
+    );
+    
+    if (!paymentResult.success) {
+      throw new Error(paymentResult.error || 'Payment processing failed');
+    }
+    
+    // Payment successful, now update user's subscription status in Firestore
+      const db = getFirestore();
+      const userRef = doc(db, "users", user.uid);
+
+      await updateDoc(userRef, {
+        paymentVerified: true,
+        purchaseDate: new Date().toISOString(),
+        purchasedPlan: selectedPlan,
+        purchaseAmount: parseFloat(getFinalPrice())
+      });
+
+    // Set session storage for immediate access
+    sessionStorage.setItem('paymentVerified', 'true');
+
+    // Set the order ID and move to confirmation page
+    setOrderId(paymentResult.orderId);
+    changeCheckoutStep('confirmation');
+    
+  } catch (error) {
+    console.error("Payment processing error:", error);
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Get plan display name
   const getPlanDisplayName = () => {
@@ -584,21 +609,58 @@ useEffect(() => {
         
         <PricingCards onSelectPlan={handleSelectPlan} />
         
-        <div className="faq-section">
-          <h3>Frequently Asked Questions</h3>
-          <div className="faq-item">
+      <div className="faq-section">
+        <h3>Frequently Asked Questions</h3>
+        
+        {/* Replace these static faq-items with interactive dropdowns */}
+        <div className="faq-item">
+          <div className="faq-question" onClick={() => toggleFaq(0)}>
             <h4>Can I cancel my subscription?</h4>
+              <div className="arrow-icon">
+                <svg 
+                  width="14" 
+                  height="8" 
+                  viewBox="0 0 14 8" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+          </div>
+          <div className={`faq-answer ${expandedFaq === 0 ? 'expanded' : ''}`}>
             <p>Yes, you can cancel at any time. If you cancel within the first 7 days, you'll receive a full refund.</p>
           </div>
-          <div className="faq-item">
+        </div>
+        
+        <div className="faq-item">
+          <div className="faq-question" onClick={() => toggleFaq(1)}>
             <h4>How frequently is new content added?</h4>
+            <div className="arrow-icon">
+              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div className={`faq-answer ${expandedFaq === 1 ? 'expanded' : ''}`}>
             <p>We add new successful applicant profiles every month, with major updates at the beginning of each application cycle.</p>
           </div>
-          <div className="faq-item">
+        </div>
+        
+        <div className="faq-item">
+          <div className="faq-question" onClick={() => toggleFaq(2)}>
             <h4>Will this help me if I'm a non-traditional applicant?</h4>
+            <div className="arrow-icon">
+              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div className={`faq-answer ${expandedFaq === 2 ? 'expanded' : ''}`}>
             <p>Absolutely! We have profiles from all types of applicants, including many non-traditional success stories.</p>
           </div>
         </div>
+      </div>
       </>
     );
   };
