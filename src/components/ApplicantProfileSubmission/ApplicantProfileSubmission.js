@@ -15,12 +15,12 @@ const ApplicantProfileSubmission = () => {
         <p>We are currently paying $2 for your profile and any profiles you refer.</p>
       </div>
       
-      <p className="form-instruction">Please fill out the form below to submit your profile.</p>
+      <p className="form-instruction">Fill out the form below.</p>
       
       <div className="google-form-container">
         {/* Replace the URL below with your actual Google Form embed URL */}
         <iframe 
-          src="https://docs.google.com/forms/d/e/1FAIpQLSfYbgXGX5xF9MH0cDFXQNLZE7OW6h0DHzf7QMW51aJBQEGW7A/viewform?embedded=true" 
+          src="https://docs.google.com/forms/d/e/1FAIpQLScYaGZ6VoTX57f5k6F5edMdNXZFaiWTmHUnlsV4Y4TAiCfp7Q/viewform?pli=1&embedded=true" 
           frameBorder="0" 
           marginHeight="0" 
           marginWidth="0"
