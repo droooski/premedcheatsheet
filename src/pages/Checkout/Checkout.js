@@ -1,4 +1,4 @@
-// src/pages/Checkout/Checkout.js - Improved to enforce payment
+// src/pages/Checkout/Checkout.js - Enhanced version with better back navigation and discount handling
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -22,7 +22,8 @@ const Checkout = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [user, setUser] = useState(null);
-  const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'confirmation'
+  const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'review', 'confirmation'
+  const [previousStep, setPreviousStep] = useState('plan'); // Track previous step for back navigation
   const [cardInfo, setCardInfo] = useState({
     number: '',
     expiry: '',
@@ -41,6 +42,10 @@ const Checkout = () => {
   const [showAuthModal, setShowAuthModal] = useState(mode === 'login');
   const [isLoginMode, setIsLoginMode] = useState(mode === 'login');
   const [useStripe, setUseStripe] = useState(true); // Default to using Stripe
+  const [subscription, setSubscription] = useState({
+    type: 'monthly', // or 'yearly'
+    price: 5.99     // Default price
+  });
   
   const navigate = useNavigate();
 
@@ -73,6 +78,42 @@ const Checkout = () => {
     }
   }, [mode]);
 
+  // Set subscription details based on selected plan
+  useEffect(() => {
+    // Set pricing based on the plan
+    switch(selectedPlan) {
+      case 'cheatsheet':
+        setSubscription({
+          type: 'monthly',
+          price: 5.99
+        });
+        break;
+      case 'cheatsheet-plus':
+        setSubscription({
+          type: 'monthly',
+          price: 9.99
+        });
+        break;
+      case 'application':
+        setSubscription({
+          type: 'onetime',
+          price: 19.99
+        });
+        break;
+      case 'application-plus':
+        setSubscription({
+          type: 'onetime',
+          price: 34.99
+        });
+        break;
+      default:
+        setSubscription({
+          type: 'monthly',
+          price: 5.99
+        });
+    }
+  }, [selectedPlan]);
+
   // Redirect to profile after confirmation
   useEffect(() => {
     if (checkoutStep === 'confirmation' && orderId) {
@@ -83,6 +124,29 @@ const Checkout = () => {
       return () => clearTimeout(timer);
     }
   }, [checkoutStep, orderId, navigate]);
+
+  // Change checkout step and track previous step
+  const changeCheckoutStep = (newStep) => {
+    setPreviousStep(checkoutStep);
+    setCheckoutStep(newStep);
+  };
+
+  // Go back to previous step
+  const handleGoBack = () => {
+    // If we're on payment, go back to plan selection
+    if (checkoutStep === 'payment') {
+      changeCheckoutStep('plan');
+    }
+    // If we're on review, go back to payment
+    else if (checkoutStep === 'review') {
+      changeCheckoutStep('payment');
+    }
+    // If we're on plan and user presses back, prevent page navigation
+    else if (checkoutStep === 'plan') {
+      // Stay on current page, maybe show a message
+      console.log('Already at the first step');
+    }
+  };
 
   // Handle plan selection
   const handleSelectPlan = (plan, couponInfo = {}) => {
@@ -102,9 +166,13 @@ const Checkout = () => {
     
     // Must be logged in to proceed to payment
     if (user) {
+      // Set previous step first
+      setPreviousStep('plan');
       setCheckoutStep('payment');
     } else {
       setShowAuthModal(true);
+      // FIXED: Set login mode to false (signup) when selecting a plan
+      setIsLoginMode(false);
     }
   };
 
@@ -127,20 +195,16 @@ const Checkout = () => {
     }
   };
 
+  // NEW: Remove applied coupon
+  const removeCoupon = () => {
+    setCouponApplied(false);
+    setCouponCode('');
+    setDiscount(0);
+  };
+
   // Calculate prices including any discounts
   const getBasePrice = () => {
-    switch (selectedPlan) {
-      case 'cheatsheet':
-        return 14.99;
-      case 'cheatsheet-plus':
-        return 29.99;
-      case 'application':
-        return 19.99;
-      case 'application-plus':
-        return 34.99;
-      default:
-        return 14.99;
-    }
+    return subscription.price;
   };
 
   const getDiscountAmount = () => {
@@ -191,7 +255,7 @@ const Checkout = () => {
 
       if (result.success) {
         setOrderId(result.orderId);
-        setCheckoutStep('confirmation');
+        changeCheckoutStep('confirmation');
       } else {
         throw new Error(result.error || 'Error processing your free access');
       }
@@ -205,27 +269,80 @@ const Checkout = () => {
 
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
-    console.log("Auth success:", userData);
+    console.log("Auth success in checkout flow:", userData);
+    
+    // Update user state with the authenticated user
     setUser(userData?.user || null);
+    
+    // Close auth modal
     setShowAuthModal(false);
     
-    // Update email field if available
-    if (userData?.user?.email) {
-      setCardInfo(prev => ({
-        ...prev,
-        email: userData.user.email
-      }));
+    // FIXED: Always proceed to payment step after successful authentication
+    if (userData?.isGuest) {
+      // Handle guest access
+      navigate('/guest-preview');
+    } else if (userData?.user) {
+      // Update email field if available
+      if (userData.user.email) {
+        setCardInfo(prev => ({
+          ...prev,
+          email: userData.user.email
+        }));
+      }
+      
+      // Check if purchase is free with coupon
+      if (isFreeWithCoupon()) {
+        // Process the free purchase, but ensure we have a valid user first
+        if (userData.user.uid) {
+          processFreePurchase();
+        }
+      } else {
+        // CRITICAL FIX: Proceed to payment step
+        console.log("Setting checkout step to payment after auth success");
+        changeCheckoutStep('payment');
+      }
+    }
+  };
+
+  // Handle continue to review
+  const continueToReview = (e) => {
+    e.preventDefault();
+    
+    // Validate card details
+    let isValid = true;
+    let errorMessage = '';
+    
+    const cardNumber = cardInfo.number.replace(/\s/g, '');
+    if (!cardNumber || cardNumber.length < 15 || cardNumber.length > 16) {
+      isValid = false;
+      errorMessage = 'Please enter a valid card number';
     }
     
-    // Check if purchase is free with coupon
-    if (isFreeWithCoupon()) {
-      // Process the free purchase, but ensure we have a valid user first
-      if (userData?.user?.uid) {
-        processFreePurchase();
-      }
-    } else {
-      setCheckoutStep('payment');
+    if (!cardInfo.expiry || !cardInfo.expiry.includes('/')) {
+      isValid = false;
+      errorMessage = 'Please enter a valid expiration date (MM/YY)';
     }
+    
+    if (!cardInfo.cvc || cardInfo.cvc.length < 3) {
+      isValid = false;
+      errorMessage = 'Please enter a valid CVC code';
+    }
+    
+    if (!cardInfo.name || cardInfo.name.trim().length < 3) {
+      isValid = false;
+      errorMessage = 'Please enter the cardholder name';
+    }
+    
+    if (!isValid) {
+      setError(errorMessage);
+      return;
+    }
+    
+    // Clear any previous errors
+    setError('');
+    
+    // Move to review step
+    changeCheckoutStep('review');
   };
 
   // Handle card input changes
@@ -282,41 +399,6 @@ const Checkout = () => {
         return processFreePurchase();
       }
       
-      // Card validation for paid purchases
-      const cardNumber = cardInfo.number.replace(/\s/g, '');
-      if (!cardNumber || cardNumber.length < 15 || cardNumber.length > 16) {
-        throw new Error('Please enter a valid card number');
-      }
-      
-      if (!cardInfo.expiry || !cardInfo.expiry.includes('/')) {
-        throw new Error('Please enter a valid expiration date (MM/YY)');
-      }
-      
-      const [expMonth, expYear] = cardInfo.expiry.split('/');
-      if (!expMonth || !expYear || expMonth.length !== 2 || expYear.length !== 2) {
-        throw new Error('Please enter a valid expiration date in MM/YY format');
-      }
-      
-      // Check expiration date validity
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear() % 100; // Get last 2 digits
-      const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
-      
-      if (
-        parseInt(expYear, 10) < currentYear || 
-        (parseInt(expYear, 10) === currentYear && parseInt(expMonth, 10) < currentMonth)
-      ) {
-        throw new Error('Your card has expired');
-      }
-      
-      if (!cardInfo.cvc || cardInfo.cvc.length < 3) {
-        throw new Error('Please enter a valid CVC code');
-      }
-      
-      if (!cardInfo.name || cardInfo.name.trim().length < 3) {
-        throw new Error('Please enter the cardholder name');
-      }
-
       // Process the payment using the appropriate method
       const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
       let result;
@@ -348,7 +430,7 @@ const Checkout = () => {
 
       if (result.success) {
         setOrderId(result.orderId);
-        setCheckoutStep('confirmation');
+        changeCheckoutStep('confirmation');
       } else {
         throw new Error(result.error || 'Payment processing failed. Please check your card information and try again.');
       }
@@ -375,6 +457,17 @@ const Checkout = () => {
     }
   };
 
+  // NEW: Get text for subscription period
+  const getSubscriptionPeriodText = () => {
+    if (subscription.type === 'monthly') {
+      return 'every month';
+    } else if (subscription.type === 'yearly') {
+      return 'per year';
+    } else {
+      return 'one time';
+    }
+  };
+
   // Render different steps based on checkout progress
   const renderCheckoutStep = () => {
     switch (checkoutStep) {
@@ -382,6 +475,8 @@ const Checkout = () => {
         return renderPlanSelection();
       case 'payment':
         return renderPaymentForm();
+      case 'review':
+        return renderReviewStep();
       case 'confirmation':
         return renderConfirmation();
       default:
@@ -396,7 +491,7 @@ const Checkout = () => {
       // If plan is pre-selected, move to payment step
       if (user) {
         if (checkoutStep === 'plan') {
-          setCheckoutStep('payment');
+          changeCheckoutStep('payment');
         }
         return renderPaymentForm();
       } else {
@@ -461,135 +556,286 @@ const Checkout = () => {
     return (
       <div className="payment-form-container">
         <div className="payment-header">
-          <h2>Complete your purchase</h2>
-          <p>You're almost done! Just enter your payment details below.</p>
+          <h2>Payment & Discounts</h2>
+          <p>Enter your payment details to continue</p>
+        </div>
+        
+        {/* Back button - NEW */}
+        <div className="navigation-controls">
+          <button className="back-button" onClick={handleGoBack}>
+            ← Back
+          </button>
         </div>
         
         <div className="order-summary">
-          <h3>Order Summary</h3>
+          <h3>Subscription Summary</h3>
           <div className="order-details">
-            <div className="order-item">
-              <span>{getPlanDisplayName()}</span>
-              <span>${getBasePrice().toFixed(2)}</span>
+            <div className="plan-name">
+              <h4>{getPlanDisplayName()}</h4>
+              <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
+              <p className="plan-description">New full applicant profile added every couple days.</p>
             </div>
             
-            {!showCouponInput ? (
-              <div className="coupon-prompt" onClick={toggleCouponInput}>
-                Have a coupon code? Enter it here
-              </div>
-            ) : (
-              <div className="coupon-input-group">
-                <input
-                  type="text"
-                  placeholder="Enter coupon code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  disabled={couponApplied}
-                />
-                <button 
-                  className="apply-coupon-btn"
-                  onClick={applyCoupon}
-                  disabled={couponApplied}
-                >
-                  {couponApplied ? 'Applied' : 'Apply'}
-                </button>
-              </div>
-            )}
+            {/* GIFT OR DISCOUNT CODE SECTION */}
+            <div className="discount-section">
+              <h4>GIFT OR DISCOUNT CODE</h4>
+              
+              {!couponApplied ? (
+                <div className="coupon-input-group">
+                  <input
+                    type="text"
+                    placeholder="Gift or Discount Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                  />
+                  <button 
+                    className="apply-coupon-btn"
+                    onClick={applyCoupon}
+                  >
+                    APPLY
+                  </button>
+                </div>
+              ) : (
+                <div className="applied-discount">
+                  <div className="discount-info">
+                    <span>Discount ({discount}% off)</span>
+                    <span>-${getDiscountAmount().toFixed(2)}</span>
+                  </div>
+                  <button className="remove-discount-btn" onClick={removeCoupon}>
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
             
-            {couponApplied && (
-              <div className="order-item discount">
-                <span>Discount ({discount}%)</span>
-                <span>-${getDiscountAmount().toFixed(2)}</span>
+            <div className="checkout-summary">
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>${subscription.price.toFixed(2)}</span>
               </div>
-            )}
-            <div className="order-item total">
-              <span>Total</span>
-              <span>${getFinalPrice()}</span>
+              
+              {couponApplied && (
+                <div className="summary-row discount">
+                  <span>Discount ({discount}%)</span>
+                  <span>-${getDiscountAmount().toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="summary-row">
+                <span>Tax</span>
+                <span>$0.00</span>
+              </div>
+              
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>${getFinalPrice()}</span>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="payment-form">
-          <h3>Payment Details</h3>
+          <h3>Card</h3>
           
           {error && <div className="payment-error">{error}</div>}
           
-          <div className="form-group">
-            <label>Card Number</label>
-            <input
-              type="text"
-              name="number"
-              placeholder="1234 5678 9012 3456"
-              value={cardInfo.number}
-              onChange={handleCardInputChange}
-              maxLength="19" // 16 digits + 3 spaces
-              required
-            />
-          </div>
-          
-          <div className="form-row">
+          <form onSubmit={continueToReview}>
             <div className="form-group">
-              <label>Expiration Date</label>
-              <input
-                type="text"
-                name="expiry"
-                placeholder="MM/YY"
-                value={cardInfo.expiry}
-                onChange={handleCardInputChange}
-                maxLength="5" // MM/YY format
-                required
-              />
+              <label>CARD NUMBER</label>
+              <div className="card-input-container">
+                <input
+                  type="text"
+                  name="number"
+                  placeholder="1234 1234 1234 1234"
+                  value={cardInfo.number}
+                  onChange={handleCardInputChange}
+                  maxLength="19" // 16 digits + 3 spaces
+                  required
+                />
+                <div className="card-brand-icon">
+                  {/* Show card brand icon based on first digits */}
+                  {cardInfo.number.startsWith('4') && <span className="visa-icon">VISA</span>}
+                  {cardInfo.number.startsWith('5') && <span className="mastercard-icon">MasterCard</span>}
+                  {cardInfo.number.startsWith('3') && <span className="amex-icon">AMEX</span>}
+                  {/* Add more card types as needed */}
+                </div>
+              </div>
             </div>
-            <div className="form-group">
-              <label>CVC</label>
-              <input
-                type="text"
-                name="cvc"
-                placeholder="123"
-                value={cardInfo.cvc}
-                onChange={handleCardInputChange}
-                maxLength="4"
-                required
-              />
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label>EXPIRATION DATE</label>
+                <input
+                  type="text"
+                  name="expiry"
+                  placeholder="MM/YY"
+                  value={cardInfo.expiry}
+                  onChange={handleCardInputChange}
+                  maxLength="5" // MM/YY format
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>SECURITY CODE</label>
+                <input
+                  type="text"
+                  name="cvc"
+                  placeholder="CVC"
+                  value={cardInfo.cvc}
+                  onChange={handleCardInputChange}
+                  maxLength="4"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label>Name on Card</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="John Doe"
-              value={cardInfo.name}
-              onChange={handleCardInputChange}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label>Name on Card</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="John Doe"
+                value={cardInfo.name}
+                onChange={handleCardInputChange}
+                required
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className="continue-button"
+              disabled={loading}
+            >
+              CONTINUE
+            </button>
+          </form>
           
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="email@example.com"
-              value={cardInfo.email || (user ? user.email : '')}
-              onChange={handleCardInputChange}
-              required
-            />
+          <div className="secure-checkout">
+            <div className="secure-icon">🔒</div>
+            <span>SECURE SSL CHECKOUT</span>
           </div>
-          
-          <button 
-            className="payment-button" 
-            onClick={handleProcessPayment}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : `Pay $${getFinalPrice()}`}
+        </div>
+      </div>
+    );
+  };
+
+  // NEW: Render review step - added for better UX
+  const renderReviewStep = () => {
+    return (
+      <div className="review-container">
+        <div className="review-header">
+          <h2>Review & Subscribe</h2>
+          <p>Please review your subscription details before finalizing your purchase</p>
+        </div>
+        
+        {/* Back button */}
+        <div className="navigation-controls">
+          <button className="back-button" onClick={handleGoBack}>
+            ← Back
           </button>
+        </div>
+        
+        <div className="subscription-summary">
+          <h3>Subscription Summary</h3>
           
-          <div className="payment-security">
-            <span>🔒</span>
-            <p>Your payment information is secure and encrypted.</p>
+          <div className="summary-details">
+            <h4>{getPlanDisplayName()}</h4>
+            <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
+            <p className="plan-description">New full applicant profile added every couple days.</p>
+            
+            {/* GIFT OR DISCOUNT CODE SECTION */}
+            <div className="discount-section">
+              <h4>GIFT OR DISCOUNT CODE</h4>
+              
+              {!couponApplied ? (
+                <div className="coupon-input-group">
+                  <input
+                    type="text"
+                    placeholder="Gift or Discount Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                  />
+                  <button 
+                    className="apply-coupon-btn"
+                    onClick={applyCoupon}
+                  >
+                    APPLY
+                  </button>
+                </div>
+              ) : (
+                <div className="applied-discount">
+                  <div className="discount-info">
+                    <span>Discount ({discount}% off)</span>
+                    <span>-${getDiscountAmount().toFixed(2)}</span>
+                  </div>
+                  <button className="remove-discount-btn" onClick={removeCoupon}>
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="payment-method">
+              <h4>Payment Method</h4>
+              <div className="card-info">
+                <div className="card-icon">
+                  {/* Show card icon based on number */}
+                  {cardInfo.number.startsWith('4') && <span className="visa-icon">VISA</span>}
+                  {cardInfo.number.startsWith('5') && <span className="mastercard-icon">MasterCard</span>}
+                  {cardInfo.number.startsWith('3') && <span className="amex-icon">AMEX</span>}
+                </div>
+                <div className="card-details">
+                  <p>**** **** **** {cardInfo.number.slice(-4)}</p>
+                  <p>{cardInfo.name}</p>
+                  <p>Expires: {cardInfo.expiry}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="checkout-summary">
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>${subscription.price.toFixed(2)}</span>
+              </div>
+              
+              {couponApplied && (
+                <div className="summary-row discount">
+                  <span>Discount ({discount}%)</span>
+                  <span>-${getDiscountAmount().toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="summary-row">
+                <span>Tax</span>
+                <span>$0.00</span>
+              </div>
+              
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>${getFinalPrice()}</span>
+              </div>
+            </div>
           </div>
+        </div>
+        
+        <div className="terms-section">
+          <p>
+            By clicking "Subscribe" below, you agree to our Terms of Service and authorize us to charge your card for the amount shown above.
+            You can cancel at any time from your account settings.
+          </p>
+        </div>
+        
+        <button 
+          className="subscribe-button" 
+          onClick={handleProcessPayment}
+          disabled={loading}
+        >
+          {loading ? 'Processing...' : 'Subscribe'}
+        </button>
+        
+        <div className="secure-checkout">
+          <div className="secure-icon">🔒</div>
+          <span>SECURE SSL CHECKOUT</span>
         </div>
       </div>
     );
