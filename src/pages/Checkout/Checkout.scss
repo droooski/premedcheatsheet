@@ -406,6 +406,8 @@
 // Payment Form
 .payment-form {
   h3 {
+    display: flex;
+    align-items: center;
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: $spacing-4;
@@ -429,6 +431,30 @@
       padding: $spacing-2;
       font-size: 0.85rem;
       border-radius: 5px;
+    }
+  }
+
+    .form-icon {
+    width: 28px;
+    height: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .cvc-input-container {
+    position: relative;
+    
+    .cvc-input {
+      padding-right: 40px; // Make room for the icon
+    }
+    
+    .cvc-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 24px;
     }
   }
   

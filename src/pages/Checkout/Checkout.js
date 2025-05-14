@@ -80,40 +80,40 @@ const Checkout = () => {
   }, [mode]);
 
   // Set subscription details based on selected plan
-  useEffect(() => {
-    // Set pricing based on the plan
-    switch(selectedPlan) {
-      case 'cheatsheet':
-        setSubscription({
-          type: 'monthly',
-          price: 5.99
-        });
-        break;
-      case 'cheatsheet-plus':
-        setSubscription({
-          type: 'monthly',
-          price: 9.99
-        });
-        break;
-      case 'application':
-        setSubscription({
-          type: 'onetime',
-          price: 19.99
-        });
-        break;
-      case 'application-plus':
-        setSubscription({
-          type: 'onetime',
-          price: 34.99
-        });
-        break;
-      default:
-        setSubscription({
-          type: 'monthly',
-          price: 5.99
-        });
-    }
-  }, [selectedPlan]);
+useEffect(() => {
+  // Set pricing based on the plan
+  switch(selectedPlan) {
+    case 'cheatsheet':
+      setSubscription({
+        type: 'onetime', // Changed from 'monthly' to 'onetime'
+        price: 14.99     // Updated from 5.99 to 14.99
+      });
+      break;
+    case 'cheatsheet-plus':
+      setSubscription({
+        type: 'onetime',  // Changed from 'monthly' to 'onetime'
+        price: 29.99      // Updated from 9.99 to 29.99
+      });
+      break;
+    case 'application':
+      setSubscription({
+        type: 'onetime',
+        price: 19.99
+      });
+      break;
+    case 'application-plus':
+      setSubscription({
+        type: 'onetime',
+        price: 34.99
+      });
+      break;
+    default:
+      setSubscription({
+        type: 'onetime',
+        price: 14.99  // Updated default price
+      });
+  }
+}, [selectedPlan]);
 
   // Redirect to profile after confirmation
   useEffect(() => {
@@ -728,7 +728,10 @@ const Checkout = () => {
         </div>
         
         <div className="payment-form">
-          <h3>Card</h3>
+        <h3>
+          <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
+          Card
+        </h3>
           
           {error && <div className="payment-error">{error}</div>}
           
@@ -768,16 +771,19 @@ const Checkout = () => {
               </div>
               <div className="form-group">
                 <label>SECURITY CODE</label>
-                <input
-                  type="text"
-                  name="cvc"
-                  placeholder="CVC"
-                  value={cardInfo.cvc}
-                  onChange={handleCardInputChange}
-                  maxLength={cardInfo.cardType === 'amex' ? 4 : 3}
-                  required
-                  className="cvc-input"
-                />
+                <div className="cvc-input-container">
+                  <input
+                    type="text"
+                    name="cvc"
+                    placeholder="CVC"
+                    value={cardInfo.cvc}
+                    onChange={handleCardInputChange}
+                    maxLength={cardInfo.cardType === 'amex' ? 4 : 3}
+                    required
+                    className="cvc-input"
+                  />
+                  <img src={require('../../assets/images/code.png')} alt="CVC" className="cvc-icon" />
+                </div>
               </div>
             </div>
 
