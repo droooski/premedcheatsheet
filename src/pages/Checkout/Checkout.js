@@ -1,4 +1,4 @@
-// src/pages/Checkout/Checkout.js - Enhanced version with better back navigation and discount handling
+// Modified Checkout.js with fixed back navigation and discount functionality
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -22,8 +22,10 @@ const Checkout = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [user, setUser] = useState(null);
+  // FIXED: Initialize checkout step properly to 'plan'
   const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'review', 'confirmation'
-  const [previousStep, setPreviousStep] = useState('plan'); // Track previous step for back navigation
+  // ADDED: Track previous step for proper back navigation
+  const [previousStep, setPreviousStep] = useState(null);
   const [cardInfo, setCardInfo] = useState({
     number: '',
     expiry: '',
@@ -125,26 +127,27 @@ const Checkout = () => {
     }
   }, [checkoutStep, orderId, navigate]);
 
-  // Change checkout step and track previous step
+  // FIXED: Proper step change that records previous step for back navigation
   const changeCheckoutStep = (newStep) => {
     setPreviousStep(checkoutStep);
     setCheckoutStep(newStep);
+    console.log(`Changing from ${checkoutStep} to ${newStep}, previous step saved as ${checkoutStep}`);
   };
 
-  // Go back to previous step
+  // FIXED: Proper back navigation that uses previous step
   const handleGoBack = () => {
+    console.log("Back button pressed, current step:", checkoutStep, "previous step:", previousStep);
+    
     // If we're on payment, go back to plan selection
     if (checkoutStep === 'payment') {
-      changeCheckoutStep('plan');
+      setCheckoutStep('plan');
     }
     // If we're on review, go back to payment
     else if (checkoutStep === 'review') {
-      changeCheckoutStep('payment');
+      setCheckoutStep('payment');
     }
-    // If we're on plan and user presses back, prevent page navigation
-    else if (checkoutStep === 'plan') {
-      // Stay on current page, maybe show a message
-      console.log('Already at the first step');
+    else {
+      navigate(-1); // Use browser navigation as fallback
     }
   };
 
@@ -166,12 +169,11 @@ const Checkout = () => {
     
     // Must be logged in to proceed to payment
     if (user) {
-      // Set previous step first
+      // Set previous step first then change current step
       setPreviousStep('plan');
       setCheckoutStep('payment');
     } else {
       setShowAuthModal(true);
-      // FIXED: Set login mode to false (signup) when selecting a plan
       setIsLoginMode(false);
     }
   };
@@ -183,6 +185,11 @@ const Checkout = () => {
 
   // Apply coupon function
   const applyCoupon = () => {
+    if (!couponCode.trim()) {
+      alert('Please enter a coupon code');
+      return;
+    }
+    
     // Convert to uppercase for case-insensitive comparison
     const code = couponCode.toUpperCase();
     
@@ -195,7 +202,7 @@ const Checkout = () => {
     }
   };
 
-  // NEW: Remove applied coupon
+  // ADDED: Function to remove applied coupon
   const removeCoupon = () => {
     setCouponApplied(false);
     setCouponCode('');
@@ -277,7 +284,6 @@ const Checkout = () => {
     // Close auth modal
     setShowAuthModal(false);
     
-    // FIXED: Always proceed to payment step after successful authentication
     if (userData?.isGuest) {
       // Handle guest access
       navigate('/guest-preview');
@@ -297,7 +303,7 @@ const Checkout = () => {
           processFreePurchase();
         }
       } else {
-        // CRITICAL FIX: Proceed to payment step
+        // FIXED: Proceed to payment step
         console.log("Setting checkout step to payment after auth success");
         changeCheckoutStep('payment');
       }
@@ -345,6 +351,18 @@ const Checkout = () => {
     changeCheckoutStep('review');
   };
 
+  // Detect card type based on first digits
+  const detectCardType = (cardNumber) => {
+    const firstDigit = cardNumber.charAt(0);
+    const firstTwoDigits = cardNumber.substring(0, 2);
+    
+    if (firstDigit === '4') return 'visa';
+    if (['51', '52', '53', '54', '55'].includes(firstTwoDigits)) return 'mastercard';
+    if (['34', '37'].includes(firstTwoDigits)) return 'amex';
+    
+    return null;
+  };
+
   // Handle card input changes
   const handleCardInputChange = (e) => {
     const { name, value } = e.target;
@@ -356,9 +374,13 @@ const Checkout = () => {
         .replace(/(\d{4})/g, '$1 ') // Add space every 4 digits
         .trim(); // Remove trailing space
       
+      // Detect card type
+      const cardType = detectCardType(formattedValue.replace(/\s/g, ''));
+      
       setCardInfo({
         ...cardInfo,
-        [name]: formattedValue
+        [name]: formattedValue,
+        cardType
       });
     } 
     // Format expiry date
@@ -457,7 +479,7 @@ const Checkout = () => {
     }
   };
 
-  // NEW: Get text for subscription period
+  // Get text for subscription period
   const getSubscriptionPeriodText = () => {
     if (subscription.type === 'monthly') {
       return 'every month';
@@ -465,6 +487,22 @@ const Checkout = () => {
       return 'per year';
     } else {
       return 'one time';
+    }
+  };
+
+  // Render card brand icon based on detected card type
+  const renderCardBrandIcon = () => {
+    if (!cardInfo.cardType) return null;
+    
+    switch(cardInfo.cardType) {
+      case 'visa':
+        return <div className="card-brand visa">VISA</div>;
+      case 'mastercard':
+        return <div className="card-brand mastercard">MasterCard</div>;
+      case 'amex':
+        return <div className="card-brand amex">AMEX</div>;
+      default:
+        return null;
     }
   };
 
@@ -560,7 +598,7 @@ const Checkout = () => {
           <p>Enter your payment details to continue</p>
         </div>
         
-        {/* Back button - NEW */}
+        {/* Back button */}
         <div className="navigation-controls">
           <button className="back-button" onClick={handleGoBack}>
             ← Back
@@ -587,6 +625,7 @@ const Checkout = () => {
                     placeholder="Gift or Discount Code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
+                    className="coupon-input"
                   />
                   <button 
                     className="apply-coupon-btn"
@@ -651,14 +690,9 @@ const Checkout = () => {
                   onChange={handleCardInputChange}
                   maxLength="19" // 16 digits + 3 spaces
                   required
+                  className="card-number-input"
                 />
-                <div className="card-brand-icon">
-                  {/* Show card brand icon based on first digits */}
-                  {cardInfo.number.startsWith('4') && <span className="visa-icon">VISA</span>}
-                  {cardInfo.number.startsWith('5') && <span className="mastercard-icon">MasterCard</span>}
-                  {cardInfo.number.startsWith('3') && <span className="amex-icon">AMEX</span>}
-                  {/* Add more card types as needed */}
-                </div>
+                {renderCardBrandIcon()}
               </div>
             </div>
             
@@ -673,6 +707,7 @@ const Checkout = () => {
                   onChange={handleCardInputChange}
                   maxLength="5" // MM/YY format
                   required
+                  className="expiry-input"
                 />
               </div>
               <div className="form-group">
@@ -685,6 +720,7 @@ const Checkout = () => {
                   onChange={handleCardInputChange}
                   maxLength="4"
                   required
+                  className="cvc-input"
                 />
               </div>
             </div>
@@ -698,6 +734,7 @@ const Checkout = () => {
                 value={cardInfo.name}
                 onChange={handleCardInputChange}
                 required
+                className="name-input"
               />
             </div>
             
@@ -719,7 +756,7 @@ const Checkout = () => {
     );
   };
 
-  // NEW: Render review step - added for better UX
+  // Render review step
   const renderReviewStep = () => {
     return (
       <div className="review-container">
@@ -754,6 +791,7 @@ const Checkout = () => {
                     placeholder="Gift or Discount Code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
+                    className="coupon-input"
                   />
                   <button 
                     className="apply-coupon-btn"
@@ -779,10 +817,7 @@ const Checkout = () => {
               <h4>Payment Method</h4>
               <div className="card-info">
                 <div className="card-icon">
-                  {/* Show card icon based on number */}
-                  {cardInfo.number.startsWith('4') && <span className="visa-icon">VISA</span>}
-                  {cardInfo.number.startsWith('5') && <span className="mastercard-icon">MasterCard</span>}
-                  {cardInfo.number.startsWith('3') && <span className="amex-icon">AMEX</span>}
+                  {renderCardBrandIcon()}
                 </div>
                 <div className="card-details">
                   <p>**** **** **** {cardInfo.number.slice(-4)}</p>
@@ -874,7 +909,7 @@ const Checkout = () => {
         </div>
       </div>
       
-      {/* Auth Modal - FIXED: Added preventRedirect prop */}
+      {/* Auth Modal with preventRedirect prop */}
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
