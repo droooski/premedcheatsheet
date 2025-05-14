@@ -1,9 +1,11 @@
+// Update your AboutPage.js form submission handler
+// This is a focused solution for your existing codebase
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ApplicantProfileSubmission from '../../components/ApplicantProfileSubmission/ApplicantProfileSubmission';
-// Import TikTok icon from assets folder instead of public
 import './AboutPage.scss';
 
 const AboutPage = () => {
@@ -17,6 +19,8 @@ const AboutPage = () => {
   });
   
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -26,28 +30,72 @@ const AboutPage = () => {
     });
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setLoading(true);
+    setError('');
     
-    // Here you would typically send the data to your backend
-    // For now, just simulate a successful submission
-    setFormSubmitted(true);
-    
-    // Reset form after submission
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      subject: '',
-      message: '',
-      newsletter: false
-    });
-    
-    // Reset submission state after 3 seconds
-    setTimeout(() => {
-      setFormSubmitted(false);
-    }, 3000);
+    try {
+      // Create the form data to be sent
+      const mailData = {
+        to: 'staff@premedcheatsheet.com',
+        from: formData.email,
+        subject: `Contact Form: ${formData.subject}`,
+        text: `
+          Name: ${formData.firstName} ${formData.lastName}
+          Email: ${formData.email}
+          Newsletter: ${formData.newsletter ? 'Yes' : 'No'}
+          
+          Message:
+          ${formData.message}
+        `,
+        html: `
+          <p><strong>Name:</strong> ${formData.firstName} ${formData.lastName}</p>
+          <p><strong>Email:</strong> ${formData.email}</p>
+          <p><strong>Newsletter:</strong> ${formData.newsletter ? 'Yes' : 'No'}</p>
+          <p><strong>Message:</strong></p>
+          <p>${formData.message.replace(/\n/g, '<br>')}</p>
+        `
+      };
+
+      // Option 1: Use a simple server-side endpoint if you have one
+      // Replace this URL with your actual email sending endpoint
+      const response = await fetch('https://api.premedcheatsheet.com/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mailData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+      
+      // Success! Show feedback to the user
+      setFormSubmitted(true);
+      setLoading(false);
+      
+      // Clear form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: '',
+        message: '',
+        newsletter: false
+      });
+      
+      // Reset the success message after 3 seconds
+      setTimeout(() => {
+        setFormSubmitted(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setError('There was a problem sending your message. Please try again or email us directly at staff@premedcheatsheet.com');
+      setLoading(false);
+    }
   };
   
   return (
@@ -103,7 +151,6 @@ const AboutPage = () => {
               
               <a href="https://www.tiktok.com/@orthrobro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" className="contact-link">
                 <span className="contact-icon">
-                  {/* Placeholder for TikTok icon - will be added via CSS background-image */}
                   <div className="tiktok-icon-placeholder"></div>
                 </span>
                 <span className="contact-text">@orthrobro</span>
@@ -134,7 +181,9 @@ const AboutPage = () => {
                       <p>Thank you for your submission! We will get back to you shortly.</p>
                     </div>
                   ) : (
-                    <form onSubmit={handleSubmit}>
+                    <form action="https://formsubmit.co/staff@premedcheatsheet.com" method="POST">
+                      {error && <div className="error-message"><p>{error}</p></div>}
+                      
                       <div className="form-field-group">
                         <label>Name <span className="required">*</span></label>
                         <div className="name-inputs">
@@ -205,8 +254,8 @@ const AboutPage = () => {
                         ></textarea>
                       </div>
                       
-                      <button type="submit" className="submit-button">
-                        Submit
+                      <button type="submit" className="submit-button" disabled={loading}>
+                        {loading ? 'Sending...' : 'Submit'}
                       </button>
                     </form>
                   )}
@@ -216,7 +265,6 @@ const AboutPage = () => {
             
             {/* Right column - Applicant Profile */}
             <div className="form-column">
-              {/* Use the ApplicantProfileSubmission component without adding additional headers */}
               <ApplicantProfileSubmission />
             </div>
           </div>
