@@ -1,4 +1,4 @@
-// src/pages/Checkout/Checkout.js - Fixed to ensure payment flow works correctly
+// src/pages/Checkout/Checkout.js - Improved to enforce payment
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -84,9 +84,8 @@ const Checkout = () => {
     }
   }, [checkoutStep, orderId, navigate]);
 
-  // Handle plan selection - CRITICAL FIX: This is where the flow starts
+  // Handle plan selection
   const handleSelectPlan = (plan, couponInfo = {}) => {
-    console.log("Plan selected:", plan, couponInfo);
     setSelectedPlan(plan);
     
     // Apply any coupon info passed from pricing card component
@@ -101,13 +100,11 @@ const Checkout = () => {
       setDiscount(0);
     }
     
-    // THIS IS THE KEY PART: Must be logged in to proceed to payment
+    // Must be logged in to proceed to payment
     if (user) {
-      console.log("User is logged in, proceeding to payment step");
-      setCheckoutStep('payment'); // Show payment form immediately if logged in
+      setCheckoutStep('payment');
     } else {
-      console.log("User not logged in, showing auth modal");
-      setShowAuthModal(true); // Show login modal if not logged in
+      setShowAuthModal(true);
     }
   };
 
@@ -206,7 +203,7 @@ const Checkout = () => {
     }
   };
 
-  // Handle authentication success - CRITICAL FIX: This is where auth completes
+  // Handle authentication success
   const handleAuthSuccess = (userData) => {
     console.log("Auth success:", userData);
     setUser(userData?.user || null);
@@ -220,16 +217,14 @@ const Checkout = () => {
       }));
     }
     
-    // CRITICAL FIX: After login/signup, ALWAYS proceed to payment step
-    console.log("Auth success, proceeding to payment step");
-    setCheckoutStep('payment');
-    
     // Check if purchase is free with coupon
     if (isFreeWithCoupon()) {
       // Process the free purchase, but ensure we have a valid user first
       if (userData?.user?.uid) {
         processFreePurchase();
       }
+    } else {
+      setCheckoutStep('payment');
     }
   };
 
@@ -382,9 +377,6 @@ const Checkout = () => {
 
   // Render different steps based on checkout progress
   const renderCheckoutStep = () => {
-    // CRITICAL FIX: Added debugging to check current step
-    console.log("Current checkout step:", checkoutStep);
-    
     switch (checkoutStep) {
       case 'plan':
         return renderPlanSelection();
@@ -418,8 +410,8 @@ const Checkout = () => {
     return (
       <>
         <div className="checkout-header">
-          <h1>Choose Your Plan</h1>
-          <p>Select the plan that best fits your needs</p>
+          <h1>This is your in.</h1>
+          <p>The full profiles of successful medical school applicants will be available once you join the cheatsheet.</p>
         </div>
         
         <PricingCards onSelectPlan={handleSelectPlan} />
@@ -624,9 +616,6 @@ const Checkout = () => {
     );
   };
 
-  // Log the state to debug
-  console.log("Checkout state:", { checkoutStep, user, showAuthModal });
-
   return (
     <div className="checkout-page">
       <Navbar />
@@ -639,7 +628,7 @@ const Checkout = () => {
         </div>
       </div>
       
-      {/* Auth Modal - IMPORTANT: this should properly call handleAuthSuccess */}
+      {/* Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
