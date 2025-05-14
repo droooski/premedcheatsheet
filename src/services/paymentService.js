@@ -1,13 +1,9 @@
-// src/services/paymentService.js
+// src/services/paymentService.js - Enhanced with stronger validation
 import { getFirestore, doc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
 import app from '../firebase/config'; // Import the Firebase app instance, not db directly
 
 // Initialize Firestore directly in this file to ensure it's properly set up
 const db = getFirestore(app);
-
-// Note: In a real implementation, payment processing would be handled by a back-end server
-// The front-end should only collect payment information and send it to the server
-// This service simulates client-side payment processing for demonstration purposes
 
 // Get Stripe publishable key from environment variables
 const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
@@ -15,6 +11,11 @@ const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
 // Function to add subscription to user document
 const addSubscriptionToUser = async (userId, plan, orderId) => {
   try {
+    // Validate required parameters
+    if (!userId) throw new Error('User ID is required');
+    if (!plan) throw new Error('Subscription plan is required');
+    if (!orderId) throw new Error('Order ID is required');
+    
     // Get user document reference
     const userRef = doc(db, 'users', userId);
     
@@ -70,28 +71,42 @@ const loadStripe = async () => {
 // Process payment
 export const processPayment = async (paymentDetails, userId, orderDetails) => {
   try {
-    console.log('DB instance:', db); // Debug log to verify db is initialized
     console.log('Processing payment:', { userId, orderDetails, isFree: orderDetails.isFree });
+    
+    // Enforce user authentication for all transactions
+    if (!userId || userId === 'guest') {
+      throw new Error('You must be logged in to complete this purchase');
+    }
+    
+    // Validate payment details for non-free purchases
+    if (!orderDetails.isFree && (!paymentDetails || !paymentDetails.number)) {
+      throw new Error('Complete payment information is required');
+    }
     
     // Create an order in Firestore
     const orderData = {
-      userId: userId || 'guest',
+      userId: userId, // No more 'guest' userId allowed
       amount: orderDetails.amount,
       plan: orderDetails.plan,
-      status: 'processing',
-      createdAt: new Date().toISOString(), // Use direct date instead of serverTimestamp()
+      status: 'processing', // Start as processing
+      createdAt: new Date().toISOString(),
       couponCode: orderDetails.couponCode || null,
       discount: orderDetails.discount || 0,
       isFree: orderDetails.isFree || false
     };
     
-    // Add order to Firestore - make sure db is properly initialized
+    // Add order to Firestore
     const orderRef = await addDoc(collection(db, 'orders'), orderData);
     console.log('Order created with ID:', orderRef.id);
     
     // For free purchases with 100% discount, mark as completed immediately
     if (orderDetails.isFree) {
       console.log('Processing free order with 100% discount');
+      
+      // Validate the discount is exactly 100%
+      if (orderDetails.discount !== 100) {
+        throw new Error('Invalid discount amount for free purchase');
+      }
       
       // Update order status to completed
       await updateDoc(doc(db, 'orders', orderRef.id), {
@@ -100,13 +115,11 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
         completedAt: new Date().toISOString(),
       });
       
-      // If user is authenticated, add subscription to user document
-      if (userId) {
-        await addSubscriptionToUser(userId, orderDetails.plan, orderRef.id);
-      } else {
-        // For guest users with free access
-        localStorage.setItem('guestAccess', 'true');
-        localStorage.setItem('guestAccessExpiry', (Date.now() + (30 * 24 * 60 * 60 * 1000)).toString()); // 30 days for free access
+      // Add subscription to user document
+      const subscriptionAdded = await addSubscriptionToUser(userId, orderDetails.plan, orderRef.id);
+      
+      if (!subscriptionAdded) {
+        throw new Error('Failed to add subscription to user account');
       }
       
       return {
@@ -116,7 +129,22 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
       };
     }
     
-    // For paid purchases, simulate payment processing
+    // For paid purchases, process the payment
+    // In production, use Stripe or other payment processor
+    
+    // Basic payment validation
+    if (!paymentDetails.number || paymentDetails.number.replace(/\s/g, '').length < 15) {
+      throw new Error('Invalid card number');
+    }
+    
+    if (!paymentDetails.expiry || !paymentDetails.expiry.includes('/')) {
+      throw new Error('Invalid expiry date (use MM/YY format)');
+    }
+    
+    if (!paymentDetails.cvc || paymentDetails.cvc.length < 3) {
+      throw new Error('Invalid CVC code');
+    }
+    
     // Simulate payment processing delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
@@ -124,29 +152,14 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
     await updateDoc(doc(db, 'orders', orderRef.id), {
       status: 'completed',
       paymentId: `sim_${Math.random().toString(36).substring(2, 15)}`,
-      completedAt: new Date().toISOString(), // Use direct date
+      completedAt: new Date().toISOString(),
     });
     
-    // If user is authenticated, add subscription to user document
-    if (userId) {
-      // Get user document reference
-      const userRef = doc(db, 'users', userId);
-      
-      // Add subscription to user document
-      await updateDoc(userRef, {
-        subscriptions: [
-          // Add new subscription
-          {
-            plan: orderDetails.plan,
-            startDate: new Date().toISOString(),
-            endDate: orderDetails.plan === 'monthly' 
-              ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-              : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-            orderId: orderRef.id,
-            active: true,
-          }
-        ]
-      });
+    // Add subscription to user document
+    const subscriptionAdded = await addSubscriptionToUser(userId, orderDetails.plan, orderRef.id);
+    
+    if (!subscriptionAdded) {
+      throw new Error('Failed to add subscription to user account');
     }
     
     return {
@@ -155,6 +168,19 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
     };
   } catch (error) {
     console.error('Payment processing error:', error);
+    
+    // If we created an order but payment failed, update order status
+    if (error.orderId) {
+      try {
+        await updateDoc(doc(db, 'orders', error.orderId), {
+          status: 'failed',
+          error: error.message
+        });
+      } catch (updateError) {
+        console.error('Failed to update order status:', updateError);
+      }
+    }
+    
     return {
       success: false,
       error: error.message || 'Payment processing failed',
@@ -165,6 +191,11 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
 // For Stripe integration in a real-world scenario
 export const processStripePayment = async (paymentDetails, userId, orderDetails) => {
   try {
+    // Enforce user authentication
+    if (!userId || userId === 'guest') {
+      throw new Error('You must be logged in to complete this purchase');
+    }
+    
     // Initialize Stripe
     const stripe = await loadStripe();
     
@@ -173,8 +204,13 @@ export const processStripePayment = async (paymentDetails, userId, orderDetails)
       return processPayment(null, userId, orderDetails);
     }
     
-    // In a real implementation, you would:
-    // 1. Call your backend API to create a payment intent
+    // Validate payment details
+    if (!paymentDetails || !paymentDetails.number || !paymentDetails.expiry || !paymentDetails.cvc) {
+      throw new Error('Complete payment information is required');
+    }
+    
+    // Call your backend API to create a payment intent
+    // Note: In production, this should point to your actual API endpoint
     const response = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: {
@@ -184,51 +220,75 @@ export const processStripePayment = async (paymentDetails, userId, orderDetails)
         amount: orderDetails.amount * 100, // Convert to cents
         currency: 'usd',
         plan: orderDetails.plan,
-        userId: userId || 'guest',
+        userId: userId,
         couponCode: orderDetails.couponCode,
         discount: orderDetails.discount
       }),
     });
     
+    // Handle API response
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create payment intent');
+    }
+    
     const { clientSecret } = await response.json();
     
-    // 2. Confirm the payment with Stripe.js
+    // Create an order record first
+    const orderData = {
+      userId: userId,
+      amount: orderDetails.amount,
+      plan: orderDetails.plan,
+      status: 'processing',
+      createdAt: new Date().toISOString(),
+      couponCode: orderDetails.couponCode || null,
+      discount: orderDetails.discount || 0,
+      isFree: false
+    };
+    
+    // Add order to Firestore
+    const orderRef = await addDoc(collection(db, 'orders'), orderData);
+    console.log('Order created with ID:', orderRef.id);
+    
+    // Confirm the payment with Stripe.js
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: {
-          number: paymentDetails.cardNumber,
+          number: paymentDetails.number,
           exp_month: parseInt(paymentDetails.expiry.split('/')[0], 10),
           exp_year: parseInt(paymentDetails.expiry.split('/')[1], 10),
           cvc: paymentDetails.cvc,
         },
         billing_details: {
-          name: paymentDetails.cardholderName,
-          email: paymentDetails.email,
+          name: paymentDetails.name,
+          email: paymentDetails.email || userId,
         },
       },
     });
     
     if (result.error) {
+      // Update order status to failed
+      await updateDoc(doc(db, 'orders', orderRef.id), {
+        status: 'failed',
+        error: result.error.message
+      });
+      
       throw new Error(result.error.message);
     }
     
     if (result.paymentIntent.status === 'succeeded') {
-      // Payment succeeded, create order in database
-      const orderRef = await addDoc(collection(db, 'orders'), {
-        userId: userId || 'guest',
-        amount: orderDetails.amount,
-        plan: orderDetails.plan,
+      // Payment succeeded, update order status to completed
+      await updateDoc(doc(db, 'orders', orderRef.id), {
         status: 'completed',
         stripePaymentIntentId: result.paymentIntent.id,
-        createdAt: serverTimestamp(),
-        completedAt: serverTimestamp(),
-        couponCode: orderDetails.couponCode,
-        discount: orderDetails.discount
+        completedAt: new Date().toISOString(),
       });
       
-      // If user is authenticated, add subscription to user document
-      if (userId) {
-        await addSubscriptionToUser(userId, orderDetails.plan, orderRef.id);
+      // Add subscription to user document
+      const subscriptionAdded = await addSubscriptionToUser(userId, orderDetails.plan, orderRef.id);
+      
+      if (!subscriptionAdded) {
+        throw new Error('Failed to add subscription to user account');
       }
       
       return {
@@ -236,6 +296,12 @@ export const processStripePayment = async (paymentDetails, userId, orderDetails)
         orderId: orderRef.id,
       };
     } else {
+      // Update order status to failed
+      await updateDoc(doc(db, 'orders', orderRef.id), {
+        status: 'failed',
+        error: 'Payment intent did not succeed'
+      });
+      
       throw new Error('Payment processing failed');
     }
   } catch (error) {

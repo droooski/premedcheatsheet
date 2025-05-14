@@ -1,12 +1,12 @@
-// src/pages/Checkout/Checkout.js
+// src/pages/Checkout/Checkout.js - Improved to enforce payment
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import AuthModal from '../../components/auth/AuthModal';
 import PricingCards from '../../components/PricingCards/PricingCards';
-import { onAuthChange, getCurrentUser } from '../../firebase/authService';
-import { processPayment } from '../../services/paymentService';
+import { onAuthChange } from '../../firebase/authService';
+import { processPayment, processStripePayment } from '../../services/paymentService';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -15,22 +15,22 @@ const Checkout = () => {
   const mode = queryParams.get('mode');
   const initialPlan = queryParams.get('plan') || 'cheatsheet';
   
-  // Basic state management
+  // State management
   const [selectedPlan, setSelectedPlan] = useState(initialPlan);
   const [couponCode, setCouponCode] = useState('');
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [user, setUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
   const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'confirmation'
   const [cardInfo, setCardInfo] = useState({
     number: '',
     expiry: '',
     cvc: '',
-    name: ''
+    name: '',
+    email: ''
   });
-  const [discountCodes, setDiscountCodes] = useState({
+  const [discountCodes] = useState({
     'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
     'STUDENT2025': { rate: 20, description: 'Student Discount' },
     'PARTNER': { rate: 100, description: 'Partnership - 100% Off' }
@@ -40,6 +40,7 @@ const Checkout = () => {
   const [orderId, setOrderId] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(mode === 'login');
   const [isLoginMode, setIsLoginMode] = useState(mode === 'login');
+  const [useStripe, setUseStripe] = useState(true); // Default to using Stripe
   
   const navigate = useNavigate();
 
@@ -49,20 +50,20 @@ const Checkout = () => {
       console.log("Auth state changed:", currentUser);
       setUser(currentUser);
       
-      // If user is authenticated and we're in confirmation step, redirect to profile
-      if (currentUser && checkoutStep === 'confirmation' && orderId) {
-        setTimeout(() => {
-          navigate('/profile');
-        }, 2000);
+      // If the user signs in and we're on the payment step, update the email field
+      if (currentUser && currentUser.email && checkoutStep === 'payment') {
+        setCardInfo(prev => ({
+          ...prev,
+          email: currentUser.email
+        }));
       }
     });
 
     return () => unsubscribe();
-  }, [checkoutStep, orderId, navigate]);
+  }, [checkoutStep]);
 
   // Handle URL parameters for authentication mode
   useEffect(() => {
-    // Parse the query parameter to see if we should show login modal
     if (mode === 'login') {
       setShowAuthModal(true);
       setIsLoginMode(true);
@@ -72,28 +73,34 @@ const Checkout = () => {
     }
   }, [mode]);
 
+  // Redirect to profile after confirmation
   useEffect(() => {
-    // If user has completed payment, redirect to profile page
     if (checkoutStep === 'confirmation' && orderId) {
-      // Add a small delay to show the confirmation screen
       const timer = setTimeout(() => {
         navigate('/profile');
-      }, 3000); // 3 seconds delay
+      }, 3000);
       
       return () => clearTimeout(timer);
     }
   }, [checkoutStep, orderId, navigate]);
 
-  // Handle plan selection from PricingCards component
-  const handleSelectPlan = (plan) => {
+  // Handle plan selection
+  const handleSelectPlan = (plan, couponInfo = {}) => {
     setSelectedPlan(plan);
     
-    // Reset coupon when plan changes
-    setCouponApplied(false);
-    setCouponCode('');
-    setDiscount(0);
+    // Apply any coupon info passed from pricing card component
+    if (couponInfo.couponCode) {
+      setCouponCode(couponInfo.couponCode);
+      setDiscount(couponInfo.discount);
+      setCouponApplied(true);
+    } else {
+      // Reset coupon when plan changes without coupon info
+      setCouponApplied(false);
+      setCouponCode('');
+      setDiscount(0);
+    }
     
-    // Move to payment step or show auth modal
+    // Must be logged in to proceed to payment
     if (user) {
       setCheckoutStep('payment');
     } else {
@@ -101,7 +108,7 @@ const Checkout = () => {
     }
   };
 
-  // Coupon toggle function
+  // Toggle coupon input visibility
   const toggleCouponInput = () => {
     setShowCouponInput(!showCouponInput);
   };
@@ -122,7 +129,6 @@ const Checkout = () => {
 
   // Calculate prices including any discounts
   const getBasePrice = () => {
-    // Return price based on selected plan
     switch (selectedPlan) {
       case 'cheatsheet':
         return 14.99;
@@ -152,21 +158,28 @@ const Checkout = () => {
     return basePrice.toFixed(2);
   };
 
-  // Check if coupon provides a 100% discount
+  // Check if purchase is free with 100% discount coupon
   const isFreeWithCoupon = () => {
-    return couponApplied && parseFloat(getFinalPrice()) === 0;
+    return couponApplied && discount === 100;
   };
 
   // Process a free purchase with 100% discount coupon
   const processFreePurchase = async () => {
     setLoading(true);
+    setError('');
     
     try {
+      // Validate user is authenticated
+      if (!user || !user.uid) {
+        throw new Error('You must be logged in to complete this purchase');
+      }
+      
       console.log("Processing free purchase with 100% discount");
+      
       // Create a free order record
       const result = await processPayment(
-        null, // No payment details needed
-        user?.uid,
+        null, // No payment details needed for free purchase
+        user.uid,
         {
           amount: 0,
           plan: selectedPlan,
@@ -190,30 +203,26 @@ const Checkout = () => {
     }
   };
 
-  // Function to continue as guest
-  const continueAsGuest = () => {
-    // Set a cookie or localStorage item to track guest access
-    localStorage.setItem('guestAccess', 'true');
-    localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
-    
-    // If free with coupon, process the free purchase first
-    if (isFreeWithCoupon()) {
-      processFreePurchase();
-    } else {
-      // Redirect to profile page
-      navigate('/profile');
-    }
-  };
-
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
     console.log("Auth success:", userData);
     setUser(userData?.user || null);
     setShowAuthModal(false);
     
+    // Update email field if available
+    if (userData?.user?.email) {
+      setCardInfo(prev => ({
+        ...prev,
+        email: userData.user.email
+      }));
+    }
+    
     // Check if purchase is free with coupon
     if (isFreeWithCoupon()) {
-      processFreePurchase();
+      // Process the free purchase, but ensure we have a valid user first
+      if (userData?.user?.uid) {
+        processFreePurchase();
+      }
     } else {
       setCheckoutStep('payment');
     }
@@ -222,10 +231,39 @@ const Checkout = () => {
   // Handle card input changes
   const handleCardInputChange = (e) => {
     const { name, value } = e.target;
-    setCardInfo({
-      ...cardInfo,
-      [name]: value
-    });
+    
+    // Format card number with spaces
+    if (name === 'number') {
+      const formattedValue = value
+        .replace(/\s/g, '') // Remove existing spaces
+        .replace(/(\d{4})/g, '$1 ') // Add space every 4 digits
+        .trim(); // Remove trailing space
+      
+      setCardInfo({
+        ...cardInfo,
+        [name]: formattedValue
+      });
+    } 
+    // Format expiry date
+    else if (name === 'expiry') {
+      let formattedValue = value.replace(/\D/g, ''); // Remove non-digits
+      
+      if (formattedValue.length > 2) {
+        formattedValue = `${formattedValue.slice(0, 2)}/${formattedValue.slice(2, 4)}`;
+      }
+      
+      setCardInfo({
+        ...cardInfo,
+        [name]: formattedValue
+      });
+    }
+    // All other fields
+    else {
+      setCardInfo({
+        ...cardInfo,
+        [name]: value
+      });
+    }
   };
 
   // Process payment
@@ -234,37 +272,89 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Skip validation for free purchases
-      if (!isFreeWithCoupon()) {
-        // Basic validation
-        if (!cardInfo.number || !cardInfo.expiry || !cardInfo.cvc) {
-          throw new Error('Please fill in all required payment fields');
-        }
+      // Validate user authentication
+      if (!user || !user.uid) {
+        throw new Error('You must be logged in to complete this purchase');
+      }
+      
+      // Check if purchase is free with 100% discount coupon
+      if (isFreeWithCoupon()) {
+        return processFreePurchase();
+      }
+      
+      // Card validation for paid purchases
+      const cardNumber = cardInfo.number.replace(/\s/g, '');
+      if (!cardNumber || cardNumber.length < 15 || cardNumber.length > 16) {
+        throw new Error('Please enter a valid card number');
+      }
+      
+      if (!cardInfo.expiry || !cardInfo.expiry.includes('/')) {
+        throw new Error('Please enter a valid expiration date (MM/YY)');
+      }
+      
+      const [expMonth, expYear] = cardInfo.expiry.split('/');
+      if (!expMonth || !expYear || expMonth.length !== 2 || expYear.length !== 2) {
+        throw new Error('Please enter a valid expiration date in MM/YY format');
+      }
+      
+      // Check expiration date validity
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear() % 100; // Get last 2 digits
+      const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+      
+      if (
+        parseInt(expYear, 10) < currentYear || 
+        (parseInt(expYear, 10) === currentYear && parseInt(expMonth, 10) < currentMonth)
+      ) {
+        throw new Error('Your card has expired');
+      }
+      
+      if (!cardInfo.cvc || cardInfo.cvc.length < 3) {
+        throw new Error('Please enter a valid CVC code');
+      }
+      
+      if (!cardInfo.name || cardInfo.name.trim().length < 3) {
+        throw new Error('Please enter the cardholder name');
       }
 
-      // Process payment
-      const result = await processPayment(
-        isFreeWithCoupon() ? null : cardInfo,
-        user?.uid,
-        {
-          amount: parseFloat(getFinalPrice()),
-          plan: selectedPlan,
-          discount: discount,
-          couponCode: couponApplied ? couponCode : null,
-          isFree: isFreeWithCoupon()
-        }
-      );
+      // Process the payment using the appropriate method
+      const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+      let result;
+      if (useStripe && STRIPE_PUBLISHABLE_KEY) {
+        result = await processStripePayment(
+          cardInfo,
+          user.uid,
+          {
+            amount: parseFloat(getFinalPrice()),
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponApplied ? couponCode : null,
+            isFree: false
+          }
+        );
+      } else {
+        result = await processPayment(
+          cardInfo,
+          user.uid,
+          {
+            amount: parseFloat(getFinalPrice()),
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponApplied ? couponCode : null,
+            isFree: false
+          }
+        );
+      }
 
       if (result.success) {
         setOrderId(result.orderId);
         setCheckoutStep('confirmation');
       } else {
-        throw new Error(result.error || 'Payment processing failed');
+        throw new Error(result.error || 'Payment processing failed. Please check your card information and try again.');
       }
     } catch (error) {
       console.error("Payment processing error:", error);
       setError(error.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -299,7 +389,7 @@ const Checkout = () => {
     }
   };
 
-  // Render plan selection step with PricingCards
+  // Render plan selection step
   const renderPlanSelection = () => {
     // Check if query param has plan selection
     if (location.search.includes('plan=')) {
@@ -320,8 +410,8 @@ const Checkout = () => {
     return (
       <>
         <div className="checkout-header">
-          <h1>Choose Your Plan</h1>
-          <p>Select the plan that best fits your needs</p>
+          <h1>This is your in.</h1>
+          <p>The full profiles of successful medical school applicants will be available once you join the cheatsheet.</p>
         </div>
         
         <PricingCards onSelectPlan={handleSelectPlan} />
@@ -347,15 +437,23 @@ const Checkout = () => {
 
   // Render payment form step
   const renderPaymentForm = () => {
-    // IMPORTANT: If using a 100% discount coupon, skip payment form and go straight to confirmation
+    // If purchase is free with 100% discount, process it immediately
     if (isFreeWithCoupon()) {
-      useEffect(() => {
+      // Trigger free purchase processing
+      if (!loading && !orderId) {
         processFreePurchase();
-      }, []);
+      }
       
       return (
-        <div className="loading-payment">
-          <p>Processing your free access...</p>
+        <div className="payment-form-container">
+          <div className="payment-header">
+            <h2>Processing your order...</h2>
+            <p>Please wait while we process your free access.</p>
+          </div>
+          
+          <div className="loader-container">
+            <div className="loader"></div>
+          </div>
         </div>
       );
     }
@@ -421,9 +519,10 @@ const Checkout = () => {
             <input
               type="text"
               name="number"
-              placeholder="1234 1234 1234 1234"
+              placeholder="1234 5678 9012 3456"
               value={cardInfo.number}
               onChange={handleCardInputChange}
+              maxLength="19" // 16 digits + 3 spaces
               required
             />
           </div>
@@ -437,6 +536,7 @@ const Checkout = () => {
                 placeholder="MM/YY"
                 value={cardInfo.expiry}
                 onChange={handleCardInputChange}
+                maxLength="5" // MM/YY format
                 required
               />
             </div>
@@ -448,6 +548,7 @@ const Checkout = () => {
                 placeholder="123"
                 value={cardInfo.cvc}
                 onChange={handleCardInputChange}
+                maxLength="4"
                 required
               />
             </div>
@@ -461,16 +562,20 @@ const Checkout = () => {
               placeholder="John Doe"
               value={cardInfo.name}
               onChange={handleCardInputChange}
+              required
             />
           </div>
           
-          <div className="billing-address-option">
+          <div className="form-group">
+            <label>Email</label>
             <input
-              type="checkbox"
-              id="same-address"
-              defaultChecked
+              type="email"
+              name="email"
+              placeholder="email@example.com"
+              value={cardInfo.email || (user ? user.email : '')}
+              onChange={handleCardInputChange}
+              required
             />
-            <label htmlFor="same-address">Billing address is the same as account address</label>
           </div>
           
           <button 
@@ -523,7 +628,7 @@ const Checkout = () => {
         </div>
       </div>
       
-      {/* Auth Modal - Now we'll handle showing/hiding it directly */}
+      {/* Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}

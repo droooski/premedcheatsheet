@@ -1,81 +1,59 @@
-/* src/components/PricingCards/PricingCards.scss */
+/* src/components/PricingCards/PricingCards.scss - 2 per row layout */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
 .pricing-cards-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 100%; /* Take up the full container width */
-  margin: 0 auto;
-  padding: 20px;
   width: 100%;
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 0 $spacing-4;
 }
 
-.pricing-cards-row {
+/* Two cards per row layout */
+.pricing-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 cards per row on larger screens */
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin-bottom: 40px;
-  width: 100%;
-  max-width: 1600px; /* Much wider maximum width */
   
-  /* Responsive adjustments */
   @media (max-width: $md) {
-    grid-template-columns: 1fr; /* 1 card per row on medium and smaller screens */
+    grid-template-columns: 1fr; /* Single column on mobile */
   }
 }
 
 .pricing-card {
-  background-color: #f5f7f6;
+  background-color: #f7f7f7;
   border: 1px solid #000;
-  border-radius: 15px;
-  padding: 40px 30px;
-  width: 100%;
-  min-width: 320px; /* Minimum width for cards */
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  &.application-plus {
-    grid-column: 1 / -1; /* Make application-plus take full width */
-    max-width: 600px;
-    margin: 0 auto;
-    
-    @media (max-width: $md) {
-      max-width: 100%;
-    }
-  }
+  padding: 30px 20px;
+  width: 100%;
   
   h3 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 500;
-    margin-bottom: 16px;
     color: #000;
+    margin-bottom: 15px;
+    text-align: center;
   }
   
   .price {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    text-align: center;
     
     .amount {
-      font-size: 3rem;
-      font-weight: 600;
+      font-size: 2.5rem;
+      font-weight: 500;
+      color: #000;
+      display: block;
     }
     
     .period {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: #666;
-      margin-top: 4px;
     }
   }
   
@@ -83,72 +61,75 @@
     background-color: transparent;
     border: 1px solid #000;
     color: #000;
-    padding: 12px 50px;
-    font-size: 1.1rem;
-    border-radius: 8px;
+    padding: 10px 0;
+    border-radius: 4px;
+    font-size: 1rem;
     cursor: pointer;
-    margin-bottom: 30px;
-    transition: background-color 0.3s, color 0.3s, transform 0.2s;
-    width: 80%;
+    width: 180px;
+    margin-bottom: 20px;
+    transition: all 0.2s;
     
     &:hover {
       background-color: #000;
       color: #fff;
-      transform: translateY(-2px);
-    }
-    
-    &:active {
-      transform: translateY(0);
     }
   }
   
   .description {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 30px;
-    min-height: 50px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+    max-width: 400px;
+    text-align: center;
   }
   
   .divider {
-    width: 100%;
     height: 1px;
-    background-color: #ccc;
-    margin-bottom: 30px;
+    background-color: #ddd;
+    width: 100%;
+    margin-bottom: 20px;
   }
   
   .features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
     width: 100%;
     text-align: left;
-    padding-left: 10px;
-    list-style-type: none;
     
     li {
-      margin-bottom: 16px;
-      font-size: 1rem;
-      line-height: 1.5;
+      padding-left: 25px;
+      position: relative;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #333;
       
       &:before {
         content: "✓";
-        margin-right: 10px;
-        color: #10B981; /* Green checkmark */
+        color: #065f46; /* Green checkmark */
+        position: absolute;
+        left: 0;
+        top: 0;
       }
     }
   }
   
-  /* Coupon section */
+  /* Coupon section styled to match screenshots */
   .coupon-section {
     width: 100%;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px dashed #ccc;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    text-align: center;
   }
   
   .coupon-prompt {
     color: #065f46;
+    text-decoration: underline;
     cursor: pointer;
     font-size: 0.9rem;
-    margin-bottom: 15px;
-    text-decoration: underline;
+    margin-bottom: 10px;
     
     &:hover {
       opacity: 0.8;
@@ -157,34 +138,30 @@
   
   .coupon-input-group {
     display: flex;
-    margin-bottom: 20px;
+    margin: 15px 0;
     width: 100%;
     
     input {
       flex: 1;
-      padding: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px 0 0 8px;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
       font-size: 0.9rem;
       
       &:focus {
         outline: none;
         border-color: #065f46;
       }
-      
-      &:disabled {
-        background-color: #f3f4f6;
-      }
     }
     
-    .apply-coupon-btn {
-      padding: 10px 15px;
+    .apply-button {
       background-color: #065f46;
       color: white;
       border: none;
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 4px 4px 0;
+      padding: 0 15px;
       cursor: pointer;
-      font-weight: 500;
+      font-size: 0.9rem;
       
       &:hover:not(:disabled) {
         background-color: darken(#065f46, 5%);
@@ -197,22 +174,21 @@
     }
   }
   
-  .discount-text {
-    color: #10B981;
-    font-weight: 600;
-    margin-bottom: 15px;
+  .discount-info {
+    text-align: center;
+    margin-top: 10px;
+    
+    .discount-text {
+      color: #065f46;
+      font-weight: 500;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .final-price {
+      font-weight: 600;
+      color: #000;
+      font-size: 1.1rem;
+    }
   }
-  
-  .final-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #065f46;
-    margin-bottom: 20px;
-  }
-}
-
-/* Extra spacing for the container to improve appearance */
-.checkout-header + .pricing-cards-container {
-  margin-top: 40px;
-  margin-bottom: 60px;
 }

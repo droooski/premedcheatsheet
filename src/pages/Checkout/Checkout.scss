@@ -24,7 +24,7 @@
 }
 
 .checkout-wrapper {
-  max-width: 800px;
+  max-width: 1700px;
   margin: 0 auto;
   
   @media (max-width: $md) {
@@ -41,12 +41,12 @@
 
 .checkout-header {
   text-align: center;
-  margin-bottom: calc($spacing-32 + $spacing-4);
+  margin-bottom: calc($spacing-16 + $spacing-4);
   
   h1 {
     font-family: $font-family-mincho;
     font-weight: 500;
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     margin-bottom: $spacing-4;
     letter-spacing: 0.02em;
     
@@ -60,7 +60,7 @@
   }
   
   p {
-    color: $text-color-light;
+    color: $black;
     max-width: 1300px;
     margin: 0 auto;
     font-size: 1.125rem;
