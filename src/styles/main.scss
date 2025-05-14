@@ -597,14 +597,14 @@ html body .hero {
     width: 90% !important;
     max-width: 500px !important;
     margin: 0 auto !important;
-    margin-bottom: 150px !important; /* More space below subheading */
+    margin-bottom: 100px !important; /* More space below subheading */
     
     /* FIXED: Proper vertical gap for mobile */
-    gap: 1px !important; /* Using explicit pixel value for predictability */
-
+    gap: 0 !important; /* Using explicit pixel value for predictability */
+    
     @media (max-width: $sm) {
       width: 100% !important;
-      padding: 0 $spacing-4 !important; /* Add padding on both sides */
+      padding: 0 $spacing-1 !important; /* Add padding on both sides */
     }
     
     @media (min-width: $md) {
@@ -697,6 +697,9 @@ html body .hero {
     }
   }
 }
+
+
+
 
 // Add these styles to your main.scss file
 // =========================================

@@ -424,3 +424,57 @@
     }
   }
 }
+
+/* Google Form Container and iframe styling */
+.google-form-container {
+  width: 100%;
+  background-color: $white;
+  border-radius: 12px;
+  padding: $spacing-4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80%;
+  margin-bottom: $spacing-16;
+  overflow: hidden; /* Ensures the iframe doesn't break the container's border radius */
+  
+  @media (min-width: $xl) {
+    max-width: 85%;
+    padding: $spacing-6;
+    margin-bottom: $spacing-20;
+  }
+  
+  @media (min-width: $xxl) {
+    max-width: 90%;
+  }
+  
+  @media (max-width: $md) {
+    max-width: 90%;
+    margin-bottom: $spacing-12;
+  }
+  
+  @media (max-width: $sm) {
+    max-width: 100%;
+    margin-bottom: $spacing-8;
+    border-radius: 8px;
+    padding: $spacing-2;
+  }
+}
+
+.google-form-iframe {
+  width: 100%;
+  height: 810px; /* Adjust this height based on your form length */
+  border: none;
+  
+  @media (max-width: $lg) {
+    height: 2000px; /* Increase height on smaller screens as the form gets taller */
+  }
+  
+  @media (max-width: $md) {
+    height: 2200px;
+  }
+  
+  @media (max-width: $sm) {
+    height: 2400px;
+  }
+}

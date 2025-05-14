@@ -50,7 +50,7 @@
     
     @media (max-width: $sm) {
       font-size: 0.85rem;
-      margin-bottom: $spacing-6;
+      margin-bottom: $spacing-6; /* Reduced space on mobile */
     }
   }
   
@@ -62,25 +62,25 @@
     max-width: 500px !important;
     margin: 0 auto !important;
     
-    /* FIXED: Proper vertical gap for mobile */
-    gap: 1px !important; /* Using explicit pixel value for predictability */
+    /* FIXED: Smaller gap specifically for mobile */
+    gap: 0px !important; /* Virtually no gap on mobile */
     
     @media (min-width: $md) {
       grid-template-columns: repeat(2, 1fr) !important;
       max-width: 800px !important;
       
-      /* FIXED: Smaller gap on medium screens */
-      gap: 1px !important; /* Less spacing on tablet */
+      /* FIXED: Slightly more gap on medium screens */
+      gap: 1px !important;
     }
     
     @media (min-width: $lg) {
       max-width: 800px !important;
-      gap: $spacing-1 !important; /* Normal spacing on large screens */
+      gap: $spacing-1 !important;
     }
     
     @media (min-width: $xl) {
       max-width: 1000px !important;
-      gap: $spacing-16 !important; /* Moderate spacing on XL screens */
+      gap: $spacing-16 !important;
     }
   }
   
@@ -94,6 +94,12 @@
     
     // Use aspect ratio instead of fixed height to prevent content cropping
     aspect-ratio: 4/3; // Default aspect ratio (adjust if needed)
+    
+    /* Reduce bottom margin specifically on mobile to reduce gap between cards */
+    @media (max-width: $sm) {
+      margin-bottom: -3px !important; /* Negative margin to reduce gap between cards */
+      border-radius: 5px; /* Smaller radius on mobile */
+    }
     
     // Responsive sizing based on screen width
     @media (min-width: $md) {

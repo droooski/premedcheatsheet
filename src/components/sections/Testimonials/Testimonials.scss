@@ -1,0 +1,151 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as mix;
+
+.testimonials {
+  padding: $spacing-12 0;
+  background-color: $white;
+  position: relative;
+  
+  // Add thin black line at the top that spans the entire screen
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: $black;
+    width: 100%;
+  }
+  
+  // Add thin black line at the bottom that spans the entire screen
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: $black;
+    width: 100%;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-8 0;
+  }
+  
+  h2 {
+    text-align: center;
+    font-family: $font-family-mincho;
+    font-weight: 400;
+    font-size: 3rem;
+    margin-bottom: $spacing-12;
+    color: $text-color;
+    
+    @media (min-width: $xl) {
+      font-size: 3.5rem;
+      margin-bottom: $spacing-16;
+    }
+    
+    @media (max-width: $md) {
+      font-size: 2.5rem;
+      margin-bottom: $spacing-8;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 2rem;
+      margin-bottom: $spacing-6;
+    }
+  }
+  
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-6;
+    
+    @media (max-width: $lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (max-width: $md) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .testimonial-card {
+    background-color: $white;
+    border-radius: 25px;
+    border: 2px solid $black;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    }
+  }
+  
+  .testimonial-content {
+    padding: $spacing-6;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    
+    .quote {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: $text-color;
+      margin-bottom: $spacing-4;
+      flex-grow: 1;
+      
+      strong {
+        font-weight: 600;
+        color: darken($primary-color, 10%);
+      }
+      
+      @media (min-width: $xl) {
+        font-size: 1rem;
+      }
+      
+      @media (max-width: $sm) {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    
+    .author-icon {
+      width: 30px;
+      height: 30px;
+      margin-right: $spacing-3;
+      object-fit: contain;
+      
+      @media (min-width: $xl) {
+        width: 35px;
+        height: 35px;
+      }
+      
+      @media (max-width: $sm) {
+        width: 25px;
+        height: 25px;
+      }
+    }
+    
+    .author-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: $text-color;
+      
+      @media (min-width: $xl) {
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
