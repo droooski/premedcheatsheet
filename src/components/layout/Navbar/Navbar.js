@@ -1,4 +1,4 @@
-// src/components/layout/Navbar/Navbar.js
+// src/components/layout/Navbar/Navbar.js - Updated for proper nav items
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
@@ -11,6 +11,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [paymentVerified, setPaymentVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -41,15 +42,25 @@ const Navbar = () => {
             console.log("User profile data:", profileData);
             setUserProfile(profileData);
             setIsAdmin(profileData.isAdmin === true);
+            
+            // Check payment verification
+            const hasVerifiedPayment = profileData.paymentVerified === true ||
+              (profileData.subscriptions && 
+               profileData.subscriptions.length > 0 && 
+               profileData.subscriptions.some(sub => sub.active));
+               
+            setPaymentVerified(hasVerifiedPayment);
           } else {
             console.log("No user profile found");
             setUserProfile(null);
             setIsAdmin(false);
+            setPaymentVerified(false);
           }
         } catch (error) {
           console.error('Error checking user profile:', error);
           setUserProfile(null);
           setIsAdmin(false);
+          setPaymentVerified(false);
         }
       } else {
         // Check if guest access is still valid
@@ -63,6 +74,7 @@ const Navbar = () => {
         
         setUserProfile(null);
         setIsAdmin(false);
+        setPaymentVerified(false);
       }
       
       setLoading(false);
@@ -107,17 +119,6 @@ const Navbar = () => {
     navigate('/profile');
   };
 
-  // Check if user has active subscription
-  const hasSubscription = () => {
-    if (userProfile && userProfile.subscriptions && userProfile.subscriptions.length > 0) {
-      // Check if any subscription is active
-      return userProfile.subscriptions.some(sub => {
-        return sub.active && new Date(sub.endDate) > new Date();
-      });
-    }
-    return false;
-  };
-
   // Determine if a nav link is active
   const isActive = (path) => {
     return location.pathname === path;
@@ -126,19 +127,20 @@ const Navbar = () => {
   // Separate guest status from auth status
   const isAuthenticated = !!user;
   const hasGuestAccess = isGuest();
+  const isPaidUser = isAuthenticated && paymentVerified;
 
   return (
     <nav className="navbar">
       <div className="container">
         <div className="navbar-content">
-          {/* Left side with logo, brand name, and primary navigation */}
+          {/* Left side with logo and brand name */}
           <div className="navbar-left">
             <Link to={isAuthenticated ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
               <img src={logo} alt="PremedCheatsheet" />
               <span>PremedCheatsheet</span>
             </Link>
             
-            {/* Primary navigation (Home, About, Pricing) - Show when NOT logged in or is a guest */}
+            {/* Primary navigation - Show ONLY for non-authenticated or guest users */}
             {(!isAuthenticated || hasGuestAccess) && (
               <ul className="primary-menu">
                 <li>
@@ -160,8 +162,8 @@ const Navbar = () => {
             )}
           </div>
           
-          {/* Center navigation - only shown when logged in AND not a guest */}
-          {isAuthenticated && !hasGuestAccess && (
+          {/* Center navigation - Only show when authenticated AND payment verified */}
+          {isPaidUser && !hasGuestAccess && (
             <div className="navbar-center">
               <ul className="main-menu">
                 <li>
@@ -200,7 +202,7 @@ const Navbar = () => {
           {/* Right side with account or login links */}
           <div className="navbar-right">
             {isAuthenticated ? (
-              // For registered users
+              // For verified authenticated users
               <div className="account-menu">
                 <Link to="/account" className="account-button">
                   Account
@@ -242,8 +244,8 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              {isAuthenticated && !hasGuestAccess ? (
-                // For registered users
+              {isPaidUser ? (
+                // For paid users - show member menu items
                 <>
                   <li>
                     <Link 

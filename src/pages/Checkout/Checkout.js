@@ -49,6 +49,8 @@ const Checkout = () => {
     price: 5.99     // Default price
   });
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [pendingUserData, setPendingUserData] = useState(null);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -481,63 +483,161 @@ useEffect(() => {
     }
   };
 
-  // Process payment
-const handleProcessPayment = async () => {
-  setLoading(true);
-  setError('');
+  // Handle registration data collection but don't create account yet
+const handleAuthDataCollection = (userData) => {
+  console.log("Registration data collected:", userData);
+  
+  // Store pending user data
+  setPendingUserData({
+    email: userData.email,
+    password: userData.password,
+    firstName: userData.firstName || '',
+    lastName: userData.lastName || ''
+  });
+  
+  // Mark registration step as complete
+  setRegistrationComplete(true);
+  
+  // Close auth modal
+  setShowAuthModal(false);
+  
+  // Move to payment step without creating Firebase account
+  changeCheckoutStep('payment');
+};
 
-  try {
-    // Validate user authentication
-    if (!user || !user.uid) {
-      throw new Error('You must be logged in to complete this purchase');
-    }
-    
-    // Check if purchase is free with 100% discount coupon
-    if (isFreeWithCoupon()) {
-      return processFreePurchase();
-    }
-    
-    // Process the payment first before granting access
-    const paymentResult = await processPayment(
-      cardInfo,
-      user.uid,
-      {
+  // Process payment
+  const handleProcessPayment = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // For free purchases with 100% coupon, create account and proceed
+      if (isFreeWithCoupon()) {
+        const registrationResult = await registerUser(
+          pendingUserData.email,
+          pendingUserData.password,
+          pendingUserData.firstName,
+          pendingUserData.lastName
+        );
+
+        if (!registrationResult.success) {
+          throw new Error(registrationResult.error || 'Account creation failed');
+        }
+
+        // Set the newly created user
+        setUser(registrationResult.user);
+        
+        // Process free order for the new user
+        const orderResult = await processPayment(
+          null,
+          registrationResult.user.uid,
+          {
+            amount: 0,
+            plan: selectedPlan,
+            discount: 100,
+            couponCode: couponCode,
+            isFree: true
+          }
+        );
+
+        if (!orderResult.success) {
+          throw new Error(orderResult.error);
+        }
+
+        // Set order ID and move to confirmation
+        setOrderId(orderResult.orderId);
+        changeCheckoutStep('confirmation');
+        return;
+      }
+
+      // Process payment first
+      const paymentResult = {
+        success: true, // Replace with actual payment processing
+        paymentId: `sim_${Math.random().toString(36).substring(2, 15)}`
+      };
+
+      if (!paymentResult.success) {
+        throw new Error('Payment processing failed');
+      }
+
+      // Payment succeeded, NOW create the user account
+      const registrationResult = await registerUser(
+        pendingUserData.email,
+        pendingUserData.password,
+        pendingUserData.firstName,
+        pendingUserData.lastName
+      );
+
+      if (!registrationResult.success) {
+        throw new Error(registrationResult.error || 'Account creation failed');
+      }
+
+      // Set the newly created user
+      setUser(registrationResult.user);
+
+      // Create order in Firebase for the new user
+      const orderData = {
+        userId: registrationResult.user.uid,
         amount: parseFloat(getFinalPrice()),
         plan: selectedPlan,
-        discount: discount,
-        couponCode: couponCode
-      }
-    );
-    
-    if (!paymentResult.success) {
-      throw new Error(paymentResult.error || 'Payment processing failed');
-    }
-    
-    // Payment successful, now update user's subscription status in Firestore
-      const db = getFirestore();
-      const userRef = doc(db, "users", user.uid);
+        status: 'completed',
+        paymentId: paymentResult.paymentId,
+        createdAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        couponCode: couponApplied ? couponCode : null,
+        discount: couponApplied ? discount : 0
+      };
 
-      await updateDoc(userRef, {
+      // Add order to Firestore
+      const db = getFirestore();
+      const orderRef = await addDoc(collection(db, 'orders'), orderData);
+
+      // Update user document with subscription and verification
+      await updateDoc(doc(db, "users", registrationResult.user.uid), {
         paymentVerified: true,
         purchaseDate: new Date().toISOString(),
         purchasedPlan: selectedPlan,
-        purchaseAmount: parseFloat(getFinalPrice())
+        purchaseAmount: parseFloat(getFinalPrice()),
+        subscriptions: [{
+          plan: selectedPlan,
+          startDate: new Date().toISOString(),
+          endDate: getSubscriptionEndDate(),
+          orderId: orderRef.id,
+          active: true
+        }]
       });
 
-    // Set session storage for immediate access
-    sessionStorage.setItem('paymentVerified', 'true');
+      // Set payment verification in session storage
+      sessionStorage.setItem('paymentVerified', 'true');
 
-    // Set the order ID and move to confirmation page
-    setOrderId(paymentResult.orderId);
-    changeCheckoutStep('confirmation');
+      // Move to confirmation step
+      setOrderId(orderRef.id);
+      changeCheckoutStep('confirmation');
+
+    } catch (error) {
+      console.error("Payment/Registration error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate subscription end date
+  const getSubscriptionEndDate = () => {
+    const now = new Date();
+    const endDate = new Date(now);
     
-  } catch (error) {
-    console.error("Payment processing error:", error);
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (subscription.type === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (subscription.type === 'yearly') {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    } else {
+      // One-time purchases - give 5 years access
+      endDate.setFullYear(endDate.getFullYear() + 5);
+    }
+    
+    return endDate.toISOString();
+  };
 
   // Get plan display name
   const getPlanDisplayName = () => {
@@ -960,14 +1060,14 @@ const renderPaymentForm = () => {
       </div>
       
       {/* Auth Modal with preventRedirect prop */}
-      <AuthModal 
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        initialMode={isLoginMode ? 'login' : 'signup'}
-        preventRedirect={true} /* This prevents automatic redirection */
-      />
-      
+        <AuthModal 
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthDataCollection} // Use the new handler
+          initialMode="signup"
+          preventRedirect={true}
+          dataCollectionOnly={true} // Only collect data, don't register yet
+        />
       <Footer />
     </div>
   );

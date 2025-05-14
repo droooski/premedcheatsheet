@@ -4,7 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
 import './AuthModal.scss';
 
-const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login', preventRedirect = false }) => {
+const AuthModal = ({ 
+  isOpen, 
+  onClose, 
+  onSuccess, 
+  initialMode = 'login', 
+  preventRedirect = false,
+  dataCollectionOnly = false // New prop
+}) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,32 +57,36 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login', preventR
     setLoading(true);
 
     try {
-      console.log("Form submission started");
-      
       // Validate form data
       if (!isLogin && password !== confirmPassword) {
         throw new Error('Passwords do not match');
       }
 
-      console.log("Authentication method:", isLogin ? "Login" : "Register");
-      
+      // If dataCollectionOnly is true, don't actually register the user
+      if (dataCollectionOnly && !isLogin) {
+        // Just pass the data to onSuccess without authentication
+        onSuccess({
+          email,
+          password,
+          firstName,
+          lastName,
+          dataCollectionOnly: true
+        });
+        
+        setLoading(false);
+        return;
+      }
+
+      // Normal authentication flow for login or full registration
       let result;
       
       if (isLogin) {
-        // Login with Firebase through our service
-        console.log("Attempting login with:", email);
         result = await loginUser(email, password);
       } else {
-        // Register with Firebase through our service
-        console.log("Attempting registration with:", email);
         result = await registerUser(email, password, firstName, lastName);
       }
 
-      console.log("Auth result:", result);
-      
       if (result.user) {
-        console.log("Auth success, getting user profile");
-        
         // Get user profile data
         let userProfile = null;
         if (result.user.uid) {
@@ -86,26 +97,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login', preventR
         }
         
         // Call onSuccess callback with user data and profile
-        if (onSuccess) {
-          onSuccess({
-            user: result.user,
-            profile: userProfile,
-            email,
-            firstName,
-            lastName
-          });
-        }
-        
-        // Close the modal first
-        onClose();
-        
-        // FIXED: Only navigate to profile if preventRedirect is false
-        // This allows checkout flow to continue properly
-        if (!preventRedirect) {
-          setTimeout(() => {
-            navigate('/profile');
-          }, 100);
-        }
+        onSuccess({
+          user: result.user,
+          profile: userProfile,
+          email,
+          firstName,
+          lastName
+        });
       } else {
         throw new Error(result.error || 'Authentication failed');
       }
