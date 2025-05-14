@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import AuthModal from '../../components/auth/AuthModal';
+import PricingCards from '../../components/PricingCards/PricingCards';
 import { onAuthChange, getCurrentUser } from '../../firebase/authService';
 import { processPayment } from '../../services/paymentService';
 import './Checkout.scss';
@@ -12,8 +13,10 @@ const Checkout = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const mode = queryParams.get('mode');
+  const initialPlan = queryParams.get('plan') || 'monthly';
+  
   // Basic state management
-  const [selectedPlan, setSelectedPlan] = useState('monthly');
+  const [selectedPlan, setSelectedPlan] = useState(initialPlan);
   const [couponCode, setCouponCode] = useState('');
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
@@ -81,7 +84,24 @@ const Checkout = () => {
     }
   }, [checkoutStep, orderId, navigate]);
 
-  // Plan toggle function
+  // Handle plan selection from PricingCards component
+  const handleSelectPlan = (plan) => {
+    setSelectedPlan(plan);
+    
+    // Reset coupon when plan changes
+    setCouponApplied(false);
+    setCouponCode('');
+    setDiscount(0);
+    
+    // Move to payment step or show auth modal
+    if (user) {
+      setCheckoutStep('payment');
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
+  // Plan toggle function for monthly/yearly subscription options
   const togglePlan = (plan) => {
     setSelectedPlan(plan);
     // Reset coupon when plan changes
@@ -111,7 +131,23 @@ const Checkout = () => {
 
   // Calculate prices including any discounts
   const getBasePrice = () => {
-    return selectedPlan === 'monthly' ? 5.99 : 59.99;
+    // Return price based on selected plan
+    switch (selectedPlan) {
+      case 'monthly':
+        return 5.99;
+      case 'yearly':
+        return 59.99;
+      case 'cheatsheet':
+        return 14.99;
+      case 'cheatsheet-plus':
+        return 29.99;
+      case 'application':
+        return 19.99;
+      case 'application-plus':
+        return 34.99;
+      default:
+        return 5.99;
+    }
   };
 
   const getDiscountAmount = () => {
@@ -263,6 +299,26 @@ const Checkout = () => {
     }
   };
 
+  // Get plan display name
+  const getPlanDisplayName = () => {
+    switch(selectedPlan) {
+      case 'monthly':
+        return 'Monthly Subscription';
+      case 'yearly':
+        return 'Annual Subscription';
+      case 'cheatsheet':
+        return 'The Cheatsheet';
+      case 'cheatsheet-plus':
+        return 'The Cheatsheet+';
+      case 'application':
+        return 'Application Cheatsheet';
+      case 'application-plus':
+        return 'Application Cheatsheet+';
+      default:
+        return 'Selected Plan';
+    }
+  };
+
   // Render different steps based on checkout progress
   const renderCheckoutStep = () => {
     switch (checkoutStep) {
@@ -277,106 +333,127 @@ const Checkout = () => {
     }
   };
 
-  // Render plan selection step
+  // Render plan selection step with PricingCards
   const renderPlanSelection = () => {
+    // Check if query param has plan selection
+    if (location.search.includes('plan=')) {
+      // If plan is pre-selected, move to payment step
+      if (user) {
+        if (checkoutStep === 'plan') {
+          setCheckoutStep('payment');
+        }
+        return renderPaymentForm();
+      } else {
+        // If no user, show auth modal
+        if (!showAuthModal) {
+          setShowAuthModal(true);
+        }
+      }
+    }
+    
     return (
       <>
         <div className="checkout-header">
-          <h1>This is your in.</h1>
-          <p>The full profiles of successful medical school applicants will be available once you join the cheatsheet.</p>
+          <h1>Choose Your Plan</h1>
+          <p>Select the plan that best fits your needs</p>
         </div>
         
-        <div className="plan-selector">
-          <div className="plan-tabs">
-            <div 
-              className={`plan-tab ${selectedPlan === 'monthly' ? 'active' : ''}`}
-              onClick={() => togglePlan('monthly')}
-            >
-              Monthly
-            </div>
-            <div 
-              className={`plan-tab ${selectedPlan === 'yearly' ? 'active' : ''}`}
-              onClick={() => togglePlan('yearly')}
-            >
-              Yearly <span className="save-badge">Save 20%</span>
-            </div>
-          </div>
-          
-          <div className="price-card">
-            <div className="price-header">
-              <h3>{selectedPlan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}</h3>
-              <div className="price">
-                <span className="amount">${getFinalPrice()}</span>
-                <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
+        <PricingCards onSelectPlan={handleSelectPlan} />
+        
+        <div className="subscription-options">
+          <h2>Or Subscribe to Get Everything</h2>
+          <div className="plan-selector">
+            <div className="plan-tabs">
+              <div 
+                className={`plan-tab ${selectedPlan === 'monthly' ? 'active' : ''}`}
+                onClick={() => togglePlan('monthly')}
+              >
+                Monthly
               </div>
-              {couponApplied && discount === 100 && (
-                <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold', marginTop: '10px'}}>
-                  100% OFF - FREE ACCESS!
-                </div>
-              )}
-              {selectedPlan === 'monthly' && !isFreeWithCoupon() && (
-                <div className="yearly-equivalent">
-                  ${(parseFloat(getFinalPrice()) * 12).toFixed(2)}/year
-                </div>
-              )}
-              {selectedPlan === 'yearly' && !isFreeWithCoupon() && (
-                <div className="savings-callout">
-                  You save ${((5.99 * 12) - 59.99).toFixed(2)} per year!
-                </div>
-              )}
+              <div 
+                className={`plan-tab ${selectedPlan === 'yearly' ? 'active' : ''}`}
+                onClick={() => togglePlan('yearly')}
+              >
+                Yearly <span className="save-badge">Save 20%</span>
+              </div>
             </div>
             
-            <ul className="features-list">
-              <li>Access to all accepted student profiles</li>
-              <li>Detailed stats: GPA, MCAT, extracurriculars</li>
-              <li>Application timelines and strategies</li>
-              <li>School selection insights</li>
-              <li>Personal statement guidance</li>
-              {selectedPlan === 'yearly' && <li className="premium-feature">Priority access to new profiles</li>}
-              {selectedPlan === 'yearly' && <li className="premium-feature">Download up to 50 profiles per month</li>}
-            </ul>
-            
-            {!showCouponInput ? (
-              <div className="coupon-prompt" onClick={toggleCouponInput}>
-                Have a coupon code? Enter it here
-              </div>
-            ) : (
-              <div className="coupon-input-group">
-                <input
-                  type="text"
-                  placeholder="Enter coupon code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  disabled={couponApplied}
-                />
-                <button 
-                  className="apply-coupon-btn"
-                  onClick={applyCoupon}
-                  disabled={couponApplied}
-                >
-                  {couponApplied ? 'Applied' : 'Apply'}
-                </button>
-              </div>
-            )}
-            
-            <button className="checkout-button" onClick={startCheckout}>
-              {isFreeWithCoupon() ? 'Get Free Access Now' : 'Get Access Now'}
-            </button>
-            
-            {!isFreeWithCoupon() && (
-              <div className="payment-methods">
-                <div className="payment-icons">
-                  <span className="payment-icon">💳</span>
-                  <span className="payment-icon">💰</span>
-                  <span className="payment-icon">🔒</span>
+            <div className="price-card">
+              <div className="price-header">
+                <h3>{selectedPlan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}</h3>
+                <div className="price">
+                  <span className="amount">${getFinalPrice()}</span>
+                  <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
                 </div>
-                <p className="secure-payment">Secure payment processing</p>
+                {couponApplied && discount === 100 && (
+                  <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold', marginTop: '10px'}}>
+                    100% OFF - FREE ACCESS!
+                  </div>
+                )}
+                {selectedPlan === 'monthly' && !isFreeWithCoupon() && (
+                  <div className="yearly-equivalent">
+                    ${(parseFloat(getFinalPrice()) * 12).toFixed(2)}/year
+                  </div>
+                )}
+                {selectedPlan === 'yearly' && !isFreeWithCoupon() && (
+                  <div className="savings-callout">
+                    You save ${((5.99 * 12) - 59.99).toFixed(2)} per year!
+                  </div>
+                )}
               </div>
-            )}
-            
-            <p className="guarantee">
-              7-day money-back guarantee. No questions asked.
-            </p>
+              
+              <ul className="features-list">
+                <li>Access to all accepted student profiles</li>
+                <li>Detailed stats: GPA, MCAT, extracurriculars</li>
+                <li>Application timelines and strategies</li>
+                <li>School selection insights</li>
+                <li>Personal statement guidance</li>
+                {selectedPlan === 'yearly' && <li className="premium-feature">Priority access to new profiles</li>}
+                {selectedPlan === 'yearly' && <li className="premium-feature">Download up to 50 profiles per month</li>}
+              </ul>
+              
+              {!showCouponInput ? (
+                <div className="coupon-prompt" onClick={toggleCouponInput}>
+                  Have a coupon code? Enter it here
+                </div>
+              ) : (
+                <div className="coupon-input-group">
+                  <input
+                    type="text"
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={couponApplied}
+                  />
+                  <button 
+                    className="apply-coupon-btn"
+                    onClick={applyCoupon}
+                    disabled={couponApplied}
+                  >
+                    {couponApplied ? 'Applied' : 'Apply'}
+                  </button>
+                </div>
+              )}
+              
+              <button className="checkout-button" onClick={startCheckout}>
+                {isFreeWithCoupon() ? 'Get Free Access Now' : 'Get Access Now'}
+              </button>
+              
+              {!isFreeWithCoupon() && (
+                <div className="payment-methods">
+                  <div className="payment-icons">
+                    <span className="payment-icon">💳</span>
+                    <span className="payment-icon">💰</span>
+                    <span className="payment-icon">🔒</span>
+                  </div>
+                  <p className="secure-payment">Secure payment processing</p>
+                </div>
+              )}
+              
+              <p className="guarantee">
+                7-day money-back guarantee. No questions asked.
+              </p>
+            </div>
           </div>
         </div>
         
@@ -425,7 +502,7 @@ const Checkout = () => {
           <h3>Order Summary</h3>
           <div className="order-details">
             <div className="order-item">
-              <span>PremedCheatsheet {selectedPlan === 'monthly' ? 'Monthly' : 'Annual'} Plan</span>
+              <span>{getPlanDisplayName()}</span>
               <span>${getBasePrice().toFixed(2)}</span>
             </div>
             {couponApplied && (
