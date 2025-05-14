@@ -13,7 +13,7 @@ const Checkout = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const mode = queryParams.get('mode');
-  const initialPlan = queryParams.get('plan') || 'monthly';
+  const initialPlan = queryParams.get('plan') || 'cheatsheet';
   
   // Basic state management
   const [selectedPlan, setSelectedPlan] = useState(initialPlan);
@@ -101,15 +101,6 @@ const Checkout = () => {
     }
   };
 
-  // Plan toggle function for monthly/yearly subscription options
-  const togglePlan = (plan) => {
-    setSelectedPlan(plan);
-    // Reset coupon when plan changes
-    setCouponApplied(false);
-    setCouponCode('');
-    setDiscount(0);
-  };
-
   // Coupon toggle function
   const toggleCouponInput = () => {
     setShowCouponInput(!showCouponInput);
@@ -133,10 +124,6 @@ const Checkout = () => {
   const getBasePrice = () => {
     // Return price based on selected plan
     switch (selectedPlan) {
-      case 'monthly':
-        return 5.99;
-      case 'yearly':
-        return 59.99;
       case 'cheatsheet':
         return 14.99;
       case 'cheatsheet-plus':
@@ -146,7 +133,7 @@ const Checkout = () => {
       case 'application-plus':
         return 34.99;
       default:
-        return 5.99;
+        return 14.99;
     }
   };
 
@@ -168,23 +155,6 @@ const Checkout = () => {
   // Check if coupon provides a 100% discount
   const isFreeWithCoupon = () => {
     return couponApplied && parseFloat(getFinalPrice()) === 0;
-  };
-
-  // Start checkout process
-  const startCheckout = () => {
-    if (user) {
-      // User is already authenticated, process based on coupon
-      if (isFreeWithCoupon()) {
-        // If 100% discount, skip payment and go straight to confirmation
-        processFreePurchase();
-      } else {
-        // Otherwise proceed to payment
-        setCheckoutStep('payment');
-      }
-    } else {
-      // Show authentication modal
-      setShowAuthModal(true);
-    }
   };
 
   // Process a free purchase with 100% discount coupon
@@ -302,10 +272,6 @@ const Checkout = () => {
   // Get plan display name
   const getPlanDisplayName = () => {
     switch(selectedPlan) {
-      case 'monthly':
-        return 'Monthly Subscription';
-      case 'yearly':
-        return 'Annual Subscription';
       case 'cheatsheet':
         return 'The Cheatsheet';
       case 'cheatsheet-plus':
@@ -360,103 +326,6 @@ const Checkout = () => {
         
         <PricingCards onSelectPlan={handleSelectPlan} />
         
-        <div className="subscription-options">
-          <h2>Or Subscribe to Get Everything</h2>
-          <div className="plan-selector">
-            <div className="plan-tabs">
-              <div 
-                className={`plan-tab ${selectedPlan === 'monthly' ? 'active' : ''}`}
-                onClick={() => togglePlan('monthly')}
-              >
-                Monthly
-              </div>
-              <div 
-                className={`plan-tab ${selectedPlan === 'yearly' ? 'active' : ''}`}
-                onClick={() => togglePlan('yearly')}
-              >
-                Yearly <span className="save-badge">Save 20%</span>
-              </div>
-            </div>
-            
-            <div className="price-card">
-              <div className="price-header">
-                <h3>{selectedPlan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}</h3>
-                <div className="price">
-                  <span className="amount">${getFinalPrice()}</span>
-                  <span className="period">/{selectedPlan === 'monthly' ? 'month' : 'year'}</span>
-                </div>
-                {couponApplied && discount === 100 && (
-                  <div className="discount-callout" style={{color: '#10b981', fontWeight: 'bold', marginTop: '10px'}}>
-                    100% OFF - FREE ACCESS!
-                  </div>
-                )}
-                {selectedPlan === 'monthly' && !isFreeWithCoupon() && (
-                  <div className="yearly-equivalent">
-                    ${(parseFloat(getFinalPrice()) * 12).toFixed(2)}/year
-                  </div>
-                )}
-                {selectedPlan === 'yearly' && !isFreeWithCoupon() && (
-                  <div className="savings-callout">
-                    You save ${((5.99 * 12) - 59.99).toFixed(2)} per year!
-                  </div>
-                )}
-              </div>
-              
-              <ul className="features-list">
-                <li>Access to all accepted student profiles</li>
-                <li>Detailed stats: GPA, MCAT, extracurriculars</li>
-                <li>Application timelines and strategies</li>
-                <li>School selection insights</li>
-                <li>Personal statement guidance</li>
-                {selectedPlan === 'yearly' && <li className="premium-feature">Priority access to new profiles</li>}
-                {selectedPlan === 'yearly' && <li className="premium-feature">Download up to 50 profiles per month</li>}
-              </ul>
-              
-              {!showCouponInput ? (
-                <div className="coupon-prompt" onClick={toggleCouponInput}>
-                  Have a coupon code? Enter it here
-                </div>
-              ) : (
-                <div className="coupon-input-group">
-                  <input
-                    type="text"
-                    placeholder="Enter coupon code"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    disabled={couponApplied}
-                  />
-                  <button 
-                    className="apply-coupon-btn"
-                    onClick={applyCoupon}
-                    disabled={couponApplied}
-                  >
-                    {couponApplied ? 'Applied' : 'Apply'}
-                  </button>
-                </div>
-              )}
-              
-              <button className="checkout-button" onClick={startCheckout}>
-                {isFreeWithCoupon() ? 'Get Free Access Now' : 'Get Access Now'}
-              </button>
-              
-              {!isFreeWithCoupon() && (
-                <div className="payment-methods">
-                  <div className="payment-icons">
-                    <span className="payment-icon">💳</span>
-                    <span className="payment-icon">💰</span>
-                    <span className="payment-icon">🔒</span>
-                  </div>
-                  <p className="secure-payment">Secure payment processing</p>
-                </div>
-              )}
-              
-              <p className="guarantee">
-                7-day money-back guarantee. No questions asked.
-              </p>
-            </div>
-          </div>
-        </div>
-        
         <div className="faq-section">
           <h3>Frequently Asked Questions</h3>
           <div className="faq-item">
@@ -505,6 +374,30 @@ const Checkout = () => {
               <span>{getPlanDisplayName()}</span>
               <span>${getBasePrice().toFixed(2)}</span>
             </div>
+            
+            {!showCouponInput ? (
+              <div className="coupon-prompt" onClick={toggleCouponInput}>
+                Have a coupon code? Enter it here
+              </div>
+            ) : (
+              <div className="coupon-input-group">
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  disabled={couponApplied}
+                />
+                <button 
+                  className="apply-coupon-btn"
+                  onClick={applyCoupon}
+                  disabled={couponApplied}
+                >
+                  {couponApplied ? 'Applied' : 'Apply'}
+                </button>
+              </div>
+            )}
+            
             {couponApplied && (
               <div className="order-item discount">
                 <span>Discount ({discount}%)</span>

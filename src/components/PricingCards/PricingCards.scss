@@ -1,42 +1,63 @@
+/* src/components/PricingCards/PricingCards.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
 .pricing-cards-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 1200px;
+  max-width: 100%; /* Take up the full container width */
   margin: 0 auto;
   padding: 20px;
+  width: 100%;
 }
 
 .pricing-cards-row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cards per row on larger screens */
+  gap: 30px;
+  margin-bottom: 40px;
   width: 100%;
+  max-width: 1600px; /* Much wider maximum width */
+  
+  /* Responsive adjustments */
+  @media (max-width: $md) {
+    grid-template-columns: 1fr; /* 1 card per row on medium and smaller screens */
+  }
 }
 
 .pricing-card {
   background-color: #f5f7f6;
   border: 1px solid #000;
   border-radius: 15px;
-  padding: 30px;
+  padding: 40px 30px;
   width: 100%;
-  max-width: 340px;
+  min-width: 320px; /* Minimum width for cards */
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
   
   &.application-plus {
-    max-width: 400px;
+    grid-column: 1 / -1; /* Make application-plus take full width */
+    max-width: 600px;
     margin: 0 auto;
+    
+    @media (max-width: $md) {
+      max-width: 100%;
+    }
   }
   
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
     color: #000;
   }
   
@@ -44,16 +65,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     
     .amount {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: 600;
     }
     
     .period {
-      font-size: 1rem;
+      font-size: 1.1rem;
       color: #666;
+      margin-top: 4px;
     }
   }
   
@@ -61,54 +83,136 @@
     background-color: transparent;
     border: 1px solid #000;
     color: #000;
-    padding: 10px 40px;
-    font-size: 1rem;
-    border-radius: 4px;
+    padding: 12px 50px;
+    font-size: 1.1rem;
+    border-radius: 8px;
     cursor: pointer;
-    margin-bottom: 20px;
-    transition: background-color 0.3s, color 0.3s;
+    margin-bottom: 30px;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    width: 80%;
     
     &:hover {
       background-color: #000;
       color: #fff;
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
   }
   
   .description {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    min-height: 50px;
   }
   
   .divider {
     width: 100%;
     height: 1px;
     background-color: #ccc;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
   
   .features-list {
     width: 100%;
     text-align: left;
-    padding-left: 0;
+    padding-left: 10px;
     list-style-type: none;
     
     li {
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      line-height: 1.4;
+      margin-bottom: 16px;
+      font-size: 1rem;
+      line-height: 1.5;
+      
+      &:before {
+        content: "✓";
+        margin-right: 10px;
+        color: #10B981; /* Green checkmark */
+      }
     }
+  }
+  
+  /* Coupon section */
+  .coupon-section {
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed #ccc;
+  }
+  
+  .coupon-prompt {
+    color: #065f46;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    text-decoration: underline;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  
+  .coupon-input-group {
+    display: flex;
+    margin-bottom: 20px;
+    width: 100%;
+    
+    input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px 0 0 8px;
+      font-size: 0.9rem;
+      
+      &:focus {
+        outline: none;
+        border-color: #065f46;
+      }
+      
+      &:disabled {
+        background-color: #f3f4f6;
+      }
+    }
+    
+    .apply-coupon-btn {
+      padding: 10px 15px;
+      background-color: #065f46;
+      color: white;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      font-weight: 500;
+      
+      &:hover:not(:disabled) {
+        background-color: darken(#065f46, 5%);
+      }
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+  }
+  
+  .discount-text {
+    color: #10B981;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  .final-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #065f46;
+    margin-bottom: 20px;
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .pricing-cards-row {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .pricing-card {
-    max-width: 100%;
-  }
+/* Extra spacing for the container to improve appearance */
+.checkout-header + .pricing-cards-container {
+  margin-top: 40px;
+  margin-bottom: 60px;
 }
