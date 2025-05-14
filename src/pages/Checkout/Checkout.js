@@ -51,6 +51,7 @@ const Checkout = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [pendingUserData, setPendingUserData] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+  const [processingFreeOrder, setProcessingFreeOrder] = useState(false);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -243,6 +244,10 @@ useEffect(() => {
 
   // Process a free purchase with 100% discount coupon
   const processFreePurchase = async () => {
+    // Prevent multiple calls
+    if (processingFreeOrder) return;
+    
+    setProcessingFreeOrder(true);
     setLoading(true);
     setError('');
     
@@ -273,13 +278,14 @@ useEffect(() => {
       } else {
         throw new Error(result.error || 'Error processing your free access');
       }
-    } catch (error) {
-      console.error("Free purchase error:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error("Free purchase error:", error);
+    setError(error.message);
+  } finally {
+    setLoading(false);
+    // Don't reset processingFreeOrder here to prevent subsequent attempts
+  }
+};
 
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
@@ -766,27 +772,30 @@ const handleAuthDataCollection = (userData) => {
   };
 
   // Render payment form step
-const renderPaymentForm = () => {
-  // If purchase is free with 100% discount, process it immediately
-  if (isFreeWithCoupon()) {
-    // Trigger free purchase processing
-    if (!loading && !orderId) {
-      processFreePurchase();
+  const renderPaymentForm = () => {
+    // If purchase is free with 100% discount, process it immediately
+    if (isFreeWithCoupon()) {
+      // IMPORTANT: Only trigger the free purchase processing if not already loading or completed
+      if (!loading && !orderId) {
+        // Use useEffect instead of direct call to prevent infinite render loop
+        useEffect(() => {
+          processFreePurchase();
+        }, []); // Empty dependency array so it only runs once
+      }
+      
+      return (
+        <div className="payment-form-container">
+          <div className="payment-header">
+            <h2>Processing your order...</h2>
+            <p>Please wait while we process your free access.</p>
+          </div>
+          
+          <div className="loader-container">
+            <div className="loader"></div>
+          </div>
+        </div>
+      );
     }
-    
-    return (
-      <div className="payment-form-container">
-        <div className="payment-header">
-          <h2>Processing your order...</h2>
-          <p>Please wait while we process your free access.</p>
-        </div>
-        
-        <div className="loader-container">
-          <div className="loader"></div>
-        </div>
-      </div>
-    );
-  }
   
   return (
     <div className="payment-form-container">
