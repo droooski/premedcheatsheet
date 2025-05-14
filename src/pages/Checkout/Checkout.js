@@ -282,8 +282,8 @@ const Checkout = () => {
     return (
       <>
         <div className="checkout-header">
-          <h1>Get Full Access to PremedCheatsheet</h1>
-          <p>Join thousands of pre-med students who've found their path to medical school using our curated profiles database.</p>
+          <h1>This is your in.</h1>
+          <p>The full profiles of successful medical school applicants will be available once you join the cheatsheet.</p>
         </div>
         
         <div className="plan-selector">
