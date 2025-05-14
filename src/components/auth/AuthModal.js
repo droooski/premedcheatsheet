@@ -1,10 +1,10 @@
-// src/components/auth/AuthModal.js
+// src/components/auth/AuthModal.js - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
 import './AuthModal.scss';
 
-const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
+const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login', preventRedirect = false }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,10 +99,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
         // Close the modal first
         onClose();
         
-        // Navigate to profile page after successful authentication
-        setTimeout(() => {
-          navigate('/profile');
-        }, 100);
+        // FIXED: Only navigate to profile if preventRedirect is false
+        // This allows checkout flow to continue properly
+        if (!preventRedirect) {
+          setTimeout(() => {
+            navigate('/profile');
+          }, 100);
+        }
       } else {
         throw new Error(result.error || 'Authentication failed');
       }
@@ -124,10 +127,20 @@ const AuthModal = ({ isOpen, onClose, onSuccess, initialMode = 'login' }) => {
     // Close the modal
     onClose();
     
-    // IMPROVED: Navigate to guest-preview page for guest access
-    setTimeout(() => {
-      navigate('/guest-preview');
-    }, 100);
+    // FIXED: Only navigate to guest-preview if preventRedirect is false
+    if (!preventRedirect) {
+      setTimeout(() => {
+        navigate('/guest-preview');
+      }, 100);
+    } else {
+      // Let the parent component handle what happens after guest login
+      if (onSuccess) {
+        onSuccess({
+          user: null, 
+          isGuest: true
+        });
+      }
+    }
   };
 
   if (!isOpen) return null;

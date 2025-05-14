@@ -628,12 +628,13 @@ const Checkout = () => {
         </div>
       </div>
       
-      {/* Auth Modal */}
+      {/* Auth Modal - FIXED: Added preventRedirect prop */}
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
         initialMode={isLoginMode ? 'login' : 'signup'}
+        preventRedirect={true} /* This prevents automatic redirection */
       />
       
       <Footer />
