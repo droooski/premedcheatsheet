@@ -24,14 +24,21 @@
 }
 
 .checkout-wrapper {
-  max-width: 1200px; // More contained width to match design
+  max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  
+  @media (max-width: $lg) {
+    max-width: 90%;
+  }
   
   @media (max-width: $md) {
+    max-width: 95%;
     padding: 0 $spacing-4;
   }
   
   @media (max-width: $sm) {
+    max-width: 100%;
     padding: 0 $spacing-2;
   }
 }
@@ -41,421 +48,127 @@
 
 .checkout-header {
   text-align: center;
-  margin-bottom: calc($spacing-16 + $spacing-4);
+  margin-bottom: $spacing-16;
   
   h1 {
-    font-family: $font-family-mincho !important; // Force BIZ font
+    font-family: $font-family-mincho;
     font-weight: 500;
     font-size: 3.5rem;
     margin-bottom: $spacing-4;
     letter-spacing: 0.02em;
     
     @media (max-width: $md) {
-      font-size: 2rem;
+      font-size: 2.5rem;
     }
     
     @media (max-width: $sm) {
-      font-size: 1.75rem;
+      font-size: 2rem;
+      margin-bottom: $spacing-3;
     }
   }
   
   p {
     color: $black;
-    max-width: 1300px;
+    max-width: 800px;
     margin: 0 auto;
     font-size: 1.125rem;
     line-height: 1.6;
     
+    @media (max-width: $md) {
+      font-size: 1.05rem;
+      max-width: 90%;
+    }
+    
     @media (max-width: $sm) {
       font-size: 1rem;
+      max-width: 95%;
+      line-height: 1.5;
     }
   }
 }
 
-.navigation-controls {
-  margin-bottom: $spacing-4;
+.plan-selector {
+  margin-bottom: $spacing-10;
+}
+
+.plan-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-12;
   
-  .back-button {
-    display: inline-flex;
-    align-items: center;
-    background: none;
-    border: none;
-    color: $primary-color;
-    font-size: 0.9rem;
+  .plan-tab {
+    padding: $spacing-3 $spacing-6;
+    border: 1px solid $gray-300;
+    background-color: $white;
+    color: $text-color;
+    font-weight: 500;
     cursor: pointer;
-    padding: $spacing-2;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 1rem;
     
-    &:hover {
-      text-decoration: underline;
+    @media (max-width: $sm) {
+      padding: $spacing-2 $spacing-4;
+      font-size: 0.9rem;
+    }
+    
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    &.active {
+      background-color: $primary-color;
+      color: $white;
+      border-color: $primary-color;
+      font-weight: 600;
+    }
+    
+    .save-badge {
+      display: inline-block;
+      background-color: #10b981;
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin-left: 0.5rem;
+      font-weight: 600;
+      
+      @media (max-width: $sm) {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.4rem;
+      }
     }
   }
 }
 
-// Payment Form Styles
-// -----------------------------
-
+// Payment Form Container
 .payment-form-container {
   background-color: $white;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: $spacing-8;
   max-width: 800px;
   margin: 0 auto;
   
-  @media (max-width: $sm) {
+  @media (max-width: $md) {
     padding: $spacing-6;
+    border-radius: 16px;
   }
-}
-
-.payment-header {
-  text-align: center;
-  margin-bottom: $spacing-8;
-  
-  h2 {
-    font-family: $font-family-mincho !important; // Force BIZ font
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: $spacing-2;
-    color: $text-color;
-    
-    @media (max-width: $md) {
-      font-size: 1.75rem;
-    }
-    
-    @media (max-width: $sm) {
-      font-size: 1.5rem;
-    }
-  }
-  
-  p {
-    color: $text-color-light;
-    font-size: 1rem;
-  }
-}
-
-.order-summary {
-  background-color: $gray-100;
-  border-radius: 8px;
-  padding: $spacing-6;
-  margin-bottom: $spacing-8;
-  
-  h3 {
-    font-family: $font-family-mincho !important; // Force BIZ font
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: $spacing-4;
-    color: $text-color;
-  }
-  
-  .order-details {
-    .plan-name {
-      margin-bottom: $spacing-4;
-      
-      h4 {
-        font-family: $font-family-mincho !important; // Force BIZ font
-        font-size: 1.1rem;
-        font-weight: 500;
-        margin-bottom: $spacing-1;
-      }
-      
-      .subscription-period {
-        font-size: 0.95rem;
-        margin-bottom: $spacing-1;
-      }
-      
-      .plan-description {
-        font-size: 0.9rem;
-        color: $text-color-light;
-      }
-    }
-    
-    .discount-section {
-      margin-bottom: $spacing-6;
-      
-      h4 {
-        font-family: $font-family-mincho !important; // Force BIZ font
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: $text-color;
-        margin-bottom: $spacing-3;
-        text-transform: uppercase;
-      }
-    }
-  }
-}
-
-.coupon-input-group {
-  display: flex;
-  margin-bottom: $spacing-3;
-  align-items: stretch;
-  width: 100%;
-  
-  .coupon-input {
-    flex: 1;
-    padding: $spacing-3;
-    border: 1px solid $gray-300;
-    border-radius: 4px 0 0 4px;
-    font-size: 0.9rem;
-    
-    &:focus {
-      outline: none;
-      border-color: $primary-color;
-    }
-  }
-  
-  .apply-coupon-btn {
-    padding: $spacing-3 $spacing-4;
-    background-color: $primary-color;
-    color: white;
-    border: none;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    min-width: 80px;
-    text-transform: uppercase;
-    
-    &:hover:not(:disabled) {
-      background-color: darken($primary-color, 5%);
-    }
-    
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.applied-discount {
-  background-color: rgba($primary-color, 0.05);
-  padding: $spacing-3;
-  border-radius: 4px;
-  margin-bottom: $spacing-3;
-  
-  .discount-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: $spacing-2;
-    font-size: 0.9rem;
-    color: $text-color;
-  }
-  
-  .remove-discount-btn {
-    background: none;
-    border: none;
-    color: $primary-color;
-    font-size: 0.8rem;
-    cursor: pointer;
-    padding: 0;
-    
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-.checkout-summary {
-  margin-top: $spacing-4;
-  
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: $spacing-2 0;
-    
-    &.discount {
-      color: #10b981; // Green for discount
-    }
-    
-    &.total {
-      font-weight: 600;
-      border-top: 1px solid $gray-300;
-      padding-top: $spacing-3;
-      margin-top: $spacing-2;
-    }
-  }
-}
-
-.payment-form {
-  h3 {
-    font-family: $font-family-mincho !important; // Force BIZ font
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: $spacing-4;
-    color: $text-color;
-  }
-  
-  .payment-error {
-    background-color: #fee2e2;
-    color: #dc2626;
-    padding: $spacing-3;
-    border-radius: 4px;
-    margin-bottom: $spacing-4;
-    font-size: 0.875rem;
-  }
-  
-  .form-group {
-    margin-bottom: $spacing-4;
-    
-    label {
-      display: block;
-      margin-bottom: $spacing-2;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: $text-color;
-      text-transform: uppercase;
-    }
-    
-    .card-input-container {
-      position: relative;
-      
-      input {
-        width: 100%;
-        padding: $spacing-3 $spacing-4;
-        border: 1px solid $gray-300;
-        border-radius: 4px;
-        font-size: 1rem;
-        
-        &:focus {
-          outline: none;
-          border-color: $primary-color;
-        }
-      }
-      
-      .card-brand {
-        position: absolute;
-        right: $spacing-3;
-        top: 50%;
-        transform: translateY(-50%);
-        padding: $spacing-1 $spacing-2;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: white;
-        
-        &.visa {
-          background-color: #1A1F71;
-        }
-        
-        &.mastercard {
-          background-color: #EB001B;
-        }
-        
-        &.amex {
-          background-color: #006FCF;
-        }
-      }
-      
-      // Card type icons
-      .card-icon {
-        position: absolute;
-        right: $spacing-3;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 40px;
-        height: 25px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        
-        &.visa {
-          background-image: url('/assets/images/visa.svg');
-        }
-        
-        &.mastercard {
-          background-image: url('/assets/images/mastercard.svg');
-        }
-        
-        &.amex {
-          background-image: url('/assets/images/amex.svg');
-        }
-      }
-    }
-  }
-  
-  .form-row {
-    display: flex;
-    gap: $spacing-4;
-    
-    @media (max-width: $sm) {
-      flex-direction: column;
-      gap: $spacing-4;
-    }
-    
-    .form-group {
-      flex: 1;
-    }
-  }
-}
-
-.continue-button {
-  width: 100%;
-  background-color: #1A3A34;
-  color: $white;
-  border: none;
-  border-radius: 6px;
-  padding: $spacing-3 $spacing-4;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  margin-bottom: $spacing-4;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  
-  &:hover:not(:disabled) {
-    background-color: darken(#1A3A34, 5%);
-    transform: translateY(-2px);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-}
-
-// Additional styles for secure checkout indicator
-.secure-checkout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: $spacing-4;
-  
-  .secure-icon {
-    margin-right: $spacing-2;
-    color: #64748b;
-  }
-  
-  span {
-    font-size: 0.8rem;
-    color: #64748b;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-  }
-}
-
-// Review and confirmation styles
-.review-container {
-  background-color: $white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: $spacing-8;
-  max-width: 800px;
-  margin: 0 auto;
   
   @media (max-width: $sm) {
-    padding: $spacing-6;
+    padding: $spacing-4;
+    border-radius: 12px;
   }
   
-  .review-header {
+  .payment-header {
     text-align: center;
     margin-bottom: $spacing-8;
     
     h2 {
-      font-family: $font-family-mincho !important; // Force BIZ font
       font-size: 2rem;
       font-weight: 600;
       margin-bottom: $spacing-2;
@@ -469,71 +182,603 @@
         font-size: 1.5rem;
       }
     }
+    
+    p {
+      color: $text-color-light;
+      font-size: 1rem;
+      
+      @media (max-width: $sm) {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .navigation-controls {
+    margin-bottom: $spacing-6;
+    
+    .back-button {
+      background: none;
+      border: none;
+      color: $primary-color;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: $spacing-1 $spacing-2;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: darken($primary-color, 10%);
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Order Summary
+.order-summary {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  padding: $spacing-6;
+  margin-bottom: $spacing-8;
+  
+  @media (max-width: $md) {
+    padding: $spacing-5;
+    border-radius: 10px;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4;
+    border-radius: 8px;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.1rem;
+      margin-bottom: $spacing-3;
+    }
+  }
+  
+  .order-details {
+    .plan-name {
+      margin-bottom: $spacing-5;
+      
+      h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: $spacing-1;
+        color: $text-color;
+        
+        @media (max-width: $sm) {
+          font-size: 1rem;
+        }
+      }
+      
+      .subscription-period {
+        font-size: 0.95rem;
+        color: $text-color;
+        margin-bottom: $spacing-2;
+        
+        @media (max-width: $sm) {
+          font-size: 0.9rem;
+        }
+      }
+      
+      .plan-description {
+        font-size: 0.9rem;
+        color: $text-color-light;
+        
+        @media (max-width: $sm) {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+  
+  // Discount section
+  .discount-section {
+    margin-bottom: $spacing-6;
+    
+    h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
+      color: $text-color;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      
+      @media (max-width: $sm) {
+        font-size: 0.85rem;
+        margin-bottom: $spacing-2;
+      }
+    }
+    
+    .coupon-input-group {
+      display: flex;
+      
+      .coupon-input {
+        flex: 1;
+        padding: $spacing-2 $spacing-3;
+        border: 1px solid $gray-300;
+        border-radius: 6px 0 0 6px;
+        font-size: 0.9rem;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
+        
+        @media (max-width: $sm) {
+          padding: $spacing-2;
+          font-size: 0.85rem;
+        }
+      }
+      
+      .apply-coupon-btn {
+        background-color: $primary-color;
+        color: white;
+        border: none;
+        border-radius: 0 6px 6px 0;
+        padding: $spacing-2 $spacing-4;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: darken($primary-color, 5%);
+        }
+        
+        @media (max-width: $sm) {
+          padding: $spacing-2;
+          font-size: 0.85rem;
+          min-width: 70px;
+        }
+      }
+    }
+    
+    .applied-discount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .discount-info {
+        color: #10b981; // Green color for discount
+        font-size: 0.9rem;
+        
+        @media (max-width: $sm) {
+          font-size: 0.85rem;
+        }
+      }
+      
+      .remove-discount-btn {
+        background: none;
+        border: none;
+        color: $text-color-light;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-decoration: underline;
+        
+        &:hover {
+          color: #dc2626; // Red on hover
+        }
+      }
+    }
+  }
+  
+  // Checkout summary rows
+  .checkout-summary {
+    margin-top: $spacing-6;
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: $spacing-2;
+      font-size: 0.95rem;
+      color: $text-color;
+      
+      @media (max-width: $sm) {
+        font-size: 0.9rem;
+      }
+      
+      &.discount {
+        color: #10b981; // Green color for discount
+      }
+      
+      &.total {
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding-top: $spacing-3;
+        margin-top: $spacing-3;
+        border-top: 1px solid $gray-300;
+        
+        @media (max-width: $sm) {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+// Payment Form
+.payment-form {
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.1rem;
+      margin-bottom: $spacing-3;
+    }
+  }
+  
+  .payment-error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: $spacing-3;
+    border-radius: 6px;
+    margin-bottom: $spacing-4;
+    font-size: 0.9rem;
+    
+    @media (max-width: $sm) {
+      padding: $spacing-2;
+      font-size: 0.85rem;
+      border-radius: 5px;
+    }
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-4;
+    
+    @media (max-width: $sm) {
+      margin-bottom: $spacing-3;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $text-color;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      
+      @media (max-width: $sm) {
+        font-size: 0.8rem;
+        margin-bottom: $spacing-1;
+      }
+    }
+    
+    input {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+      
+      @media (max-width: $sm) {
+        padding: $spacing-2 $spacing-3;
+        font-size: 0.95rem;
+        border-radius: 5px;
+      }
+    }
+    
+    .card-input-container {
+      position: relative;
+      
+      .card-number-input {
+        padding-right: 60px; // Make room for card brand icon
+      }
+      
+      .card-brand-container {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 24px;
+        display: flex;
+        align-items: center;
+        
+        .card-icons {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        .card-icon {
+          width: 32px;
+          height: 20px;
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+          
+          &.visa {
+            background-image: url('/assets/images/card-visa.png');
+          }
+          
+          &.mastercard {
+            background-image: url('/assets/images/card-mastercard.png');
+          }
+          
+          &.amex {
+            background-image: url('/assets/images/card-amex.png');
+          }
+          
+          &.visa-faded,
+          &.mastercard-faded,
+          &.amex-faded {
+            opacity: 0.3;
+          }
+          
+          &.visa-faded {
+            background-image: url('/assets/images/card-visa.png');
+          }
+          
+          &.mastercard-faded {
+            background-image: url('/assets/images/card-mastercard.png');
+          }
+          
+          &.amex-faded {
+            background-image: url('/assets/images/card-amex.png');
+          }
+        }
+      }
+    }
+  }
+  
+  .form-row {
+    display: flex;
+    gap: $spacing-4;
+    
+    @media (max-width: $sm) {
+      gap: $spacing-3;
+    }
+    
+    .form-group {
+      flex: 1;
+    }
+  }
+  
+  .continue-button {
+    width: 100%;
+    background-color: #1A3A34;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: $spacing-4;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: $spacing-6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    &:hover:not(:disabled) {
+      background-color: darken(#1A3A34, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    @media (max-width: $md) {
+      padding: $spacing-3;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      margin-top: $spacing-4;
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-3;
+      font-size: 0.9rem;
+      border-radius: 6px;
+    }
+  }
+  
+  .secure-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: $spacing-4;
+    
+    .secure-icon {
+      margin-right: $spacing-2;
+    }
+    
+    span {
+      font-size: 0.8rem;
+      color: $text-color-light;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
+// Review Step
+.review-container {
+  background-color: $white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: $spacing-8;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  @media (max-width: $md) {
+    padding: $spacing-6;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4;
+    border-radius: 12px;
+  }
+  
+  .review-header {
+    text-align: center;
+    margin-bottom: $spacing-8;
+    
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: $spacing-2;
+      color: $text-color;
+      
+      @media (max-width: $md) {
+        font-size: 1.75rem;
+      }
+      
+      @media (max-width: $sm) {
+        font-size: 1.5rem;
+      }
+    }
+    
+    p {
+      color: $text-color-light;
+      font-size: 1rem;
+      
+      @media (max-width: $sm) {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .navigation-controls {
+    margin-bottom: $spacing-6;
+    
+    .back-button {
+      background: none;
+      border: none;
+      color: $primary-color;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: $spacing-1 $spacing-2;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: darken($primary-color, 10%);
+        text-decoration: underline;
+      }
+    }
   }
   
   .subscription-summary {
-    background-color: $gray-100;
-    border-radius: 8px;
-    padding: $spacing-6;
     margin-bottom: $spacing-6;
     
     h3 {
-      font-family: $font-family-mincho !important; // Force BIZ font
       font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: $spacing-4;
       color: $text-color;
-    }
-  }
-  
-  .payment-method {
-    margin-top: $spacing-6;
-    
-    h4 {
-      font-family: $font-family-mincho !important; // Force BIZ font
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: $spacing-3;
-      color: $text-color;
-    }
-    
-    .card-info {
-      display: flex;
-      align-items: center;
-      background-color: white;
-      padding: $spacing-3;
-      border-radius: 6px;
-      border: 1px solid $gray-200;
       
-      .card-icon {
-        margin-right: $spacing-4;
-        width: 40px;
-        height: 25px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
+      @media (max-width: $sm) {
+        font-size: 1.1rem;
+        margin-bottom: $spacing-3;
+      }
+    }
+    
+    .summary-details {
+      background-color: #f9fafb;
+      border-radius: 12px;
+      padding: $spacing-6;
+      
+      @media (max-width: $md) {
+        padding: $spacing-4;
+      }
+      
+      @media (max-width: $sm) {
+        padding: $spacing-3;
+        border-radius: 8px;
+      }
+      
+      h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: $spacing-1;
+        color: $text-color;
         
-        &.visa {
-          background-image: url('/assets/images/visa.svg');
-        }
-        
-        &.mastercard {
-          background-image: url('/assets/images/mastercard.svg');
-        }
-        
-        &.amex {
-          background-image: url('/assets/images/amex.svg');
+        @media (max-width: $sm) {
+          font-size: 1rem;
         }
       }
       
-      .card-details {
-        p {
-          margin: 0;
+      .subscription-period {
+        font-size: 0.95rem;
+        color: $text-color;
+        margin-bottom: $spacing-2;
+        
+        @media (max-width: $sm) {
           font-size: 0.9rem;
-          line-height: 1.4;
+        }
+      }
+      
+      .plan-description {
+        font-size: 0.9rem;
+        color: $text-color-light;
+        margin-bottom: $spacing-4;
+        
+        @media (max-width: $sm) {
+          font-size: 0.85rem;
+        }
+      }
+      
+      // Payment method section
+      .payment-method {
+        margin: $spacing-6 0;
+        
+        h4 {
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin-bottom: $spacing-3;
+          color: $text-color;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
           
-          &:first-child {
-            font-weight: 500;
+          @media (max-width: $sm) {
+            font-size: 0.85rem;
+            margin-bottom: $spacing-2;
+          }
+        }
+        
+        .card-info {
+          display: flex;
+          align-items: center;
+          
+          .card-icon {
+            margin-right: $spacing-3;
+            
+            @media (max-width: $sm) {
+              margin-right: $spacing-2;
+            }
+          }
+          
+          .card-details {
+            p {
+              font-size: 0.9rem;
+              margin-bottom: $spacing-1;
+              
+              @media (max-width: $sm) {
+                font-size: 0.85rem;
+              }
+            }
           }
         }
       }
@@ -541,124 +786,215 @@
   }
   
   .terms-section {
-    margin: $spacing-6 0;
+    margin-bottom: $spacing-6;
     
     p {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: $text-color-light;
-      line-height: 1.5;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      
+      @media (max-width: $sm) {
+        font-size: 0.85rem;
+      }
     }
   }
   
   .subscribe-button {
     width: 100%;
     background-color: #1A3A34;
-    color: $white;
+    color: white;
     border: none;
-    border-radius: 6px;
-    padding: $spacing-3 $spacing-4;
+    border-radius: 8px;
+    padding: $spacing-4;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     margin-bottom: $spacing-4;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     
     &:hover:not(:disabled) {
       background-color: darken(#1A3A34, 5%);
       transform: translateY(-2px);
     }
     
+    &:active {
+      transform: translateY(0);
+    }
+    
     &:disabled {
       opacity: 0.7;
       cursor: not-allowed;
     }
+    
+    @media (max-width: $md) {
+      padding: $spacing-3;
+      font-size: 0.95rem;
+      border-radius: 6px;
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-3;
+      font-size: 0.9rem;
+      border-radius: 6px;
+    }
+  }
+  
+  .secure-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .secure-icon {
+      margin-right: $spacing-2;
+    }
+    
+    span {
+      font-size: 0.8rem;
+      color: $text-color-light;
+      letter-spacing: 0.05em;
+    }
   }
 }
 
-// Confirmation styles
+// Confirmation Step
 .confirmation-container {
   background-color: $white;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: $spacing-10;
-  text-align: center;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
+  text-align: center;
+  
+  @media (max-width: $md) {
+    padding: $spacing-8;
+    border-radius: 16px;
+    max-width: 90%;
+  }
   
   @media (max-width: $sm) {
-    padding: $spacing-8;
+    padding: $spacing-6;
+    border-radius: 12px;
   }
   
   .confirmation-icon {
     font-size: 4rem;
-    margin-bottom: $spacing-4;
     color: #10b981;
+    margin-bottom: $spacing-6;
+    
+    @media (max-width: $md) {
+      font-size: 3.5rem;
+      margin-bottom: $spacing-5;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 3rem;
+      margin-bottom: $spacing-4;
+    }
   }
   
   h2 {
-    font-family: $font-family-mincho !important; // Force BIZ font
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 600;
     margin-bottom: $spacing-4;
     color: $text-color;
     
     @media (max-width: $md) {
-      font-size: 1.75rem;
+      font-size: 2rem;
+      margin-bottom: $spacing-3;
     }
     
     @media (max-width: $sm) {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
     }
   }
   
   p {
+    font-size: 1.1rem;
     color: $text-color-light;
-    font-size: 1.125rem;
     margin-bottom: $spacing-2;
     
-    @media (max-width: $sm) {
+    @media (max-width: $md) {
       font-size: 1rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 0.95rem;
     }
   }
   
   .order-id {
     font-family: monospace;
-    background-color: $gray-100;
-    padding: $spacing-2 $spacing-4;
-    border-radius: 4px;
-    display: inline-block;
+    font-size: 1rem;
+    color: $text-color;
     margin: $spacing-4 0;
+    padding: $spacing-2 $spacing-4;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    display: inline-block;
+    
+    @media (max-width: $sm) {
+      font-size: 0.9rem;
+      padding: $spacing-1 $spacing-3;
+    }
   }
   
   .continue-button {
-    margin-top: $spacing-8;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
+    background-color: #1A3A34;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: $spacing-4 $spacing-8;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: $spacing-6;
+    
+    &:hover {
+      background-color: darken(#1A3A34, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    @media (max-width: $md) {
+      padding: $spacing-3 $spacing-6;
+      font-size: 0.95rem;
+      margin-top: $spacing-5;
+    }
+    
+    @media (max-width: $sm) {
+      padding: $spacing-3 $spacing-5;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      margin-top: $spacing-4;
+    }
   }
 }
 
-// Card brand detection classes
-.card-brand {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
+// Loader Animation
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-8;
   
-  &.visa {
-    background-color: #1A1F71;
-  }
-  
-  &.mastercard {
-    background-color: #EB001B;
-  }
-  
-  &.amex {
-    background-color: #006FCF;
+  .loader {
+    border: 5px solid $gray-200;
+    border-radius: 50%;
+    border-top: 5px solid $primary-color;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   }
 }
