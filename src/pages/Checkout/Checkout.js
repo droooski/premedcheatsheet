@@ -1,4 +1,4 @@
-// Modified Checkout.js with fixed back navigation and discount functionality
+// src/pages/Checkout/Checkout.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -22,16 +22,15 @@ const Checkout = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [user, setUser] = useState(null);
-  // FIXED: Initialize checkout step properly to 'plan'
   const [checkoutStep, setCheckoutStep] = useState('plan'); // 'plan', 'payment', 'review', 'confirmation'
-  // ADDED: Track previous step for proper back navigation
   const [previousStep, setPreviousStep] = useState(null);
   const [cardInfo, setCardInfo] = useState({
     number: '',
     expiry: '',
     cvc: '',
     name: '',
-    email: ''
+    email: '',
+    cardType: null
   });
   const [discountCodes] = useState({
     'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
@@ -127,14 +126,14 @@ const Checkout = () => {
     }
   }, [checkoutStep, orderId, navigate]);
 
-  // FIXED: Proper step change that records previous step for back navigation
+  // Proper step change that records previous step for back navigation
   const changeCheckoutStep = (newStep) => {
     setPreviousStep(checkoutStep);
     setCheckoutStep(newStep);
     console.log(`Changing from ${checkoutStep} to ${newStep}, previous step saved as ${checkoutStep}`);
   };
 
-  // FIXED: Proper back navigation that uses previous step
+  // Proper back navigation that uses previous step
   const handleGoBack = () => {
     console.log("Back button pressed, current step:", checkoutStep, "previous step:", previousStep);
     
@@ -202,7 +201,7 @@ const Checkout = () => {
     }
   };
 
-  // ADDED: Function to remove applied coupon
+  // Function to remove applied coupon
   const removeCoupon = () => {
     setCouponApplied(false);
     setCouponCode('');
@@ -303,7 +302,7 @@ const Checkout = () => {
           processFreePurchase();
         }
       } else {
-        // FIXED: Proceed to payment step
+        // Proceed to payment step
         console.log("Setting checkout step to payment after auth success");
         changeCheckoutStep('payment');
       }
@@ -353,29 +352,47 @@ const Checkout = () => {
 
   // Detect card type based on first digits
   const detectCardType = (cardNumber) => {
-    const firstDigit = cardNumber.charAt(0);
-    const firstTwoDigits = cardNumber.substring(0, 2);
+    const cleanNumber = cardNumber.replace(/\s+/g, '');
     
-    if (firstDigit === '4') return 'visa';
-    if (['51', '52', '53', '54', '55'].includes(firstTwoDigits)) return 'mastercard';
-    if (['34', '37'].includes(firstTwoDigits)) return 'amex';
+    // Visa - starts with 4
+    if (/^4/.test(cleanNumber)) return 'visa';
+    
+    // Mastercard - starts with 51-55, or 2221-2720
+    if (/^5[1-5]/.test(cleanNumber) || /^2[2-7][0-9]{2}/.test(cleanNumber)) return 'mastercard';
+    
+    // American Express - starts with 34 or 37
+    if (/^3[47]/.test(cleanNumber)) return 'amex';
     
     return null;
   };
 
-  // Handle card input changes
+  // Handle card input changes with better formatting
   const handleCardInputChange = (e) => {
     const { name, value } = e.target;
     
     // Format card number with spaces
     if (name === 'number') {
-      const formattedValue = value
-        .replace(/\s/g, '') // Remove existing spaces
-        .replace(/(\d{4})/g, '$1 ') // Add space every 4 digits
-        .trim(); // Remove trailing space
+      // Remove all non-digits and existing spaces
+      let digits = value.replace(/\D/g, '');
+      let formattedValue = '';
       
       // Detect card type
-      const cardType = detectCardType(formattedValue.replace(/\s/g, ''));
+      const cardType = detectCardType(digits);
+      
+      // Format differently based on card type
+      if (cardType === 'amex') {
+        // Format as 4-6-5 for American Express
+        for (let i = 0; i < digits.length && i < 15; i++) {
+          if (i === 4 || i === 10) formattedValue += ' ';
+          formattedValue += digits[i];
+        }
+      } else {
+        // Format as 4-4-4-4 for other cards
+        for (let i = 0; i < digits.length && i < 16; i++) {
+          if (i > 0 && i % 4 === 0) formattedValue += ' ';
+          formattedValue += digits[i];
+        }
+      }
       
       setCardInfo({
         ...cardInfo,
@@ -383,17 +400,46 @@ const Checkout = () => {
         cardType
       });
     } 
-    // Format expiry date
+    // Format expiry date as MM/YY
     else if (name === 'expiry') {
-      let formattedValue = value.replace(/\D/g, ''); // Remove non-digits
+      let digits = value.replace(/\D/g, '');
+      let formattedValue = '';
       
-      if (formattedValue.length > 2) {
-        formattedValue = `${formattedValue.slice(0, 2)}/${formattedValue.slice(2, 4)}`;
+      // Format first 2 digits as month
+      if (digits.length > 0) {
+        // Make sure month is valid (01-12)
+        let month = digits.substring(0, 2);
+        if (month.length === 1) {
+          if (parseInt(month) > 1) {
+            month = '0' + month;
+          }
+        } else if (parseInt(month) > 12) {
+          month = '12';
+        } else if (parseInt(month) === 0) {
+          month = '01';
+        }
+        
+        formattedValue = month;
+        
+        // Add slash and year if we have enough digits
+        if (digits.length > 2) {
+          formattedValue += '/' + digits.substring(2, 4);
+        }
       }
       
       setCardInfo({
         ...cardInfo,
         [name]: formattedValue
+      });
+    }
+    // Restrict CVC to numbers only and limit length based on card type
+    else if (name === 'cvc') {
+      const digits = value.replace(/\D/g, '');
+      const maxLength = cardInfo.cardType === 'amex' ? 4 : 3;
+      
+      setCardInfo({
+        ...cardInfo,
+        [name]: digits.substring(0, maxLength)
       });
     }
     // All other fields
@@ -402,6 +448,30 @@ const Checkout = () => {
         ...cardInfo,
         [name]: value
       });
+    }
+  };
+
+  // Render card brand icon based on detected card type
+  const renderCardBrandIcon = () => {
+    if (!cardInfo.cardType) {
+      return (
+        <div className="card-icons">
+          <div className="card-icon visa-faded"></div>
+          <div className="card-icon mastercard-faded"></div>
+          <div className="card-icon amex-faded"></div>
+        </div>
+      );
+    }
+    
+    switch(cardInfo.cardType) {
+      case 'visa':
+        return <div className="card-icon visa"></div>;
+      case 'mastercard':
+        return <div className="card-icon mastercard"></div>;
+      case 'amex':
+        return <div className="card-icon amex"></div>;
+      default:
+        return null;
     }
   };
 
@@ -487,22 +557,6 @@ const Checkout = () => {
       return 'per year';
     } else {
       return 'one time';
-    }
-  };
-
-  // Render card brand icon based on detected card type
-  const renderCardBrandIcon = () => {
-    if (!cardInfo.cardType) return null;
-    
-    switch(cardInfo.cardType) {
-      case 'visa':
-        return <div className="card-brand visa">VISA</div>;
-      case 'mastercard':
-        return <div className="card-brand mastercard">MasterCard</div>;
-      case 'amex':
-        return <div className="card-brand amex">AMEX</div>;
-      default:
-        return null;
     }
   };
 
@@ -692,7 +746,9 @@ const Checkout = () => {
                   required
                   className="card-number-input"
                 />
-                {renderCardBrandIcon()}
+                <div className="card-brand-container">
+                  {renderCardBrandIcon()}
+                </div>
               </div>
             </div>
             
@@ -718,7 +774,7 @@ const Checkout = () => {
                   placeholder="CVC"
                   value={cardInfo.cvc}
                   onChange={handleCardInputChange}
-                  maxLength="4"
+                  maxLength={cardInfo.cardType === 'amex' ? 4 : 3}
                   required
                   className="cvc-input"
                 />
@@ -726,7 +782,7 @@ const Checkout = () => {
             </div>
 
             <div className="form-group">
-              <label>Name on Card</label>
+              <label>NAME ON CARD</label>
               <input
                 type="text"
                 name="name"
@@ -743,7 +799,7 @@ const Checkout = () => {
               className="continue-button"
               disabled={loading}
             >
-              CONTINUE
+              {loading ? 'Processing...' : 'CONTINUE'}
             </button>
           </form>
           
