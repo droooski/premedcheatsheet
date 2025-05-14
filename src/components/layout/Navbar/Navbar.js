@@ -224,7 +224,7 @@ const Navbar = () => {
                   Log in
                 </a>
                 <Link to="/signup" className="try-free-button">
-                  Try it Free
+                  Join
                 </Link>
               </>
             )}
@@ -328,7 +328,7 @@ const Navbar = () => {
                       </li>
                       <li>
                         <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>
-                          Try it Free
+                          Join
                         </Link>
                       </li>
                     </>
