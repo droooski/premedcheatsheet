@@ -170,7 +170,7 @@ const Navbar = () => {
                     className={isActive('/profile') ? 'active' : ''}
                     onClick={closeMobileMenu}
                   >
-                    Members
+                    Premed Cheatsheet Members
                   </Link>
                 </li>
                 <li>
@@ -251,7 +251,7 @@ const Navbar = () => {
                       className={isActive('/profile') ? 'active' : ''}
                       onClick={closeMobileMenu}
                     >
-                      Members
+                      Premed Cheatsheet Members
                     </Link>
                   </li>
                   <li>
