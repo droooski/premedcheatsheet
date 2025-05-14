@@ -1,0 +1,89 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.stripe-card-element {
+  width: 100%;
+  
+  .stripe-form {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-6;
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $text-color;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    
+    input {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 6px;
+      font-size: 1rem;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+    }
+  }
+  
+  .card-element-container {
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $gray-300;
+    border-radius: 6px;
+    background-color: white;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    
+    &:focus-within {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    }
+  }
+  
+  .card-error {
+    color: #e53e3e;
+    margin-bottom: $spacing-4;
+    font-size: 0.9rem;
+    background-color: #fee2e2;
+    padding: $spacing-3;
+    border-radius: 6px;
+  }
+  
+  .payment-button {
+    width: 100%;
+    background-color: #1A3A34;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: $spacing-4;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    &:hover:not(:disabled) {
+      background-color: darken(#1A3A34, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
