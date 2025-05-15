@@ -1,4 +1,6 @@
-// src/components/auth/AuthModal.js (with updates)
+// Fix for src/components/auth/AuthModal.js
+// The issue is likely with how the close button is handling events
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
@@ -10,7 +12,7 @@ const AuthModal = ({
   onSuccess, 
   initialMode = 'login', 
   preventRedirect = false,
-  dataCollectionOnly = false // New prop for just collecting data without authentication
+  dataCollectionOnly = false 
 }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
@@ -141,12 +143,33 @@ const AuthModal = ({
     }
   };
 
+  // Handle modal overlay click
+  const handleOverlayClick = (e) => {
+    // Only close if clicking directly on the overlay
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Handle close button click with explicit stop propagation
+  const handleCloseClick = (e) => {
+    e.stopPropagation(); // Stop event from bubbling up
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="auth-modal-overlay" onClick={onClose}>
+    <div className="auth-modal-overlay" onClick={handleOverlayClick}>
       <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>&times;</button>
+        {/* Modified close button with explicit handler */}
+        <button 
+          className="close-button" 
+          onClick={handleCloseClick}
+          aria-label="Close modal"
+        >
+          &times;
+        </button>
         
         <h2>
           {isLogin 

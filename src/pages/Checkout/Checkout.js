@@ -1,5 +1,5 @@
 // src/pages/Checkout/Checkout.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
@@ -51,6 +51,12 @@ const Checkout = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [pendingUserData, setPendingUserData] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+
+  // Add this ref to track if a modal was just closed
+  const modalJustClosedRef = useRef(false);
+  
+  // Keep track of manual close actions
+  const manualCloseCount = useRef(0);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -243,15 +249,46 @@ useEffect(() => {
     return couponApplied && discount === 100;
   };
 
-  useEffect(() => {
-    // Show auth modal if we're in payment step and need user data
-    if (checkoutStep === 'payment' && !user && !pendingUserData && !showAuthModal) {
-      console.log("Showing auth modal for data collection");
-      setShowAuthModal(true);
-      setIsLoginMode(false); // Force signup mode
-    }
+  const handleCloseAuthModal = () => {
+    console.log("MANUAL CLOSE REQUESTED");
+    setShowAuthModal(false);
     
-}, [checkoutStep, user, pendingUserData, showAuthModal]);
+    // Set the ref to prevent reopening
+    modalJustClosedRef.current = true;
+    manualCloseCount.current += 1;
+    
+    // Clear the flag after a delay
+    setTimeout(() => {
+      modalJustClosedRef.current = false;
+    }, 500);
+  };
+
+  useEffect(() => {
+    // Only show auth modal during initial render in payment step or on explicit user action
+    // This has been disabled because it was causing modal reopen loops
+    
+    // DISABLED: automatic modal opening was causing infinite loops
+    /* 
+    if (checkoutStep === 'payment' && !user && !pendingUserData && !showAuthModal) {
+      // Only reopen if not manually closed
+      if (!modalJustClosedRef.current) {
+        console.log("Showing auth modal for data collection");
+        setShowAuthModal(true);
+        setIsLoginMode(false); // Force signup mode
+      }
+    }
+    */
+  }, []);
+
+    // Add a new effect to show the modal ONLY on initial render or checkout step change
+  useEffect(() => {
+    // Only when changing to payment step initially
+    if (checkoutStep === 'payment' && !user && !pendingUserData && manualCloseCount.current === 0) {
+      console.log("Initial payment step - showing auth modal");
+      setShowAuthModal(true);
+      setIsLoginMode(false);
+    }
+  }, [checkoutStep]); // Only depends on checkout step changes
 
   // Process a free purchase with 100% discount coupon
   const processFreePurchase = async () => {
@@ -1324,14 +1361,14 @@ const handleRegistrationDataCollection = (userData) => {
       </div>
       
       {/* Auth Modal with preventRedirect prop */}
-      <AuthModal 
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        initialMode={isLoginMode ? 'login' : 'signup'}
-        preventRedirect={true} /* This prevents automatic redirection */
-        dataCollectionOnly={checkoutStep === 'payment'} /* CRITICAL: This prevents account creation during payment flow */
-      />     
+        <AuthModal 
+          isOpen={showAuthModal}
+          onClose={handleCloseAuthModal}  // Use the fixed handler
+          onSuccess={handleAuthSuccess}
+          initialMode={isLoginMode ? 'login' : 'signup'}
+          preventRedirect={true}
+          dataCollectionOnly={checkoutStep === 'payment'}
+        />
       <Footer />
     </div>
   );
