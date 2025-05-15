@@ -174,15 +174,17 @@ useEffect(() => {
       setDiscount(0);
     }
     
-    // Must be logged in to proceed to payment
-    if (user) {
-      // Set previous step first then change current step
-      setPreviousStep('plan');
-      setCheckoutStep('payment');
-    } else {
-      setShowAuthModal(true);
-      setIsLoginMode(false);
-    }
+    // CHANGE: Go directly to payment step without requiring login first
+    setPreviousStep('plan');
+    setCheckoutStep('payment');
+    
+    // Store the plan selection in URL parameters for easy recovery
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('plan', plan);
+    navigate({
+      pathname: location.pathname,
+      search: searchParams.toString()
+    }, { replace: true });
   };
 
   // Toggle coupon input visibility
@@ -241,37 +243,105 @@ useEffect(() => {
     return couponApplied && discount === 100;
   };
 
+  useEffect(() => {
+    // Show auth modal if we're in payment step and need user data
+    if (checkoutStep === 'payment' && !user && !pendingUserData && !showAuthModal) {
+      console.log("Showing auth modal for data collection");
+      setShowAuthModal(true);
+      setIsLoginMode(false); // Force signup mode
+    }
+    
+}, [checkoutStep, user, pendingUserData, showAuthModal]);
+
   // Process a free purchase with 100% discount coupon
   const processFreePurchase = async () => {
     setLoading(true);
     setError('');
     
     try {
-      // Validate user is authenticated
-      if (!user || !user.uid) {
-        throw new Error('You must be logged in to complete this purchase');
+      console.log("Starting free purchase process");
+      
+      // Check if we're dealing with a logged-in user or pending user data
+      if (!user && pendingUserData) {
+        console.log("Creating new user account from pending data for free purchase");
+        
+        // Create the user account from pending data
+        const registrationResult = await registerUser(
+          pendingUserData.email,
+          pendingUserData.password,
+          pendingUserData.firstName,
+          pendingUserData.lastName
+        );
+        
+        if (!registrationResult.success) {
+          throw new Error(registrationResult.error || 'Account creation failed');
+        }
+        
+        console.log("User account created successfully:", registrationResult.user.uid);
+        
+        // Update the user state
+        setUser(registrationResult.user);
+        
+        // Create a free order for the new user
+        const orderResult = await processPayment(
+          null, // No payment details for free purchase
+          registrationResult.user.uid,
+          {
+            amount: 0,
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponCode,
+            isFree: true
+          }
+        );
+        
+        if (!orderResult.success) {
+          throw new Error(orderResult.error || 'Error processing your free access');
+        }
+        
+        console.log("Free order created:", orderResult.orderId);
+        
+        // Set order ID and move to confirmation
+        setOrderId(orderResult.orderId);
+        changeCheckoutStep('confirmation');
+        
+        // Set payment verification in session storage for immediate access
+        sessionStorage.setItem('paymentVerified', 'true');
+        
+        return;
       }
       
-      console.log("Processing free purchase with 100% discount");
-      
-      // Create a free order record
-      const result = await processPayment(
-        null, // No payment details needed for free purchase
-        user.uid,
-        {
-          amount: 0,
-          plan: selectedPlan,
-          discount: discount,
-          couponCode: couponCode,
-          isFree: true
+      // Handle case for already logged-in user
+      if (user && user.uid) {
+        console.log("Processing free purchase for existing user:", user.uid);
+        
+        // Create a free order record
+        const result = await processPayment(
+          null, // No payment details needed for free purchase
+          user.uid,
+          {
+            amount: 0,
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponCode,
+            isFree: true
+          }
+        );
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Error processing your free access');
         }
-      );
-
-      if (result.success) {
+        
+        console.log("Free order created:", result.orderId);
+        
+        // Set order ID and move to confirmation
         setOrderId(result.orderId);
         changeCheckoutStep('confirmation');
+        
+        // Set payment verification in session storage for immediate access
+        sessionStorage.setItem('paymentVerified', 'true');
       } else {
-        throw new Error(result.error || 'Error processing your free access');
+        throw new Error('User account required to complete purchase');
       }
     } catch (error) {
       console.error("Free purchase error:", error);
@@ -285,16 +355,32 @@ useEffect(() => {
   const handleAuthSuccess = (userData) => {
     console.log("Auth success in checkout flow:", userData);
     
-    // Update user state with the authenticated user
-    setUser(userData?.user || null);
+    // Check if this is data collection mode (for payment) or actual authentication
+    if (userData?.dataCollectionOnly) {
+      console.log("Data collection mode - storing user data without authentication");
+      
+      // Don't set the user state - just store the registration data
+      setPendingUserData({
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || ''
+      });
+      
+      // Mark registration as complete
+      setRegistrationComplete(true);
+      
+      // Close auth modal
+      setShowAuthModal(false);
+      
+      return; // Critical: exit early without setting user state or changing route
+    }
     
-    // Close auth modal
-    setShowAuthModal(false);
-    
-    if (userData?.isGuest) {
-      // Handle guest access
-      navigate('/guest-preview');
-    } else if (userData?.user) {
+    // If it's a real authentication (not data collection), set the user state
+    if (userData?.user) {
+      // Set the authenticated user
+      setUser(userData.user);
+      
       // Update email field if available
       if (userData.user.email) {
         setCardInfo(prev => ({
@@ -302,18 +388,14 @@ useEffect(() => {
           email: userData.user.email
         }));
       }
-      
-      // Check if purchase is free with coupon
-      if (isFreeWithCoupon()) {
-        // Process the free purchase, but ensure we have a valid user first
-        if (userData.user.uid) {
-          processFreePurchase();
-        }
-      } else {
-        // Proceed to payment step
-        console.log("Setting checkout step to payment after auth success");
-        changeCheckoutStep('payment');
-      }
+    }
+    
+    // Close auth modal
+    setShowAuthModal(false);
+    
+    if (userData?.isGuest) {
+      // Handle guest access
+      navigate('/guest-preview');
     }
   };
 
@@ -511,56 +593,26 @@ const handleAuthDataCollection = (userData) => {
     setError('');
 
     try {
-      // For free purchases with 100% coupon, create account and proceed
-      if (isFreeWithCoupon()) {
-        const registrationResult = await registerUser(
-          pendingUserData.email,
-          pendingUserData.password,
-          pendingUserData.firstName,
-          pendingUserData.lastName
-        );
-
-        if (!registrationResult.success) {
-          throw new Error(registrationResult.error || 'Account creation failed');
+      // 1. Process the payment first
+      const paymentResult = await processStripePayment(
+        {
+          cardId: cardInfo.id,
+          name: cardInfo.name,
+          email: pendingUserData.email || cardInfo.email
+        },
+        null, // No user ID yet since account isn't created
+        {
+          amount: parseFloat(getFinalPrice()),
+          plan: selectedPlan,
+          couponCode: couponApplied ? couponCode : ''
         }
-
-        // Set the newly created user
-        setUser(registrationResult.user);
-        
-        // Process free order for the new user
-        const orderResult = await processPayment(
-          null,
-          registrationResult.user.uid,
-          {
-            amount: 0,
-            plan: selectedPlan,
-            discount: 100,
-            couponCode: couponCode,
-            isFree: true
-          }
-        );
-
-        if (!orderResult.success) {
-          throw new Error(orderResult.error);
-        }
-
-        // Set order ID and move to confirmation
-        setOrderId(orderResult.orderId);
-        changeCheckoutStep('confirmation');
-        return;
-      }
-
-      // Process payment first
-      const paymentResult = {
-        success: true, // Replace with actual payment processing
-        paymentId: `sim_${Math.random().toString(36).substring(2, 15)}`
-      };
+      );
 
       if (!paymentResult.success) {
-        throw new Error('Payment processing failed');
+        throw new Error(paymentResult.error || 'Payment processing failed');
       }
 
-      // Payment succeeded, NOW create the user account
+      // 2. Now create the user account AFTER payment success
       const registrationResult = await registerUser(
         pendingUserData.email,
         pendingUserData.password,
@@ -569,30 +621,21 @@ const handleAuthDataCollection = (userData) => {
       );
 
       if (!registrationResult.success) {
-        throw new Error(registrationResult.error || 'Account creation failed');
+        // This is a critical error - payment successful but account creation failed
+        console.error("Payment succeeded but account creation failed:", registrationResult.error);
+        throw new Error("Your payment was successful, but we encountered an issue creating your account. Please contact support with your payment confirmation.");
       }
 
-      // Set the newly created user
+      // 3. Set the user state with the newly created user
       setUser(registrationResult.user);
 
-      // Create order in Firebase for the new user
-      const orderData = {
+      // 4. Update the order with the user ID and create subscription record
+      await updateDoc(doc(db, "orders", paymentResult.orderId), {
         userId: registrationResult.user.uid,
-        amount: parseFloat(getFinalPrice()),
-        plan: selectedPlan,
-        status: 'completed',
-        paymentId: paymentResult.paymentId,
-        createdAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        couponCode: couponApplied ? couponCode : null,
-        discount: couponApplied ? discount : 0
-      };
+        status: 'completed'
+      });
 
-      // Add order to Firestore
-      const db = getFirestore();
-      const orderRef = await addDoc(collection(db, 'orders'), orderData);
-
-      // Update user document with subscription and verification
+      // 5. Update user document with subscription details
       await updateDoc(doc(db, "users", registrationResult.user.uid), {
         paymentVerified: true,
         purchaseDate: new Date().toISOString(),
@@ -602,18 +645,18 @@ const handleAuthDataCollection = (userData) => {
           plan: selectedPlan,
           startDate: new Date().toISOString(),
           endDate: getSubscriptionEndDate(),
-          orderId: orderRef.id,
+          orderId: paymentResult.orderId,
           active: true
         }]
       });
 
-      // Set payment verification in session storage
+      // 6. Set payment verification in session storage for immediate access
       sessionStorage.setItem('paymentVerified', 'true');
 
-      // Move to confirmation step
-      setOrderId(orderRef.id);
+      // 7. Move to confirmation step
+      setOrderId(paymentResult.orderId);
       changeCheckoutStep('confirmation');
-
+      
     } catch (error) {
       console.error("Payment/Registration error:", error);
       setError(error.message);
@@ -748,146 +791,384 @@ const handleAuthDataCollection = (userData) => {
     );
   };
 
+
+  // This function collects user registration data without creating the account
+const handleRegistrationDataCollection = (userData) => {
+  console.log("Registration data collected:", userData);
+  
+  // Store pending user data for later account creation
+  setPendingUserData({
+    email: userData.email,
+    password: userData.password,
+    firstName: userData.firstName || '',
+    lastName: userData.lastName || ''
+  });
+  
+  // Mark registration as complete
+  setRegistrationComplete(true);
+  
+  // Close the auth modal
+  setShowAuthModal(false);
+};
+
+  // Add this explicit handler for confirming free purchases
+  const handleConfirmFreePurchase = async () => {
+    console.log("Confirming free purchase");
+    setLoading(true);
+    setError('');
+    
+    try {
+      // We need to check if we have pending user data (new user) or existing user
+      if (!user && pendingUserData) {
+        console.log("Creating account from pending data:", pendingUserData.email);
+        
+        // 1. First create the user account
+        const registrationResult = await registerUser(
+          pendingUserData.email,
+          pendingUserData.password,
+          pendingUserData.firstName,
+          pendingUserData.lastName
+        );
+        
+        if (!registrationResult.user || !registrationResult.success) {
+          console.error("Failed to create user account:", registrationResult.error);
+          throw new Error(registrationResult.error || 'Failed to create your account');
+        }
+        
+        console.log("Account created successfully:", registrationResult.user.uid);
+        
+        // 2. Set the user state with the newly created user
+        setUser(registrationResult.user);
+        
+        // 3. Create a free order for this user
+        const orderResult = await processPayment(
+          null, // No payment details for free purchase
+          registrationResult.user.uid,
+          {
+            amount: 0,
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponCode,
+            isFree: true
+          }
+        );
+        
+        if (!orderResult.success) {
+          console.error("Failed to create order:", orderResult.error);
+          throw new Error(orderResult.error || 'Failed to process your free access');
+        }
+        
+        console.log("Order created successfully:", orderResult.orderId);
+        
+        // 4. Update the user document to mark payment as verified
+        try {
+          const db = getFirestore();
+          await updateDoc(doc(db, "users", registrationResult.user.uid), {
+            paymentVerified: true,
+            purchaseDate: new Date().toISOString(),
+            purchasedPlan: selectedPlan,
+            purchaseAmount: 0, // Free purchase
+            subscriptions: [{
+              plan: selectedPlan,
+              startDate: new Date().toISOString(),
+              endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+              orderId: orderResult.orderId,
+              active: true
+            }]
+          });
+          
+          // Set payment verification in session storage for immediate access
+          sessionStorage.setItem('paymentVerified', 'true');
+        } catch (updateError) {
+          console.error("Failed to update user document:", updateError);
+          // We'll continue anyway since the core account and order were created
+        }
+        
+        // 5. Move to confirmation step
+        setOrderId(orderResult.orderId);
+        changeCheckoutStep('confirmation');
+      } else if (user && user.uid) {
+        // Handle existing user free purchase
+        console.log("Processing free purchase for existing user:", user.uid);
+        
+        const result = await processPayment(
+          null, // No payment details needed for free purchase
+          user.uid,
+          {
+            amount: 0,
+            plan: selectedPlan,
+            discount: discount,
+            couponCode: couponCode,
+            isFree: true
+          }
+        );
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Error processing your free access');
+        }
+        
+        console.log("Free order created:", result.orderId);
+        
+        // Set order ID and move to confirmation
+        setOrderId(result.orderId);
+        changeCheckoutStep('confirmation');
+        
+        // Set payment verification in session storage for immediate access
+        sessionStorage.setItem('paymentVerified', 'true');
+      } else {
+        throw new Error('Missing user information. Please try again.');
+      }
+    } catch (error) {
+      console.error("Free purchase error:", error);
+      setError(error.message || 'An error occurred while processing your order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Render payment form step
-const renderPaymentForm = () => {
-  // If purchase is free with 100% discount, process it immediately
-  if (isFreeWithCoupon()) {
-    // Trigger free purchase processing
-    if (!loading && !orderId) {
-      processFreePurchase();
+  const renderPaymentForm = () => {
+    // If we need to collect user data first and haven't done so yet
+    if (!user && !pendingUserData && !loading) {
+      return (
+        <div className="payment-form-container">
+          <div className="payment-header">
+            <h2>Creating Your Account</h2>
+            <p>Please provide your details to continue with payment</p>
+          </div>
+          
+          {/* Back button to plan selection */}
+          <div className="navigation-controls">
+            <button className="back-button" onClick={handleGoBack}>
+              ← Back to Plans
+            </button>
+          </div>
+          
+          <div className="loader-container">
+            <div className="loader"></div>
+          </div>
+        </div>
+      );
     }
     
+    // If purchase is free with 100% discount, show confirmation screen instead of auto-processing
+    if (isFreeWithCoupon()) {
+      return (
+        <div className="payment-form-container">
+          <div className="payment-header">
+            <h2>Confirm Free Access</h2>
+            <p>Your order qualifies for free access with the applied coupon.</p>
+          </div>
+          
+          {/* Back button */}
+          <div className="navigation-controls">
+            <button className="back-button" onClick={handleGoBack}>
+              ← Back
+            </button>
+          </div>
+          
+          <div className="order-summary">
+            <h3>Order Summary</h3>
+            <div className="order-details">
+              <div className="plan-name">
+                <h4>{getPlanDisplayName()}</h4>
+                <p className="subscription-period">
+                  <span style={{textDecoration: 'line-through'}}>${subscription.price.toFixed(2)}</span>
+                  {' '}<strong>FREE</strong> {getSubscriptionPeriodText()}
+                </p>
+                <p className="plan-description">New full applicant profile added every couple days.</p>
+              </div>
+              
+              <div className="applied-discount">
+                <div className="discount-info" style={{marginBottom: '20px'}}>
+                  <span>Discount coupon applied: </span>
+                  <span><strong>{couponCode}</strong> ({discount}% off)</span>
+                </div>
+              </div>
+              
+              {/* If we have pending user data, show account details to be created */}
+              {pendingUserData && (
+                <div className="user-info-summary" style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  borderLeft: '3px solid #10b981',
+                  padding: '15px',
+                  marginBottom: '20px',
+                  borderRadius: '4px'
+                }}>
+                  <h4 style={{marginBottom: '10px'}}>Account Details</h4>
+                  <p><strong>Email:</strong> {pendingUserData.email}</p>
+                  <p><strong>Name:</strong> {pendingUserData.firstName} {pendingUserData.lastName}</p>
+                  <p style={{marginTop: '10px', fontSize: '0.9em', fontStyle: 'italic'}}>
+                    Your account will be created when you confirm your order.
+                  </p>
+                </div>
+              )}
+              
+              {/* Show a prominent confirm button */}
+              <button 
+                onClick={handleConfirmFreePurchase} 
+                style={{
+                  width: '100%',
+                  padding: '15px',
+                  backgroundColor: '#065f46',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  marginTop: '20px',
+                  marginBottom: '20px'
+                }}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Confirm Free Access'}
+              </button>
+              
+              {/* Show any error messages */}
+              {error && (
+                <div style={{
+                  color: '#e53e3e',
+                  backgroundColor: '#fee2e2',
+                  padding: '10px 15px',
+                  borderRadius: '4px',
+                  marginTop: '15px'
+                }}>
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Regular payment form for non-free purchases (your existing code)
     return (
       <div className="payment-form-container">
-        <div className="payment-header">
-          <h2>Processing your order...</h2>
-          <p>Please wait while we process your free access.</p>
-        </div>
-        
-        <div className="loader-container">
-          <div className="loader"></div>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="payment-form-container">
-      <div className="payment-header">
-        <h2>Payment & Discounts</h2>
-        <p>Enter your payment details to continue</p>
-      </div>
-      
-      {/* Back button */}
-      <div className="navigation-controls">
-        <button className="back-button" onClick={handleGoBack}>
-          ← Back
-        </button>
-      </div>
-      
-      <div className="order-summary">
-        <h3>Subscription Summary</h3>
-        <div className="order-details">
-          <div className="plan-name">
-            <h4>{getPlanDisplayName()}</h4>
-            <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
-            <p className="plan-description">New full applicant profile added every couple days.</p>
+          <div className="payment-header">
+            <h2>Payment & Discounts</h2>
+            <p>Enter your payment details to continue</p>
           </div>
           
-          {/* GIFT OR DISCOUNT CODE SECTION */}
-          <div className="discount-section">
-            <h4>GIFT OR DISCOUNT CODE</h4>
-            
-            {!couponApplied ? (
-              <div className="coupon-input-group">
-                <input
-                  type="text"
-                  placeholder="Gift or Discount Code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="coupon-input"
-                />
-                <button 
-                  className="apply-coupon-btn"
-                  onClick={applyCoupon}
-                >
-                  APPLY
-                </button>
+          {/* Back button */}
+          <div className="navigation-controls">
+            <button className="back-button" onClick={handleGoBack}>
+              ← Back
+            </button>
+          </div>
+          
+          <div className="order-summary">
+            <h3>Subscription Summary</h3>
+            <div className="order-details">
+              <div className="plan-name">
+                <h4>{getPlanDisplayName()}</h4>
+                <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
+                <p className="plan-description">New full applicant profile added every couple days.</p>
               </div>
-            ) : (
-              <div className="applied-discount">
-                <div className="discount-info">
-                  <span>Discount ({discount}% off)</span>
-                  <span>-${getDiscountAmount().toFixed(2)}</span>
+              
+              {/* GIFT OR DISCOUNT CODE SECTION */}
+              <div className="discount-section">
+                <h4>GIFT OR DISCOUNT CODE</h4>
+                
+                {!couponApplied ? (
+                  <div className="coupon-input-group">
+                    <input
+                      type="text"
+                      placeholder="Gift or Discount Code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="coupon-input"
+                    />
+                    <button 
+                      className="apply-coupon-btn"
+                      onClick={applyCoupon}
+                    >
+                      APPLY
+                    </button>
+                  </div>
+                ) : (
+                  <div className="applied-discount">
+                    <div className="discount-info">
+                      <span>Discount ({discount}% off)</span>
+                      <span>-${getDiscountAmount().toFixed(2)}</span>
+                    </div>
+                    <button className="remove-discount-btn" onClick={removeCoupon}>
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="checkout-summary">
+                <div className="summary-row">
+                  <span>Subtotal</span>
+                  <span>${subscription.price.toFixed(2)}</span>
                 </div>
-                <button className="remove-discount-btn" onClick={removeCoupon}>
-                  Remove
-                </button>
+                
+                {couponApplied && (
+                  <div className="summary-row discount">
+                    <span>Discount ({discount}%)</span>
+                    <span>-${getDiscountAmount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <div className="summary-row">
+                  <span>Tax</span>
+                  <span>$0.00</span>
+                </div>
+                
+                <div className="summary-row total">
+                  <span>Total</span>
+                  <span>${getFinalPrice()}</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
           
-          <div className="checkout-summary">
-            <div className="summary-row">
-              <span>Subtotal</span>
-              <span>${subscription.price.toFixed(2)}</span>
-            </div>
+          <div className="payment-form">
+            <h3>
+              <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
+              Card Information
+            </h3>
+              
+            {error && <div className="payment-error">{error}</div>}
             
-            {couponApplied && (
-              <div className="summary-row discount">
-                <span>Discount ({discount}%)</span>
-                <span>-${getDiscountAmount().toFixed(2)}</span>
+            {/* If we have pending user data (from auth modal), show their email */}
+            {pendingUserData && (
+              <div className="user-info-summary">
+                <p>Account will be created for: <strong>{pendingUserData.email}</strong></p>
+                <p className="pending-note">Your account will be created after successful payment.</p>
               </div>
             )}
             
-            <div className="summary-row">
-              <span>Tax</span>
-              <span>$0.00</span>
-            </div>
+            {/* Replace your custom form with the Stripe Elements component */}
+            <StripeWrapper
+              onSuccess={(paymentMethod) => {
+                console.log("Payment method created:", paymentMethod);
+                // Store the payment method details and proceed to review
+                setCardInfo({
+                  ...cardInfo,
+                  brand: paymentMethod.card?.brand || 'unknown',
+                  last4: paymentMethod.card?.last4 || '****',
+                  id: paymentMethod.id
+                });
+                changeCheckoutStep('review');
+              }}
+              onError={(errorMessage) => {
+                setError(errorMessage);
+              }}
+              processingPayment={loading}
+            />
             
-            <div className="summary-row total">
-              <span>Total</span>
-              <span>${getFinalPrice()}</span>
+            <div className="secure-checkout">
+              <div className="secure-icon">🔒</div>
+              <span>SECURE SSL CHECKOUT</span>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="payment-form">
-        <h3>
-          <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
-          Card Information
-        </h3>
-          
-        {error && <div className="payment-error">{error}</div>}
-        
-        {/* Replace your custom form with the Stripe Elements component */}
-        <StripeWrapper
-          onSuccess={(paymentMethod) => {
-            console.log("Payment method created:", paymentMethod);
-            // Store the payment method details and proceed to review
-            setCardInfo({
-              ...cardInfo,
-              brand: paymentMethod.card?.brand || 'unknown',
-              last4: paymentMethod.card?.last4 || '****',
-              id: paymentMethod.id
-            });
-            changeCheckoutStep('review');
-          }}
-          onError={(errorMessage) => {
-            setError(errorMessage);
-          }}
-          processingPayment={loading}
-        />
-        
-        <div className="secure-checkout">
-          <div className="secure-icon">🔒</div>
-          <span>SECURE SSL CHECKOUT</span>
-        </div>
-      </div>
-    </div>
-  );
-};
+      );
+    };
 
   // Render review step
   const renderReviewStep = () => {
@@ -1049,8 +1330,8 @@ const renderPaymentForm = () => {
         onSuccess={handleAuthSuccess}
         initialMode={isLoginMode ? 'login' : 'signup'}
         preventRedirect={true} /* This prevents automatic redirection */
-      />
-      
+        dataCollectionOnly={checkoutStep === 'payment'} /* CRITICAL: This prevents account creation during payment flow */
+      />     
       <Footer />
     </div>
   );

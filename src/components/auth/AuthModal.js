@@ -1,4 +1,4 @@
-// src/components/auth/AuthModal.js - FIXED VERSION
+// src/components/auth/AuthModal.js (with updates)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
@@ -10,7 +10,7 @@ const AuthModal = ({
   onSuccess, 
   initialMode = 'login', 
   preventRedirect = false,
-  dataCollectionOnly = false // New prop
+  dataCollectionOnly = false // New prop for just collecting data without authentication
 }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [email, setEmail] = useState('');
@@ -125,7 +125,7 @@ const AuthModal = ({
     // Close the modal
     onClose();
     
-    // FIXED: Only navigate to guest-preview if preventRedirect is false
+    // Only navigate to guest-preview if preventRedirect is false
     if (!preventRedirect) {
       setTimeout(() => {
         navigate('/guest-preview');
@@ -151,12 +151,16 @@ const AuthModal = ({
         <h2>
           {isLogin 
             ? "Sign in to your account" 
-            : "Create an account"}
+            : (dataCollectionOnly 
+               ? "Create your account" 
+               : "Create an account")}
         </h2>
         <p className="auth-subtitle">
           {isLogin 
             ? "Sign in to continue to PremedCheatsheet." 
-            : "Create an account to continue to PremedCheatsheet."}
+            : (dataCollectionOnly 
+               ? "Enter your details to complete your purchase." 
+               : "Create an account to continue to PremedCheatsheet.")}
         </p>
 
         {error && <div className="auth-error">{error}</div>}
@@ -221,7 +225,13 @@ const AuthModal = ({
             className="auth-button"
             disabled={loading}
           >
-            {loading ? "Processing..." : (isLogin ? "Sign In" : "Create Account")}
+            {loading 
+              ? "Processing..." 
+              : (isLogin 
+                 ? "Sign In" 
+                 : (dataCollectionOnly 
+                    ? "Continue to Payment" 
+                    : "Create Account"))}
           </button>
         </form>
 
@@ -239,9 +249,11 @@ const AuthModal = ({
             </p>
           )}
           
-          <button className="guest-button" onClick={continueAsGuest}>
-            Continue as guest
-          </button>
+          {!dataCollectionOnly && (
+            <button className="guest-button" onClick={continueAsGuest}>
+              Continue as guest
+            </button>
+          )}
         </div>
       </div>
     </div>
