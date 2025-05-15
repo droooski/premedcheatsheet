@@ -1,4 +1,4 @@
-// src/App.js with payment verification added
+// src/App.js with reset password route added
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
@@ -10,8 +10,9 @@ import AdminPanel from './pages/Admin/AdminPanel';
 import GuestPage from './pages/Guest/GuestPage';
 import AboutPage from './pages/About/AboutPage';
 import AdminRoute from './components/auth/AdminRoute';
-import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute'; // Add this import
+import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
+import ResetPasswordPage from './components/auth/ResetPasswordPage'; // Add reset password page
 import { onAuthChange } from './firebase/authService';
 import './styles/main.scss';
 
@@ -60,13 +61,16 @@ function App() {
         <Route path="/login" element={isAuthenticated ? <Navigate to="/profile" /> : <Checkout mode="login" />} />
         <Route path="/pricing" element={<Checkout />} />
         
+        {/* Reset Password route - NEW */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        
         {/* About page route */}
         <Route path="/about" element={<AboutPage />} />
         
         {/* Guest preview route - explicit route for guest viewers */}
         <Route path="/guest-preview" element={<GuestPage />} />
         
-        {/* UPDATED: Protected routes with payment verification */}
+        {/* Protected routes with payment verification */}
         <Route path="/profile" element={
           isAuthenticated ? (
             <PaymentVerifiedRoute fallbackPath="/checkout">
@@ -79,17 +83,17 @@ function App() {
           )
         } />
 
-          <Route path="/application-cheatsheet" element={
-            isAuthenticated ? (
-              <PaymentVerifiedRoute fallbackPath="/checkout">
-                <ApplicationCheatsheetPage />
-              </PaymentVerifiedRoute>
-            ) : isGuest ? (
-              <GuestPage />
-            ) : (
-              <Navigate to="/" />
-            )
-          } />
+        <Route path="/application-cheatsheet" element={
+          isAuthenticated ? (
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <ApplicationCheatsheetPage />
+            </PaymentVerifiedRoute>
+          ) : isGuest ? (
+            <GuestPage />
+          ) : (
+            <Navigate to="/" />
+          )
+        } />
         
         <Route path="/school/:schoolId" element={
           isAuthenticated ? (
@@ -117,19 +121,6 @@ function App() {
         <Route path="/contact" element={<AboutPage />} />
         <Route path="/privacy" element={<HomePage />} />
         <Route path="/terms" element={<HomePage />} />
-        
-        {/* Application cheatsheet route */}
-        <Route path="/application-cheatsheet" element={
-          isAuthenticated ? (
-            <PaymentVerifiedRoute fallbackPath="/checkout">
-              <ProfilePage />
-            </PaymentVerifiedRoute>
-          ) : isGuest ? (
-            <GuestPage />
-          ) : (
-            <Navigate to="/" />
-          )
-        } />
         
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" />} />

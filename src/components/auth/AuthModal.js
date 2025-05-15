@@ -1,9 +1,8 @@
-// Fix for src/components/auth/AuthModal.js
-// The issue is likely with how the close button is handling events
-
+// src/components/auth/AuthModal.js - Updated with forgot password functionality
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
+import ForgotPassword from './ForgotPassword';
 import './AuthModal.scss';
 
 const AuthModal = ({ 
@@ -15,6 +14,7 @@ const AuthModal = ({
   dataCollectionOnly = false 
 }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,6 +34,7 @@ const AuthModal = ({
     if (isOpen) {
       // When opening, just reset error
       setError('');
+      setShowForgotPassword(false);
     } else {
       // When closing, reset all fields
       setEmail('');
@@ -43,12 +44,27 @@ const AuthModal = ({
       setLastName('');
       setError('');
       setLoading(false);
+      setShowForgotPassword(false);
     }
   }, [isOpen]);
 
   // Toggle between login and signup modes
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
+    setError('');
+    setShowForgotPassword(false);
+  };
+
+  // Show forgot password form
+  const handleShowForgotPassword = (e) => {
+    e.preventDefault();
+    setShowForgotPassword(true);
+    setError('');
+  };
+
+  // Back to login from forgot password
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
     setError('');
   };
 
@@ -171,113 +187,123 @@ const AuthModal = ({
           &times;
         </button>
         
-        <h2>
-          {isLogin 
-            ? "Sign in to your account" 
-            : (dataCollectionOnly 
-               ? "Create your account" 
-               : "Create an account")}
-        </h2>
-        <p className="auth-subtitle">
-          {isLogin 
-            ? "Sign in to continue to PremedCheatsheet." 
-            : (dataCollectionOnly 
-               ? "Enter your details to complete your purchase." 
-               : "Create an account to continue to PremedCheatsheet.")}
-        </p>
+        {/* Conditional rendering based on state */}
+        {showForgotPassword ? (
+          <ForgotPassword 
+            onClose={onClose} 
+            onBackToLogin={handleBackToLogin} 
+          />
+        ) : (
+          <>
+            <h2>
+              {isLogin 
+                ? "Sign in to your account" 
+                : (dataCollectionOnly 
+                   ? "Create your account" 
+                   : "Create an account")}
+            </h2>
+            <p className="auth-subtitle">
+              {isLogin 
+                ? "Sign in to continue to PremedCheatsheet." 
+                : (dataCollectionOnly 
+                   ? "Enter your details to complete your purchase." 
+                   : "Create an account to continue to PremedCheatsheet.")}
+            </p>
 
-        {error && <div className="auth-error">{error}</div>}
+            {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <div className="name-inputs">
+            <form onSubmit={handleSubmit}>
+              {!isLogin && (
+                <div className="name-inputs">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      placeholder="First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="form-group">
                 <input
-                  type="text"
-                  placeholder="First Name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
+
               <div className="form-group">
                 <input
-                  type="text"
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
+
+              {!isLogin && (
+                <div className="form-group">
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                className="auth-button"
+                disabled={loading}
+              >
+                {loading 
+                  ? "Processing..." 
+                  : (isLogin 
+                     ? "Sign In" 
+                     : (dataCollectionOnly 
+                        ? "Continue to Payment" 
+                        : "Create Account"))}
+              </button>
+            </form>
+
+            <div className="auth-footer">
+              {isLogin ? (
+                <p>
+                  <a href="#" onClick={handleShowForgotPassword}>Forgot Password?</a>
+                  {' | '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Create account</a>
+                </p>
+              ) : (
+                <p>
+                  Already have an account?{' '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Sign in</a>
+                </p>
+              )}
+              
+              {!dataCollectionOnly && (
+                <button className="guest-button" onClick={continueAsGuest}>
+                  Continue as guest
+                </button>
+              )}
             </div>
-          )}
-
-          <div className="form-group">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          {!isLogin && (
-            <div className="form-group">
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-          )}
-
-          <button 
-            type="submit" 
-            className="auth-button"
-            disabled={loading}
-          >
-            {loading 
-              ? "Processing..." 
-              : (isLogin 
-                 ? "Sign In" 
-                 : (dataCollectionOnly 
-                    ? "Continue to Payment" 
-                    : "Create Account"))}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          {isLogin ? (
-            <p>
-              <a href="#" onClick={(e) => { e.preventDefault(); }}>Forgot Password?</a>
-              {' | '}
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Create account</a>
-            </p>
-          ) : (
-            <p>
-              Already have an account?{' '}
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Sign in</a>
-            </p>
-          )}
-          
-          {!dataCollectionOnly && (
-            <button className="guest-button" onClick={continueAsGuest}>
-              Continue as guest
-            </button>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

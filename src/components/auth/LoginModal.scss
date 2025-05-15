@@ -1,4 +1,4 @@
-/* src/components/auth/LoginModal.scss */
+/* Updated LoginModal.scss to support forgot password styling */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -69,6 +69,80 @@
     margin-bottom: $spacing-4;
     font-size: 0.875rem;
     text-align: center;
+  }
+  
+  .success-message {
+    text-align: center;
+    background-color: rgba($green-500, 0.1);
+    border-left: 3px solid $green-500;
+    padding: $spacing-4;
+    margin-bottom: $spacing-4;
+    border-radius: 4px;
+    
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
+      color: darken($green-500, 5%);
+    }
+    
+    p {
+      margin-bottom: $spacing-3;
+      font-size: 0.95rem;
+      color: $text-color;
+      
+      &:last-of-type {
+        margin-bottom: $spacing-4;
+        font-size: 0.85rem;
+        color: $text-color-light;
+      }
+    }
+    
+    .success-actions {
+      display: flex;
+      gap: $spacing-2;
+      margin-top: $spacing-4;
+      
+      @media (max-width: $sm) {
+        flex-direction: column;
+        gap: $spacing-2;
+      }
+      
+      .back-to-login-button, .resend-button {
+        flex: 1;
+        padding: $spacing-2 $spacing-3;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .back-to-login-button {
+        background-color: $white;
+        color: $text-color;
+        border: 1px solid $gray-300;
+        
+        &:hover {
+          background-color: $gray-100;
+        }
+      }
+      
+      .resend-button {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        
+        &:hover:not(:disabled) {
+          background-color: darken($primary-color, 5%);
+        }
+        
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
+    }
   }
   
   .form-group {
