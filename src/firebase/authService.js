@@ -16,6 +16,9 @@ const db = getFirestore(app);
 // Register a new user
 export const registerUser = async (email, password, firstName, lastName) => {
   try {
+    console.log(`Registering user: ${email}, firstName: ${firstName}, lastName: ${lastName}`);
+    
+    // Create user with Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
     // Create user profile in Firestore
@@ -24,9 +27,11 @@ export const registerUser = async (email, password, firstName, lastName) => {
       lastName: lastName || '',
       email: email,
       createdAt: new Date().toISOString(),
-      subscriptions: []
+      subscriptions: [],
+      paymentVerified: false
     });
     
+    console.log("User registered successfully:", userCredential.user.uid);
     return { user: userCredential.user, success: true };
   } catch (error) {
     console.error("Error registering user:", error);

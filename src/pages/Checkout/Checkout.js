@@ -51,7 +51,6 @@ const Checkout = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [pendingUserData, setPendingUserData] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
-  const [processingFreeOrder, setProcessingFreeOrder] = useState(false);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -244,10 +243,6 @@ useEffect(() => {
 
   // Process a free purchase with 100% discount coupon
   const processFreePurchase = async () => {
-    // Prevent multiple calls
-    if (processingFreeOrder) return;
-    
-    setProcessingFreeOrder(true);
     setLoading(true);
     setError('');
     
@@ -278,14 +273,13 @@ useEffect(() => {
       } else {
         throw new Error(result.error || 'Error processing your free access');
       }
-  } catch (error) {
-    console.error("Free purchase error:", error);
-    setError(error.message);
-  } finally {
-    setLoading(false);
-    // Don't reset processingFreeOrder here to prevent subsequent attempts
-  }
-};
+    } catch (error) {
+      console.error("Free purchase error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle authentication success
   const handleAuthSuccess = (userData) => {
@@ -628,23 +622,6 @@ const handleAuthDataCollection = (userData) => {
     }
   };
 
-  // Calculate subscription end date
-  const getSubscriptionEndDate = () => {
-    const now = new Date();
-    const endDate = new Date(now);
-    
-    if (subscription.type === 'monthly') {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else if (subscription.type === 'yearly') {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    } else {
-      // One-time purchases - give 5 years access
-      endDate.setFullYear(endDate.getFullYear() + 5);
-    }
-    
-    return endDate.toISOString();
-  };
-
   // Get plan display name
   const getPlanDisplayName = () => {
     switch(selectedPlan) {
@@ -772,140 +749,145 @@ const handleAuthDataCollection = (userData) => {
   };
 
   // Render payment form step
-  const renderPaymentForm = () => {
-    // If purchase is free with 100% discount, show loading UI
-    if (isFreeWithCoupon()) {
-      return (
-        <div className="payment-form-container">
-          <div className="payment-header">
-            <h2>Processing your order...</h2>
-            <p>Please wait while we process your free access.</p>
-          </div>
-          
-          <div className="loader-container">
-            <div className="loader"></div>
-          </div>
-        </div>
-      );
+const renderPaymentForm = () => {
+  // If purchase is free with 100% discount, process it immediately
+  if (isFreeWithCoupon()) {
+    // Trigger free purchase processing
+    if (!loading && !orderId) {
+      processFreePurchase();
     }
-  
+    
     return (
       <div className="payment-form-container">
         <div className="payment-header">
-          <h2>Payment & Discounts</h2>
-          <p>Enter your payment details to continue</p>
+          <h2>Processing your order...</h2>
+          <p>Please wait while we process your free access.</p>
         </div>
         
-        {/* Back button */}
-        <div className="navigation-controls">
-          <button className="back-button" onClick={handleGoBack}>
-            ← Back
-          </button>
-        </div>
-        
-        <div className="order-summary">
-          <h3>Subscription Summary</h3>
-          <div className="order-details">
-            <div className="plan-name">
-              <h4>{getPlanDisplayName()}</h4>
-              <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
-              <p className="plan-description">New full applicant profile added every couple days.</p>
-            </div>
-            
-            {/* GIFT OR DISCOUNT CODE SECTION */}
-            <div className="discount-section">
-              <h4>GIFT OR DISCOUNT CODE</h4>
-              
-              {!couponApplied ? (
-                <div className="coupon-input-group">
-                  <input
-                    type="text"
-                    placeholder="Gift or Discount Code"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="coupon-input"
-                  />
-                  <button 
-                    className="apply-coupon-btn"
-                    onClick={applyCoupon}
-                  >
-                    APPLY
-                  </button>
-                </div>
-              ) : (
-                <div className="applied-discount">
-                  <div className="discount-info">
-                    <span>Discount ({discount}% off)</span>
-                    <span>-${getDiscountAmount().toFixed(2)}</span>
-                  </div>
-                  <button className="remove-discount-btn" onClick={removeCoupon}>
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
-            
-            <div className="checkout-summary">
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>${subscription.price.toFixed(2)}</span>
-              </div>
-              
-              {couponApplied && (
-                <div className="summary-row discount">
-                  <span>Discount ({discount}%)</span>
-                  <span>-${getDiscountAmount().toFixed(2)}</span>
-                </div>
-              )}
-              
-              <div className="summary-row">
-                <span>Tax</span>
-                <span>$0.00</span>
-              </div>
-              
-              <div className="summary-row total">
-                <span>Total</span>
-                <span>${getFinalPrice()}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="payment-form">
-          <h3>
-            <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
-            Card Information
-          </h3>
-            
-          {error && <div className="payment-error">{error}</div>}
-          
-          {/* Replace your custom form with the Stripe Elements component */}
-          <StripeWrapper
-            onSuccess={(paymentMethod) => {
-              console.log("Payment method created:", paymentMethod);
-              // Store the payment method details and proceed to review
-              setCardInfo({
-                ...cardInfo,
-                brand: paymentMethod.card?.brand || 'unknown',
-                last4: paymentMethod.card?.last4 || '****',
-                id: paymentMethod.id
-              });
-              changeCheckoutStep('review');
-            }}
-            onError={(errorMessage) => {
-              setError(errorMessage);
-            }}
-            processingPayment={loading}
-          />
-          
-          <div className="secure-checkout">
-            <div className="secure-icon">🔒</div>
-            <span>SECURE SSL CHECKOUT</span>
-          </div>
+        <div className="loader-container">
+          <div className="loader"></div>
         </div>
       </div>
     );
-  };
+  }
+  
+  return (
+    <div className="payment-form-container">
+      <div className="payment-header">
+        <h2>Payment & Discounts</h2>
+        <p>Enter your payment details to continue</p>
+      </div>
+      
+      {/* Back button */}
+      <div className="navigation-controls">
+        <button className="back-button" onClick={handleGoBack}>
+          ← Back
+        </button>
+      </div>
+      
+      <div className="order-summary">
+        <h3>Subscription Summary</h3>
+        <div className="order-details">
+          <div className="plan-name">
+            <h4>{getPlanDisplayName()}</h4>
+            <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
+            <p className="plan-description">New full applicant profile added every couple days.</p>
+          </div>
+          
+          {/* GIFT OR DISCOUNT CODE SECTION */}
+          <div className="discount-section">
+            <h4>GIFT OR DISCOUNT CODE</h4>
+            
+            {!couponApplied ? (
+              <div className="coupon-input-group">
+                <input
+                  type="text"
+                  placeholder="Gift or Discount Code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="coupon-input"
+                />
+                <button 
+                  className="apply-coupon-btn"
+                  onClick={applyCoupon}
+                >
+                  APPLY
+                </button>
+              </div>
+            ) : (
+              <div className="applied-discount">
+                <div className="discount-info">
+                  <span>Discount ({discount}% off)</span>
+                  <span>-${getDiscountAmount().toFixed(2)}</span>
+                </div>
+                <button className="remove-discount-btn" onClick={removeCoupon}>
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div className="checkout-summary">
+            <div className="summary-row">
+              <span>Subtotal</span>
+              <span>${subscription.price.toFixed(2)}</span>
+            </div>
+            
+            {couponApplied && (
+              <div className="summary-row discount">
+                <span>Discount ({discount}%)</span>
+                <span>-${getDiscountAmount().toFixed(2)}</span>
+              </div>
+            )}
+            
+            <div className="summary-row">
+              <span>Tax</span>
+              <span>$0.00</span>
+            </div>
+            
+            <div className="summary-row total">
+              <span>Total</span>
+              <span>${getFinalPrice()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="payment-form">
+        <h3>
+          <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
+          Card Information
+        </h3>
+          
+        {error && <div className="payment-error">{error}</div>}
+        
+        {/* Replace your custom form with the Stripe Elements component */}
+        <StripeWrapper
+          onSuccess={(paymentMethod) => {
+            console.log("Payment method created:", paymentMethod);
+            // Store the payment method details and proceed to review
+            setCardInfo({
+              ...cardInfo,
+              brand: paymentMethod.card?.brand || 'unknown',
+              last4: paymentMethod.card?.last4 || '****',
+              id: paymentMethod.id
+            });
+            changeCheckoutStep('review');
+          }}
+          onError={(errorMessage) => {
+            setError(errorMessage);
+          }}
+          processingPayment={loading}
+        />
+        
+        <div className="secure-checkout">
+          <div className="secure-icon">🔒</div>
+          <span>SECURE SSL CHECKOUT</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
   // Render review step
   const renderReviewStep = () => {
@@ -1064,11 +1046,11 @@ const handleAuthDataCollection = (userData) => {
       <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthDataCollection} // Use the new handler
-        initialMode={isLoginMode ? "login" : "signup"}
-        preventRedirect={true}
-        dataCollectionOnly={true} // Only collect data, don't register yet
+        onSuccess={handleAuthSuccess}
+        initialMode={isLoginMode ? 'login' : 'signup'}
+        preventRedirect={true} /* This prevents automatic redirection */
       />
+      
       <Footer />
     </div>
   );
