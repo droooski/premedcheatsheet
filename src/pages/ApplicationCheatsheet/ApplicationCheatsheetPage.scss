@@ -1,0 +1,47 @@
+.expanded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-4 $spacing-6;
+    border-bottom: 1px solid $gray-200;
+    text-align: center;
+    
+    @media (max-width: $sm) {
+      padding: $spacing-3 $spacing-4;
+    }
+    
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-color;
+      width: 100%;
+      text-align: center;
+      
+      @media (max-width: $sm) {
+        font-size: 1.25rem;
+      }
+    }
+    
+    .close-button {
+      position: absolute;
+      right: $spacing-6;
+      background-color: $gray-100;
+      color: $text-color;
+      border: 1px solid $gray-300;
+      padding: $spacing-2 $spacing-4;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: $gray-200;
+      }
+      
+      @media (max-width: $sm) {
+        right: $spacing-4;
+      }
+    }
+  }

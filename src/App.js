@@ -11,6 +11,7 @@ import GuestPage from './pages/Guest/GuestPage';
 import AboutPage from './pages/About/AboutPage';
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute'; // Add this import
+import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
 import { onAuthChange } from './firebase/authService';
 import './styles/main.scss';
 
@@ -77,6 +78,18 @@ function App() {
             <Navigate to="/" />
           )
         } />
+
+          <Route path="/application-cheatsheet" element={
+            isAuthenticated ? (
+              <PaymentVerifiedRoute fallbackPath="/checkout">
+                <ApplicationCheatsheetPage />
+              </PaymentVerifiedRoute>
+            ) : isGuest ? (
+              <GuestPage />
+            ) : (
+              <Navigate to="/" />
+            )
+          } />
         
         <Route path="/school/:schoolId" element={
           isAuthenticated ? (
