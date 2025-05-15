@@ -181,7 +181,7 @@ const AccountPage = () => {
               <h2 className="section-title">Profile</h2>
               <div className="section-content">
                 <p className="profile-email">{user?.email || 'Guest User'}</p>
-                <button className="edit-button">Edit Profile</button>
+                {/* <button className="edit-button">Edit Profile</button> */}
               </div>
             </div>
             
@@ -190,7 +190,7 @@ const AccountPage = () => {
               <h2 className="section-title">Address</h2>
               <div className="section-content empty">
                 <p className="section-summary">No saved addresses</p>
-                <button className="add-new-button">Add Address</button>
+                {/* <button className="add-new-button">Add Address</button> */}
               </div>
             </div>
             
@@ -239,7 +239,7 @@ const AccountPage = () => {
               <h2 className="section-title">Payment</h2>
               <div className="section-content empty">
                 <p className="section-summary">No saved payments</p>
-                <button className="add-new-button">Add Payment Method</button>
+                {/* <button className="add-new-button">Add Payment Method</button> */}
               </div>
             </div>
           </div>
