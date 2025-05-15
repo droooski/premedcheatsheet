@@ -1,4 +1,4 @@
-// src/firebase/authService.js - Updated with enhanced password reset functionality
+// src/firebase/authService.js - Updated with email verification functions
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
@@ -7,9 +7,11 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged,
   verifyPasswordResetCode,
-  confirmPasswordReset
+  confirmPasswordReset,
+  sendEmailVerification, // Added for email verification
+  applyActionCode       // Added for handling verification link clicks
 } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import app from './config';
 
 const auth = getAuth(app);
@@ -23,6 +25,12 @@ export const registerUser = async (email, password, firstName, lastName) => {
     // Create user with Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
+    // Send email verification
+    await sendEmailVerification(userCredential.user, {
+      url: `${window.location.origin}/account`,
+      handleCodeInApp: false
+    });
+    
     // Create user profile in Firestore
     await setDoc(doc(db, "users", userCredential.user.uid), {
       firstName: firstName || '',
@@ -30,7 +38,8 @@ export const registerUser = async (email, password, firstName, lastName) => {
       email: email,
       createdAt: new Date().toISOString(),
       subscriptions: [],
-      paymentVerified: false
+      paymentVerified: false,
+      emailVerified: false // Track email verification status in Firestore
     });
     
     console.log("User registered successfully:", userCredential.user.uid);
@@ -60,6 +69,73 @@ export const logoutUser = async () => {
   } catch (error) {
     console.error("Error signing out:", error);
     return { error: error.message, success: false };
+  }
+};
+
+// Function to send verification email
+export const sendVerificationEmail = async (user) => {
+  try {
+    if (!user) {
+      throw new Error("No user is currently signed in");
+    }
+    
+    await sendEmailVerification(user, {
+      url: `${window.location.origin}/account`,
+      handleCodeInApp: false
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    return { 
+      error: { 
+        code: error.code, 
+        message: error.message || "Failed to send verification email" 
+      }, 
+      success: false 
+    };
+  }
+};
+
+// Function to verify email with code from URL
+export const verifyEmail = async (actionCode) => {
+  try {
+    await applyActionCode(auth, actionCode);
+    
+    // Update Firestore if user is logged in
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        emailVerified: true
+      });
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    return { 
+      error: { 
+        code: error.code, 
+        message: error.message || "Failed to verify email" 
+      }, 
+      success: false 
+    };
+  }
+};
+
+// Update Firestore emailVerified status when Firebase auth state changes
+export const updateEmailVerificationStatus = async (userId, isVerified) => {
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      emailVerified: isVerified
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating email verification status:", error);
+    return { 
+      error: error.message, 
+      success: false 
+    };
   }
 };
 

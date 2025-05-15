@@ -1,9 +1,16 @@
-// src/pages/Account/AccountPage.js
+// src/pages/Account/AccountPage.js - Updated with email verification
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
-import { onAuthChange, logoutUser, getUserProfile } from '../../firebase/authService';
+import { 
+  onAuthChange, 
+  logoutUser, 
+  getUserProfile, 
+  sendVerificationEmail,
+  verifyEmail,
+  updateEmailVerificationStatus
+} from '../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import './AccountPage.scss';
 
@@ -16,17 +23,64 @@ const AccountPage = () => {
   const [renewalDate, setRenewalDate] = useState(null);
   const [orders, setOrders] = useState([]);
   const [digitalProducts, setDigitalProducts] = useState([]);
-  const [emailVerified, setEmailVerified] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
+  
   const navigate = useNavigate();
+  const location = useLocation();
   const db = getFirestore();
+
+  // Handle email verification from link
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const mode = queryParams.get('mode');
+    const oobCode = queryParams.get('oobCode');
+    
+    const handleVerification = async () => {
+      // If this is an email verification link
+      if (mode === 'verifyEmail' && oobCode) {
+        try {
+          setLoading(true);
+          const result = await verifyEmail(oobCode);
+          
+          if (result.success) {
+            setVerificationSuccess(true);
+            setEmailVerified(true);
+            
+            // Clear URL parameters after successful verification
+            navigate('/account', { replace: true });
+          } else {
+            setVerificationError(result.error.message || 'Verification failed');
+          }
+        } catch (error) {
+          console.error("Error handling verification:", error);
+          setVerificationError('An error occurred during verification');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    if (mode === 'verifyEmail' && oobCode) {
+      handleVerification();
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const unsubscribe = onAuthChange(async (currentUser) => {
         if (currentUser) {
           setUser(currentUser);
+          
+          // Check Firebase auth email verification status
           setEmailVerified(currentUser.emailVerified);
+          
+          // If email was just verified, update Firestore
+          if (currentUser.emailVerified) {
+            await updateEmailVerificationStatus(currentUser.uid, true);
+          }
           
           // Fetch user profile data
           try {
@@ -100,16 +154,23 @@ const AccountPage = () => {
   };
 
   const handleResendVerification = async () => {
+    if (!user) return;
+    
     setResendingEmail(true);
+    setVerificationError(null);
+    
     try {
-      // Mock verification email sending
-      setTimeout(() => {
-        alert("Verification email has been resent to your email address");
-        setResendingEmail(false);
-      }, 1500);
+      const result = await sendVerificationEmail(user);
+      
+      if (result.success) {
+        alert("Verification email has been sent to your email address. Please check your inbox.");
+      } else {
+        throw new Error(result.error.message || "Failed to send verification email");
+      }
     } catch (error) {
       console.error("Error sending verification email:", error);
-      alert("Error sending verification email. Please try again later.");
+      setVerificationError(error.message || "Error sending verification email. Please try again later.");
+    } finally {
       setResendingEmail(false);
     }
   };
@@ -145,12 +206,36 @@ const AccountPage = () => {
       <div className="account-content">
         <div className="container">
           <div className="account-header">
-            <h1 className="page-title">Account</h1>
+            <h1 className="page-title">
+              Account
+              {emailVerified && (
+                <span className="verified-badge" title="Email Verified">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z" fill="#10B981" strokeWidth="2"/>
+                    <path d="M7 11L10 14L15 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              )}
+            </h1>
             <div className="account-actions-top">
               <button className="back-button" onClick={() => navigate(-1)}>BACK</button>
               <button className="close-button" onClick={() => navigate('/profile')}>CLOSE</button>
             </div>
           </div>
+          
+          {/* Verification success message */}
+          {verificationSuccess && (
+            <div className="verification-success-banner">
+              <p>Your email has been successfully verified. Thank you!</p>
+            </div>
+          )}
+          
+          {/* Verification error message */}
+          {verificationError && (
+            <div className="verification-error-banner">
+              <p>{verificationError}</p>
+            </div>
+          )}
           
           {/* Email Verification Banner */}
           {user && !emailVerified && (
@@ -180,7 +265,12 @@ const AccountPage = () => {
             <div className="account-card">
               <h2 className="section-title">Profile</h2>
               <div className="section-content">
-                <p className="profile-email">{user?.email || 'Guest User'}</p>
+                <p className="profile-email">
+                  {user?.email || 'Guest User'}
+                  {emailVerified && (
+                    <span className="email-verified-tag" title="Email Verified">Verified</span>
+                  )}
+                </p>
                 {/* <button className="edit-button">Edit Profile</button> */}
               </div>
             </div>

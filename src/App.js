@@ -1,4 +1,4 @@
-// src/App.js with reset password route added
+// src/App.js - Update to handle verification link handling
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
@@ -12,7 +12,8 @@ import AboutPage from './pages/About/AboutPage';
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
-import ResetPasswordPage from './components/auth/ResetPasswordPage'; // Add reset password page
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
+import EmailVerificationPage from './components/auth/EmailVerificationPage'; // New component for handling verifications
 import { onAuthChange } from './firebase/authService';
 import './styles/main.scss';
 
@@ -61,8 +62,11 @@ function App() {
         <Route path="/login" element={isAuthenticated ? <Navigate to="/profile" /> : <Checkout mode="login" />} />
         <Route path="/pricing" element={<Checkout />} />
         
-        {/* Reset Password route - NEW */}
+        {/* Reset Password route */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        
+        {/* Email Verification Handler route */}
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
         
         {/* About page route */}
         <Route path="/about" element={<AboutPage />} />
@@ -107,6 +111,7 @@ function App() {
           )
         } />
         
+        {/* Account page - handles email verification */}
         <Route path="/account" element={
           user ? <AccountPage /> : <Navigate to="/" />
         } />

@@ -1,0 +1,191 @@
+/* src/components/auth/EmailVerificationPage.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.email-verification-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+  
+  .verification-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: $spacing-8 $spacing-4;
+    
+    @media (max-width: $sm) {
+      padding: $spacing-4 $spacing-2;
+    }
+    
+    .verification-card {
+      background-color: $white;
+      border-radius: 10px;
+      padding: $spacing-8;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      
+      @media (max-width: $sm) {
+        padding: $spacing-6;
+      }
+      
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: $spacing-6;
+        color: $text-color;
+        
+        @media (max-width: $sm) {
+          font-size: 1.5rem;
+          margin-bottom: $spacing-4;
+        }
+      }
+      
+      .verifying-container {
+        .spinner {
+          margin: 0 auto $spacing-4;
+          width: 48px;
+          height: 48px;
+          border: 4px solid rgba($primary-color, 0.2);
+          border-left-color: $primary-color;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        }
+        
+        p {
+          font-size: 1.1rem;
+          color: $text-color;
+        }
+      }
+      
+      .success-container {
+        .success-icon {
+          width: 64px;
+          height: 64px;
+          background-color: $green-500;
+          color: white;
+          font-size: 2rem;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto $spacing-4;
+        }
+        
+        h2 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: $green-500;
+          margin-bottom: $spacing-4;
+        }
+        
+        p {
+          color: $text-color;
+          margin-bottom: $spacing-2;
+          
+          &:last-of-type {
+            margin-bottom: $spacing-6;
+            color: $text-color-light;
+            font-size: 0.9rem;
+          }
+        }
+        
+        .redirect-button {
+          background-color: $primary-color;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: $spacing-3 $spacing-6;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background-color: darken($primary-color, 5%);
+            transform: translateY(-2px);
+          }
+          
+          &:active {
+            transform: translateY(0);
+          }
+        }
+      }
+      
+      .error-container {
+        .error-icon {
+          width: 64px;
+          height: 64px;
+          background-color: #dc2626;
+          color: white;
+          font-size: 2rem;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto $spacing-4;
+        }
+        
+        h2 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #dc2626;
+          margin-bottom: $spacing-4;
+        }
+        
+        p {
+          color: $text-color;
+          margin-bottom: $spacing-6;
+        }
+        
+        .action-buttons {
+          display: flex;
+          justify-content: center;
+          gap: $spacing-4;
+          
+          @media (max-width: $sm) {
+            flex-direction: column;
+            gap: $spacing-3;
+          }
+          
+          .back-button, .retry-button {
+            padding: $spacing-2 $spacing-4;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .back-button {
+            background-color: $gray-200;
+            color: $text-color;
+            border: 1px solid $gray-300;
+            
+            &:hover {
+              background-color: darken($gray-200, 5%);
+            }
+          }
+          
+          .retry-button {
+            background-color: $primary-color;
+            color: white;
+            border: none;
+            
+            &:hover {
+              background-color: darken($primary-color, 5%);
+            }
+          }
+        }
+      }
+    }
+  }
+}
