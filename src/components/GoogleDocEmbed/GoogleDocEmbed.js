@@ -7,7 +7,6 @@ const GoogleDocEmbed = ({ docId, title }) => {
   
   return (
     <div className="google-doc-embed">
-      <h3 className="doc-title">{title}</h3>
       <div className="doc-container">
         <iframe 
           src={docUrl} 
