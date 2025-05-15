@@ -5,7 +5,7 @@ import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import AuthModal from '../../components/auth/AuthModal';
 import PricingCards from '../../components/PricingCards/PricingCards';
-import { onAuthChange } from '../../firebase/authService';
+import { onAuthChange, registerUser } from '../../firebase/authService';
 import { processPayment, processStripePayment } from '../../services/paymentService';
 import StripeWrapper from '../../components/payment/StripeWrapper';
 import './Checkout.scss';
