@@ -10,8 +10,10 @@ import './Navbar.scss';
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [userProfile, setUserProfile] = useState(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -222,9 +224,13 @@ const Navbar = () => {
             ) : (
               // For non-authenticated users
               <>
-                <a href="#" onClick={handleLoginClick} className="login-link">
+                <button
+                  type="button"
+                  onClick={handleLoginClick}
+                  className="login-link-button"
+                >
                   Log in
-                </a>
+                </button>
                 <Link to="/signup" className="try-free-button">
                   Join
                 </Link>
@@ -320,13 +326,16 @@ const Navbar = () => {
                     // For non-authenticated users
                     <>
                       <li>
-                        <a href="#" onClick={(e) => {
-                          e.preventDefault();
-                          closeMobileMenu();
-                          setShowAuthModal(true);
-                        }}>
+                        <button
+                          type="button"
+                          className="mobile-login-button"
+                          onClick={() => {
+                            closeMobileMenu();
+                            setShowAuthModal(true);
+                          }}
+                        >
                           Log in
-                        </a>
+                        </button>
                       </li>
                       <li>
                         <Link to="/signup" className="try-free-mobile" onClick={closeMobileMenu}>

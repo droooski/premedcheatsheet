@@ -1,5 +1,4 @@
-// Debug script to add to your project - logs modal actions
-// Place this in a new file src/utils/modalDebug.js
+import React from 'react';
 
 // Log modal actions to help identify any issues with closing modals
 export const setupModalDebugging = () => {
@@ -85,8 +84,10 @@ export const forceCloseModals = () => {
   return modals.length;
 };
 
-export default {
+const modalDebugUtils = {
   setupModalDebugging,
   checkModalVisibility,
   forceCloseModals
 };
+
+export default modalDebugUtils;

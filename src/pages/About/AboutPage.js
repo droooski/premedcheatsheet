@@ -2,7 +2,7 @@
 // This is a focused solution for your existing codebase
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ApplicantProfileSubmission from '../../components/ApplicantProfileSubmission/ApplicantProfileSubmission';
@@ -30,6 +30,7 @@ const AboutPage = () => {
     });
   };
   
+  // eslint-disable-next-line no-unused-vars
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

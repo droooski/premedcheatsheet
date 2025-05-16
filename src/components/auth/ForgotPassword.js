@@ -1,6 +1,6 @@
 // src/components/auth/ForgotPassword.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { resetPassword } from '../../firebase/authService';
 import './ForgotPassword.scss';
 
@@ -9,7 +9,7 @@ const ForgotPassword = ({ onClose, onBackToLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

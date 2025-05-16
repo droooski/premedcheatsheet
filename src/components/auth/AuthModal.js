@@ -285,14 +285,32 @@ const AuthModal = ({
             <div className="auth-footer">
               {isLogin ? (
                 <p>
-                  <a href="#" onClick={handleShowForgotPassword}>Forgot Password?</a>
+                  <button 
+                    type="button" 
+                    className="link-button" 
+                    onClick={handleShowForgotPassword}
+                  >
+                    Forgot Password?
+                  </button>
                   {' | '}
-                  <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Create account</a>
+                  <button 
+                    type="button"
+                    className="link-button" 
+                    onClick={toggleAuthMode}
+                  >
+                    Create account
+                  </button>
                 </p>
               ) : (
                 <p>
                   Already have an account?{' '}
-                  <a href="#" onClick={(e) => { e.preventDefault(); toggleAuthMode(); }}>Sign in</a>
+                  <button 
+                    type="button"
+                    className="link-button" 
+                    onClick={toggleAuthMode}
+                  >
+                     Sign In
+                  </button>
                 </p>
               )}
               

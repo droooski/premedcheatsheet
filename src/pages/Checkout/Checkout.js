@@ -1,4 +1,6 @@
 // src/pages/Checkout/Checkout.js
+
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -8,6 +10,11 @@ import PricingCards from '../../components/PricingCards/PricingCards';
 import { onAuthChange, registerUser } from '../../firebase/authService';
 import { processPayment, processStripePayment } from '../../services/paymentService';
 import StripeWrapper from '../../components/payment/StripeWrapper';
+import { 
+  getFirestore, 
+  doc, 
+  updateDoc 
+} from 'firebase/firestore';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -57,6 +64,8 @@ const Checkout = () => {
   };
   
   const navigate = useNavigate();
+
+  const db = getFirestore();
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -599,6 +608,19 @@ const handleAuthDataCollection = (userData) => {
   // Move to payment step without creating Firebase account
   changeCheckoutStep('payment');
 };
+
+  // Calculate subscription end date based on plan type
+  const getSubscriptionEndDate = () => {
+    const now = new Date();
+    if (subscription.type === 'monthly') {
+      return new Date(now.setMonth(now.getMonth() + 1)).toISOString();
+    } else if (subscription.type === 'yearly') {
+      return new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
+    } else {
+      // For one-time purchases, set to 1 year by default
+      return new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
+    }
+  };
 
   // Process payment
   const handleProcessPayment = async () => {

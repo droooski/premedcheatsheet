@@ -1,4 +1,7 @@
 // src/pages/Account/AccountPage.js - Updated with email verification
+
+/* eslint-disable no-unused-vars */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';

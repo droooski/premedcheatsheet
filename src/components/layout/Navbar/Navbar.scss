@@ -439,3 +439,43 @@
     }
   }
 }
+
+
+
+.login-link-button {
+  background: none;
+  border: none;
+  color: $text-color;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-right: $spacing-4;
+  padding: 0;
+  
+  &:hover {
+    color: $primary-color;
+  }
+  
+  @media (min-width: $xl) {
+    margin-right: $spacing-6;
+    font-size: 1rem;
+  }
+  
+  @media (min-width: $xxl) {
+    font-size: 1.05rem;
+  }
+}
+
+.mobile-login-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  
+  &:hover {
+    color: $primary-color;
+  }
+}

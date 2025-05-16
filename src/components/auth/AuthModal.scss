@@ -161,3 +161,18 @@
     }
   }
 }
+
+.link-button {
+  background: none;
+  border: none;
+  color: $primary-color;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  
+  &:hover {
+    color: darken($primary-color, 10%);
+  }
+}

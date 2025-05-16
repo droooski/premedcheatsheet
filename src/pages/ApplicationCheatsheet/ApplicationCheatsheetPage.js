@@ -1,5 +1,5 @@
 // src/pages/ApplicationCheatsheet/ApplicationCheatsheetPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
@@ -14,6 +14,7 @@ import file4Preview from '../../assets/images/File4.png';
 
 const ApplicationCheatsheetPage = () => {
   const [expandedDoc, setExpandedDoc] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
 
   // Collection of Google Doc resources with their actual IDs from your links

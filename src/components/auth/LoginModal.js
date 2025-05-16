@@ -138,7 +138,13 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         
         <div className="login-footer">
           <p>
-            <a href="#" onClick={backToLogin}>Back to Sign In</a>
+            <button 
+              type="button"
+              className="link-button" 
+              onClick={backToLogin}
+            >
+              Back to Sign In
+            </button>
           </p>
         </div>
       </>
@@ -186,11 +192,23 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
         <div className="login-footer">
           <p>
-            <a href="#" onClick={switchToForgotPassword}>Forgot Password?</a>
+            <button 
+              type="button"
+              className="link-button" 
+              onClick={switchToForgotPassword}
+            >
+              Forgot Password?
+            </button>
           </p>
           <p>
             Don't have an account?{' '}
-            <a href="#" onClick={(e) => { e.preventDefault(); goToSignup(); }}>Create account</a>
+            <button 
+              type="button"
+              className="link-button" 
+              onClick={goToSignup}
+            >
+              Create account
+            </button>
           </p>
           
           <button className="guest-button" onClick={continueAsGuest}>

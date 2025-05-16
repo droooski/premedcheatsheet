@@ -1,4 +1,6 @@
 // src/pages/SchoolProfile/SchoolProfile.js
+
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -22,6 +24,7 @@ const SchoolProfilePage = () => {
   const [profiles, setProfiles] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null);
   const [viewMode, setViewMode] = useState('card'); // 'card' or 'list'
 

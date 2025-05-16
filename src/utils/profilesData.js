@@ -319,7 +319,7 @@ export const groupProfilesByType = (profiles) => {
   return groups;
 };
 
-export default {
+const profileDataUtils = {
   loadProfiles,
   filterProfiles,
   groupProfilesByType,
@@ -327,3 +327,5 @@ export default {
   getProfilesForSchool,
   normalizeSchoolName
 };
+
+export default profileDataUtils;

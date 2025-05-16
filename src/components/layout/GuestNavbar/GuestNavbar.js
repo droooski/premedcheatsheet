@@ -33,37 +33,40 @@ const GuestNavbar = ({ onNavigate }) => {
           {/* Desktop Menu */}
           <div className="primary-menu">
             <li>
-              <a 
-                href="#" 
-                className="active" 
-                onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}
+              <button 
+                type="button"
+                className="nav-link-button active" 
+                onClick={() => handleNavigate('/')}
               >
                 Home
-              </a>
+              </button>
             </li>
             <li>
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); handleNavigate('/about'); }}
+              <button 
+                type="button"
+                className="nav-link-button active" 
+                onClick={() => handleNavigate('/about')}
               >
                 About
-              </a>
+              </button>
             </li>
             <li>
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); handleNavigate('/pricing'); }}
+              <button 
+                type="button"
+                className="nav-link-button active" 
+                onClick={() => handleNavigate('/pricing')}
               >
                 Pricing
-              </a>
+              </button>
             </li>
             <li>
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); handleNavigate('/login'); }}
+              <button 
+                type="button"
+                className="nav-link-button active" 
+                onClick={() => handleNavigate('/login')}
               >
                 Log in
-              </a>
+              </button>
             </li>
             <button 
               className="try-free-button" 
@@ -87,30 +90,34 @@ const GuestNavbar = ({ onNavigate }) => {
       {/* Mobile Menu */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-menu-items">
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}
+          <button 
+            type="button"
+            className="nav-link-button active" 
+            onClick={() => handleNavigate('/')}
           >
             Home
-          </a>
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); handleNavigate('/about'); }}
-          >
-            About
-          </a>
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); handleNavigate('/pricing'); }}
-          >
-            Pricing
-          </a>
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); handleNavigate('/login'); }}
-          >
-            Log in
-          </a>
+          </button>
+          <button 
+              type="button"
+              className="nav-link-button active" 
+              onClick={() => handleNavigate('/about')}
+            >
+              About
+          </button>
+          <button 
+              type="button"
+              className="nav-link-button active" 
+              onClick={() => handleNavigate('/pricing')}
+            >
+              Pricing
+          </button>
+          <button 
+              type="button"
+              className="nav-link-button active" 
+              onClick={() => handleNavigate('/login')}
+            >
+              Log in
+          </button>
           <button 
             className="try-free-button" 
             onClick={() => handleNavigate('/signup')}

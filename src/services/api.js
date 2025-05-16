@@ -72,8 +72,10 @@ export const subscriptions = {
   }),
 };
 
-export default {
+const apiServices = {
   auth,
   profiles,
   subscriptions,
 };
+
+export default apiServices;

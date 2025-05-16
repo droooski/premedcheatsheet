@@ -1,4 +1,6 @@
 // src/pages/Admin/AdminPanel.js
+
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { 
   getFirestore, 
