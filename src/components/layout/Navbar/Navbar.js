@@ -213,16 +213,8 @@ const Navbar = () => {
                   Log out
                 </button>
               </div>
-            ) : hasGuestAccess ? (
-              // For guest users
-              <div className="guest-menu">
-                {/* Show an upgrade button for guests */}
-                <Link to="/pricing" className="try-free-button">
-                  Upgrade
-                </Link>
-              </div>
             ) : (
-              // For non-authenticated users
+              // For ALL non-authenticated users (including guests)
               <>
                 <button
                   type="button"
@@ -357,7 +349,7 @@ const Navbar = () => {
       )}
       
       {/* Auth Modal for login */}
-      <AuthModal 
+      <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
