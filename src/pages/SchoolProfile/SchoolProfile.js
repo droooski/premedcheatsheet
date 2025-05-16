@@ -1,6 +1,5 @@
 // src/pages/SchoolProfile/SchoolProfile.js
 
-// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -10,8 +9,8 @@ import { onAuthChange } from '../../firebase/authService';
 import { 
   loadProfiles, 
   extractSchools, 
-  getProfilesForSchool, 
-  normalizeSchoolName 
+  getProfilesForSchool
+  // Removed the unused import: normalizeSchoolName
 } from '../../utils/profilesData';
 import './SchoolProfilePage.scss';
 
