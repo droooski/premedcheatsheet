@@ -99,7 +99,7 @@
       
       a {
         color: $text-color;
-        font-weight: 500;
+        font-weight: 300;
         @include mix.transition(color);
         font-size: 0.95rem;
         padding: $spacing-2 0;
@@ -115,7 +115,7 @@
         
         // Active state with underline
         &.active {
-          font-weight: 600;
+          font-weight: 500;
           
           &:after {
             content: '';
@@ -209,7 +209,7 @@
     
     .account-button {
       color: $text-color;
-      font-weight: 500;
+      font-weight: 300;
       padding: $spacing-2 $spacing-3;
       border-radius: 4px;
       font-size: 0.95rem;
@@ -228,7 +228,7 @@
     
     .login-link {
       color: $text-color;
-      font-weight: 500;
+      font-weight: 200;
       margin-right: $spacing-4;
       font-size: 0.95rem;
       

@@ -110,6 +110,7 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
     
     @media (min-width: $xl) {
       font-size: clamp(2rem, 4vw, 3rem) !important; /* Kept consistent across breakpoints */
