@@ -9,8 +9,8 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
   // Complete school images mapping - updated with all schools from the applicant profiles
   const schoolImages = {
     // Original schools
-    'Albert Einstein College of Medicine': 'https://medicine.einstein.yu.edu/uploadedImages/Home/about-us/einstein-building-slider.jpg',
-    'A.T. Still University': 'https://www.atsu.edu/sites/default/files/styles/panopoly_image_original/public/2020-05/MesaSignMay2020.jpg',
+    'Albert Einstein College of Medicine': 'https://images.squarespace-cdn.com/content/v1/6797e072b9ef964e6416c4b8/2f8c7797-24e5-4bfe-9d41-2795109c96fc/einsteinpricecenter-blockpavilion1_resize.jpg?format=2500w',
+    'A.T. Still University': 'https://images.squarespace-cdn.com/content/v1/6797e072b9ef964e6416c4b8/8b5e099d-c9bc-4a99-9224-2facdccbe9db/ATSU-SOMA-entrance-600x400.jpg?format=2500w',
     'Boston University': 'https://www.bu.edu/files/2020/03/social-bumc-aerial-1200x630.jpg',
     'Brown University': 'https://www.brown.edu/sites/default/files/styles/wide_med/public/2022-08/Warren-Alpert-Medical-School-evening_0.jpg',
     'Chicago College of Osteopathic Medicine': 'https://www.midwestern.edu/media/carousels/il-campus-carousel/main-campus-entrance-evening-2.jpg',
@@ -24,7 +24,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Harvard': 'https://hms.harvard.edu/sites/default/files/image/buildings.jpg',
     'Johns Hopkins': 'https://www.hopkinsmedicine.org/sebin/s/x/Johns%20Hopkins%20Medicine%20Campus%20(2)%20Dome.jpg',
     'Mayo Clinic': 'https://college.mayo.edu/media/mccms/content-assets/academics/school-of-medicine/md-program/about/mayo-clinic-school-of-medicine-campus-1375x775-02.jpg',
-    'New York Medical College': 'https://www.nymc.edu/media/schools-and-colleges/nymc/img/news-and-events/BSB2.jpg',
+    'New York Medical College': 'https://images.squarespace-cdn.com/content/v1/6797e072b9ef964e6416c4b8/d21934cc-ebf9-4bc5-8abd-8635b41b2475/nymc-building.jpg?format=2500w',
     'Northwestern University': 'https://www.feinberg.northwestern.edu/about/campus/facilities/buildings/images/simpson-querey-biomedical-research-center.jpg',
     'Ohio State University': 'https://wexnermedical.osu.edu/-/media/images/wexnermedical/about-us/newsroom/our-new-hospital/new-hospital-tower-rendering.jpg',
     'University of Michigan': 'https://medicine.umich.edu/sites/default/files/styles/large/public/2021-05/UM%20North_01.jpg',
@@ -80,7 +80,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Case': 'https://case.edu/medicine/sites/case.edu.medicine/files/styles/subfeature_705x528/public/2019-08/som-building.jpg',
     'Pitt': 'https://www.medschool.pitt.edu/sites/default/files/styles/crop_header_large/public/2021-03/scaife-hall-crop-2.jpg',
     'Pittsburgh': 'https://www.medschool.pitt.edu/sites/default/files/styles/crop_header_large/public/2021-03/scaife-hall-crop-2.jpg',
-    'And Mount Sinai': 'https://icahn.mssm.edu/files/ISMMS/Assets/About%20the%20School/HankLuisGardiner-2016-004.jpg',
+    'And Mount Sinai': 'https://images.squarespace-cdn.com/content/v1/5d0e1f92156c470001eeb814/1568131116192-VSR3JV0D344NGI51219Y/MtSinaiIcahn6.jpg',
     'UWSMPH': 'https://www.med.wisc.edu/media/_sizes/images/news-events/buildings/front-entrance-smph-h-426-960-c-90-q-81-1000x563.jpg',
     
     // Common abbreviations and alternate spellings
