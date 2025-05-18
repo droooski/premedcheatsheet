@@ -1025,7 +1025,7 @@ const handleRegistrationDataCollection = (userData) => {
       <div className="payment-form-container">
           <div className="payment-header">
             <h2>Payment & Discounts</h2>
-            <p>Enter your payment details to continue</p>
+            <p>Transactions are secure and encrypted.</p>
           </div>
           
           {/* Back button */}
