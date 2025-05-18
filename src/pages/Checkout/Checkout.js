@@ -55,13 +55,8 @@ const Checkout = () => {
     type: 'monthly', // or 'yearly'
     price: 5.99     // Default price
   });
-  const [expandedFaq, setExpandedFaq] = useState(null);
   const [pendingUserData, setPendingUserData] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
-
-  const toggleFaq = (index) => {
-    setExpandedFaq(expandedFaq === index ? null : index);
-  };
   
   const navigate = useNavigate();
 
@@ -769,59 +764,6 @@ const handleAuthDataCollection = (userData) => {
         </div>
         
         <PricingCards onSelectPlan={handleSelectPlan} />
-        
-      <div className="faq-section">
-        <h3>Frequently Asked Questions</h3>
-        
-        {/* Replace these static faq-items with interactive dropdowns */}
-        <div className="faq-item">
-          <div className="faq-question" onClick={() => toggleFaq(0)}>
-            <h4>Can I cancel my subscription?</h4>
-              <div className="arrow-icon">
-                <svg 
-                  width="14" 
-                  height="8" 
-                  viewBox="0 0 14 8" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-          </div>
-          <div className={`faq-answer ${expandedFaq === 0 ? 'expanded' : ''}`}>
-            <p>Yes, you can cancel at any time. If you cancel within the first 7 days, you'll receive a full refund.</p>
-          </div>
-        </div>
-        
-        <div className="faq-item">
-          <div className="faq-question" onClick={() => toggleFaq(1)}>
-            <h4>How frequently is new content added?</h4>
-            <div className="arrow-icon">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-          <div className={`faq-answer ${expandedFaq === 1 ? 'expanded' : ''}`}>
-            <p>We add new successful applicant profiles every month, with major updates at the beginning of each application cycle.</p>
-          </div>
-        </div>
-        
-        <div className="faq-item">
-          <div className="faq-question" onClick={() => toggleFaq(2)}>
-            <h4>Will this help me if I'm a non-traditional applicant?</h4>
-            <div className="arrow-icon">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1L7 7L13 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-          <div className={`faq-answer ${expandedFaq === 2 ? 'expanded' : ''}`}>
-            <p>Absolutely! We have profiles from all types of applicants, including many non-traditional success stories.</p>
-          </div>
-        </div>
-      </div>
       </>
     );
   };

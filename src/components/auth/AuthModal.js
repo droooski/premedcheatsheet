@@ -1,4 +1,4 @@
-// src/components/auth/AuthModal.js - Updated with forgot password functionality
+// src/components/auth/AuthModal.js - Redesigned UI while preserving functionality
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
@@ -167,26 +167,11 @@ const AuthModal = ({
     }
   };
 
-  // Handle close button click with explicit stop propagation
-  const handleCloseClick = (e) => {
-    e.stopPropagation(); // Stop event from bubbling up
-    onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className="auth-modal-overlay" onClick={handleOverlayClick}>
-      <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Modified close button with explicit handler */}
-        <button 
-          className="close-button" 
-          onClick={handleCloseClick}
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-        
+      <div className="auth-modal">
         {/* Conditional rendering based on state */}
         {showForgotPassword ? (
           <ForgotPassword 
@@ -197,24 +182,22 @@ const AuthModal = ({
           <>
             <h2>
               {isLogin 
-                ? "Sign in to your account" 
-                : (dataCollectionOnly 
-                   ? "Create your account" 
-                   : "Create an account")}
+                ? "Join The Cheatsheet" 
+                : "Join The Cheatsheet"}
             </h2>
             <p className="auth-subtitle">
               {isLogin 
-                ? "Sign in to continue to PremedCheatsheet." 
+                ? "Sign in to unlock exclusive content." 
                 : (dataCollectionOnly 
                    ? "Enter your details to complete your purchase." 
-                   : "Create an account to continue to PremedCheatsheet.")}
+                   : "Create an account to unlock exclusive content.")}
             </p>
 
             {error && <div className="auth-error">{error}</div>}
 
             <form onSubmit={handleSubmit}>
               {!isLogin && (
-                <div className="name-inputs">
+                <div className="form-row">
                   <div className="form-group">
                     <input
                       type="text"
@@ -230,6 +213,7 @@ const AuthModal = ({
                       placeholder="Last Name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      required
                     />
                   </div>
                 </div>
@@ -248,7 +232,7 @@ const AuthModal = ({
               <div className="form-group">
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder={isLogin ? "Password" : "Create Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -259,7 +243,7 @@ const AuthModal = ({
                 <div className="form-group">
                   <input
                     type="password"
-                    placeholder="Confirm Password"
+                    placeholder="Re-type Password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -267,49 +251,57 @@ const AuthModal = ({
                 </div>
               )}
 
+              {!isLogin && (
+                <p className="terms-note">
+                  By joining, you may receive emails and updates related to your account. You can unsubscribe at anytime.
+                </p>
+              )}
+
               <button 
                 type="submit" 
-                className="auth-button"
+                className="submit-button"
                 disabled={loading}
               >
                 {loading 
                   ? "Processing..." 
                   : (isLogin 
-                     ? "Sign In" 
+                     ? "Sign in" 
                      : (dataCollectionOnly 
                         ? "Continue to Payment" 
-                        : "Create Account"))}
+                        : "Create account"))}
               </button>
             </form>
 
             <div className="auth-footer">
               {isLogin ? (
-                <p>
+                <div className="auth-links">
                   <button 
                     type="button" 
-                    className="link-button" 
+                    className="forgot-password-link" 
                     onClick={handleShowForgotPassword}
                   >
                     Forgot Password?
                   </button>
-                  {' | '}
-                  <button 
-                    type="button"
-                    className="link-button" 
-                    onClick={toggleAuthMode}
-                  >
-                    Create account
-                  </button>
-                </p>
+                  <p className="account-toggle">
+                    Don't have an account?{' '}
+                    <button 
+                      type="button"
+                      className="toggle-mode-button" 
+                      onClick={toggleAuthMode}
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
               ) : (
-                <p>
+                <p className="account-toggle">
                   Already have an account?{' '}
                   <button 
                     type="button"
-                    className="link-button" 
+                    className="toggle-mode-button" 
                     onClick={toggleAuthMode}
                   >
-                     Sign In
+                    Sign in
                   </button>
                 </p>
               )}

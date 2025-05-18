@@ -1,4 +1,4 @@
-// src/components/auth/AuthModal.scss
+/* src/components/auth/AuthModal.scss - Redesigned UI */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -12,50 +12,43 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; // Higher z-index to be above navbar
+  z-index: 1000;
   padding: 0 $spacing-4;
 }
 
 .auth-modal {
   background-color: $white;
   border-radius: 8px;
-  width: 90%;
-  max-width: 450px;
-  padding: $spacing-6;
+  width: 100%;
+  max-width: 600px;
+  padding: $spacing-8;
   position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   
-  @media (min-width: $md) {
-    width: 450px;
-    padding: $spacing-8;
+  @media (max-width: $md) {
+    max-width: 90%;
+    padding: $spacing-6;
   }
   
-  .close-button {
-    position: absolute;
-    top: $spacing-4;
-    right: $spacing-4;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: $gray-500;
-    line-height: 1;
-    
-    &:hover {
-      color: $text-color;
-    }
+  @media (max-width: $sm) {
+    padding: $spacing-4;
   }
   
   h2 {
-    font-family: $font-family-sans;
-    font-weight: 600;
-    font-size: 1.5rem;
+    font-family: 'BIZ UDPMincho', serif;
+    font-size: 30px;
+    font-weight: 500; /* Mincho fonts often look better with normal weight */
     text-align: center;
     margin-bottom: $spacing-2;
     color: $text-color;
+    letter-spacing: 0.01em;
     
-    @media (min-width: $md) {
-      font-size: 1.75rem;
+    @media (max-width: $md) {
+      font-size: 24px;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 20px;
     }
   }
   
@@ -63,10 +56,11 @@
     text-align: center;
     color: $text-color-light;
     margin-bottom: $spacing-6;
-    font-size: 0.9rem;
+    font-size: 16px;
     
-    @media (min-width: $md) {
-      font-size: 1rem;
+    @media (max-width: $md) {
+      font-size: 14px;
+      margin-bottom: $spacing-4;
     }
   }
   
@@ -74,10 +68,26 @@
     background-color: #fee2e2;
     color: #dc2626;
     padding: $spacing-3;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: $spacing-4;
-    font-size: 0.875rem;
+    font-size: 14px;
     text-align: center;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: $spacing-4;
+    margin-bottom: $spacing-4;
+    
+    @media (max-width: $sm) {
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 0;
+    }
+    
+    .form-group {
+      flex: 1;
+    }
   }
   
   .form-group {
@@ -85,57 +95,112 @@
     
     input {
       width: 100%;
-      padding: $spacing-3 $spacing-4;
-      border: 1px solid $gray-300;
-      border-radius: 4px;
-      font-size: 0.95rem;
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.2s;
       
       &:focus {
         outline: none;
-        border-color: $primary-color;
+        border-color: #4b5563;
+      }
+      
+      &::placeholder {
+        color: #9ca3af;
+      }
+      
+      @media (max-width: $sm) {
+        padding: 12px;
+        font-size: 14px;
       }
     }
   }
   
-  .name-inputs {
-    display: flex;
-    gap: $spacing-4;
+  .terms-note {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: $spacing-6;
+    line-height: 1.5;
     
-    .form-group {
-      flex: 1;
+    @media (max-width: $sm) {
+      font-size: 12px;
+      margin-bottom: $spacing-4;
     }
   }
   
-  .auth-button {
+  .submit-button {
     width: 100%;
-    background-color: #1A3A34;
-    color: $white;
+    background-color: #333;
+    color: white;
     border: none;
-    border-radius: 4px;
-    padding: $spacing-3 $spacing-4;
-    font-size: 1rem;
-    font-weight: 500;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 400;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-bottom: $spacing-4;
+    font-family: $font-family-sans;
     
     &:hover:not(:disabled) {
-      background-color: darken(#1A3A34, 5%);
+      background-color: #1f2937;
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
     
     &:disabled {
       opacity: 0.7;
       cursor: not-allowed;
     }
+    
+    @media (max-width: $sm) {
+      padding: 12px;
+      font-size: 14px;
+    }
   }
   
   .auth-footer {
-    margin-top: $spacing-6;
     text-align: center;
-    font-size: 0.875rem;
     
-    a {
-      color: $primary-color;
+    .auth-links {
+      margin-bottom: $spacing-4;
+    }
+    
+    .forgot-password-link {
+      background: none;
+      border: none;
+      color: #4b5563;
+      padding: 0;
+      margin-bottom: $spacing-4;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: #000;
+        text-decoration: underline;
+      }
+    }
+    
+    .account-toggle {
+      color: #4b5563;
+      font-size: 14px;
+      margin-bottom: $spacing-4;
+    }
+    
+    .toggle-mode-button {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #000;
+      font-weight: 500;
+      cursor: pointer;
       text-decoration: none;
+      font-size: 14px;
       
       &:hover {
         text-decoration: underline;
@@ -143,36 +208,25 @@
     }
     
     .guest-button {
-      display: block;
       width: 100%;
-      background: none;
-      border: 1px solid $gray-300;
-      border-radius: 4px;
-      padding: $spacing-2 $spacing-3;
-      margin-top: $spacing-4;
-      font-size: 0.875rem;
-      color: $text-color;
+      background-color: transparent;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 14px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
       
       &:hover {
-        background-color: $gray-100;
+        background-color: #f9fafb;
+        color: #111827;
+      }
+      
+      @media (max-width: $sm) {
+        padding: 10px;
+        font-size: 13px;
       }
     }
-  }
-}
-
-.link-button {
-  background: none;
-  border: none;
-  color: $primary-color;
-  padding: 0;
-  font-size: inherit;
-  font-weight: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-  
-  &:hover {
-    color: darken($primary-color, 10%);
   }
 }
