@@ -1,9 +1,10 @@
-// src/pages/Profile/ProfilePage.js
+// src/pages/Profile/ProfilePage.js - Updated with MedicalSchoolGrid
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
+import MedicalSchoolGrid from '../../components/MedicalSchoolGrid/MedicalSchoolGrid'; // Import the new component
 import { onAuthChange } from '../../firebase/authService';
 import { loadProfiles, extractSchools } from '../../utils/profilesData';
 import './ProfilePage.scss';
@@ -222,12 +223,6 @@ const ProfilePage = () => {
     setSearchQuery('');
   };
 
-  // Calculate pagination for schools
-  const paginatedSchools = filteredSchools.slice(
-    (currentPage - 1) * 10, 
-    currentPage * 10
-  );
-
   // Go to page
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -430,27 +425,8 @@ const ProfilePage = () => {
           )}
           
           {activeView === 'schools' ? (
-            <div className="schools-grid">
-              {paginatedSchools.length > 0 ? (
-                paginatedSchools.map(school => (
-                  <div className="school-card" key={school.id}>
-                    <h3 className="school-name">{school.name}</h3>
-                    <p className="profile-count">{school.count || 0} Accepted {school.count === 1 ? 'Profile' : 'Profiles'}</p>
-                    <button 
-                      className="view-profiles-button"
-                      onClick={() => navigate(`/school/${school.id}`)}
-                    >
-                      View Profiles
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="no-results">
-                  <p>No medical schools found matching "{searchQuery}"</p>
-                  <button onClick={() => setSearchQuery('')}>Clear Search</button>
-                </div>
-              )}
-            </div>
+            // Use the new MedicalSchoolGrid component here instead of the old schools-grid
+            <MedicalSchoolGrid schools={filteredSchools} searchQuery={searchQuery} />
           ) : (
             <>
               <div className="profiles-grid">
@@ -492,72 +468,6 @@ const ProfilePage = () => {
                 </div>
               )}
             </>
-          )}
-          
-          {activeView === 'schools' && totalPages > 1 && (
-            <div className="pagination">
-              <button 
-                className="page-button prev"
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                ← Previous
-              </button>
-              
-              <div className="page-numbers">
-                {currentPage > 1 && (
-                  <button 
-                    className="page-number"
-                    onClick={() => goToPage(1)}
-                  >
-                    1
-                  </button>
-                )}
-                
-                {currentPage > 3 && <span className="ellipsis">...</span>}
-                
-                {currentPage > 2 && (
-                  <button 
-                    className="page-number"
-                    onClick={() => goToPage(currentPage - 1)}
-                  >
-                    {currentPage - 1}
-                  </button>
-                )}
-                
-                <button className="page-number active">
-                  {currentPage}
-                </button>
-                
-                {currentPage < totalPages - 1 && (
-                  <button 
-                    className="page-number"
-                    onClick={() => goToPage(currentPage + 1)}
-                  >
-                    {currentPage + 1}
-                  </button>
-                )}
-                
-                {currentPage < totalPages - 2 && <span className="ellipsis">...</span>}
-                
-                {currentPage < totalPages && (
-                  <button 
-                    className="page-number"
-                    onClick={() => goToPage(totalPages)}
-                  >
-                    {totalPages}
-                  </button>
-                )}
-              </div>
-              
-              <button 
-                className="page-button next"
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next →
-              </button>
-            </div>
           )}
         </div>
       </div>
