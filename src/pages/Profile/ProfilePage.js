@@ -250,7 +250,7 @@ const ProfilePage = () => {
       
       <div className="profile-content">
         <div className="container">
-          <h1 className="page-title">Student Profile Database</h1>
+          <h1 className="page-title">The Cheatsheet</h1>
           
           <div className="view-toggle-container">
             <button 

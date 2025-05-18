@@ -24,7 +24,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Harvard': 'https://hms.harvard.edu/sites/default/files/image/buildings.jpg',
     'Johns Hopkins': 'https://www.hopkinsmedicine.org/sebin/s/x/Johns%20Hopkins%20Medicine%20Campus%20(2)%20Dome.jpg',
     'Mayo Clinic': 'https://college.mayo.edu/media/mccms/content-assets/academics/school-of-medicine/md-program/about/mayo-clinic-school-of-medicine-campus-1375x775-02.jpg',
-    'New York Medical College': 'https://images.squarespace-cdn.com/content/v1/6797e072b9ef964e6416c4b8/d21934cc-ebf9-4bc5-8abd-8635b41b2475/nymc-building.jpg?format=2500w',
+    'New York Medical College': 'https://thecustodianus.com/wp-content/uploads/2023/04/New-York-Medical-College-1.jpeg',
     'Northwestern University': 'https://www.feinberg.northwestern.edu/about/campus/facilities/buildings/images/simpson-querey-biomedical-research-center.jpg',
     'Ohio State University': 'https://wexnermedical.osu.edu/-/media/images/wexnermedical/about-us/newsroom/our-new-hospital/new-hospital-tower-rendering.jpg',
     'University of Michigan': 'https://medicine.umich.edu/sites/default/files/styles/large/public/2021-05/UM%20North_01.jpg',
@@ -64,7 +64,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'SLU': 'https://www.slu.edu/medicine/images/education/campus-school-of-medicine.jpg',
     'UT Southwestern': 'https://www.utsouthwestern.edu/about-us/administrative-offices/university-police/images/UT-Southwestern-William-P.-Clements-Jr.-University-Hospital-and-Medical-School.jpg',
     'USUHS': 'https://www.usuhs.edu/sites/default/files/2020-06/building-new_0.png',
-    'And Usuhs': 'https://www.usuhs.edu/sites/default/files/2020-06/building-new_0.png',
+    'And Usuhs': 'https://money-assets.money.com/mcp/2024/243744.jpg',
     'WashU': 'https://medicine.wustl.edu/wp-content/uploads/WUSM_Aerial-View-of-Medical-Campus-min.jpg',
     'RWJMS': 'https://rwjms.rutgers.edu/images/default-source/home/robert-wood-johnson-medical-school-front.jpg',
     'Quinipiac': 'https://www.qu.edu/499098/globalassets/global/secondary-audiences/school/medicine/medicine-campus-aerial.jpg',
@@ -80,7 +80,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Case': 'https://case.edu/medicine/sites/case.edu.medicine/files/styles/subfeature_705x528/public/2019-08/som-building.jpg',
     'Pitt': 'https://www.medschool.pitt.edu/sites/default/files/styles/crop_header_large/public/2021-03/scaife-hall-crop-2.jpg',
     'Pittsburgh': 'https://www.medschool.pitt.edu/sites/default/files/styles/crop_header_large/public/2021-03/scaife-hall-crop-2.jpg',
-    'And Mount Sinai': 'https://images.squarespace-cdn.com/content/v1/5d0e1f92156c470001eeb814/1568131116192-VSR3JV0D344NGI51219Y/MtSinaiIcahn6.jpg',
+    'And Mount Sinai': 'https://icahn.mssm.edu/files/ISMMS/Assets/About/Contacts-Directions/ISMMS-ContactDirections-IcahnBuilding-Carousel-768x307-v3.jpg',
     'UWSMPH': 'https://www.med.wisc.edu/media/_sizes/images/news-events/buildings/front-entrance-smph-h-426-960-c-90-q-81-1000x563.jpg',
     
     // Common abbreviations and alternate spellings
