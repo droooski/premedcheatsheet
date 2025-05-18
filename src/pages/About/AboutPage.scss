@@ -1,4 +1,4 @@
-/* src/pages/About/AboutPage.scss - Pixel perfect with responsive design */
+/* src/pages/About/AboutPage.scss */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -33,6 +33,47 @@
     }
   }
   
+  /* New two-column layout for About and Contact */
+  /* Reducing the gap between about-contact and forms sections */
+  .about-contact-container {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-24; /* Increased spacing between columns */
+    margin-bottom: $spacing-8; /* Reduced from $spacing-16 */
+    
+    @media (min-width: $xxl) {
+      gap: $spacing-32; /* Even more spacing on larger screens */
+    }
+    
+    @media (max-width: $lg) {
+      flex-direction: column;
+      gap: $spacing-8;
+      margin-bottom: $spacing-6; /* Reduced */
+    }
+    
+    @media (max-width: $md) {
+      gap: $spacing-6;
+      margin-bottom: $spacing-4; /* Reduced */
+    }
+    
+    @media (max-width: $sm) {
+      gap: $spacing-4;
+      margin-bottom: $spacing-3; /* Reduced */
+    }
+    
+    .about-column {
+      flex: 3; /* Takes 60% of the space */
+    }
+    
+    .contact-column {
+      flex: 2; /* Takes 40% of the space */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* Align to top instead of center */
+      padding-top: $spacing-1; /* Fine-tune alignment with About section */
+    }
+  }
+  
   .about-text-container {
     max-width: 100%;
     width: 100%;
@@ -60,78 +101,90 @@
   .about-header {
     font-family: $font-family-mincho !important;
     font-weight: 400 !important;
-    font-size: clamp(2.5rem, 5vw, 5rem) !important;
+    font-size: clamp(2rem, 4vw, 3rem) !important; /* Reduced to match contact header */
     color: $text-color;
-    margin-bottom: $spacing-12;
+    margin-bottom: $spacing-4; /* Reduced from $spacing-8 */
     letter-spacing: 0.02em !important;
     line-height: 1.2 !important;
-    text-align: center;
     width: 100%;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
     
     @media (min-width: $xl) {
-      font-size: clamp(4rem, 6vw, 6.5rem) !important;
+      font-size: clamp(2rem, 4vw, 3rem) !important; /* Kept consistent across breakpoints */
       letter-spacing: 0.025em !important;
-      margin-bottom: $spacing-16;
+      margin-bottom: $spacing-6; /* Reduced from $spacing-12 */
     }
     
     @media (max-width: $md) {
-      font-size: clamp(2.5rem, 4vw, 4rem) !important;
-      margin-bottom: $spacing-8;
+      font-size: clamp(1.75rem, 3vw, 2.5rem) !important;
+      margin-bottom: $spacing-4; /* Reduced */
     }
     
     @media (max-width: $sm) {
-      font-size: clamp(2rem, 5vw, 3rem) !important;
-      margin-bottom: $spacing-6;
+      font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+      margin-bottom: $spacing-3; /* Reduced */
     }
   }
   
   .about-paragraph {
-    font-size: clamp(1rem, 1.5vw, 1.3rem);
-    line-height: 1.7;
+    font-size: clamp(0.9rem, 1.1vw, 1rem); /* Reduced font size */
+    line-height: 1.6; /* Reduced line height */
     color: $text-color;
-    margin-bottom: $spacing-8;
+    margin-bottom: $spacing-6; /* Reduced bottom margin */
     max-width: 100%;
     padding: 0 $spacing-3;
     
     /* Responsive text sizes */
     @media (min-width: $xl) {
-      font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-      line-height: 1.8;
-      margin-bottom: $spacing-10;
+      font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+      line-height: 1.7;
+      margin-bottom: $spacing-6;
       padding: 0;
     }
     
     @media (max-width: $md) {
-      font-size: clamp(0.95rem, 1.4vw, 1.2rem);
-      margin-bottom: $spacing-6;
+      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+      margin-bottom: $spacing-4;
     }
     
     @media (max-width: $sm) {
-      font-size: clamp(0.9rem, 1.3vw, 1.1rem);
-      margin-bottom: $spacing-5;
-      line-height: 1.6;
+      font-size: clamp(0.9rem, 1.3vw, 1rem);
+      margin-bottom: $spacing-3;
+      line-height: 1.5;
       padding: 0 $spacing-2;
     }
   }
   
-  /* Contact section - Updated styles for a row layout */
+  /* Contact section - Updated styles to match the layout */
   .contact-section {
-    margin: $spacing-16 0;
     width: 100%;
     
-    @media (min-width: $xl) {
-      margin: $spacing-20 0;
+    /* Adjustments for the side-by-side layout */
+    .about-contact-container & {
+      margin: 0;
+      padding-top: 0; /* Remove padding to align with About header */
+      
+      @media (max-width: $lg) {
+        padding-top: 0;
+      }
     }
     
-    @media (max-width: $md) {
-      margin: $spacing-12 0;
-    }
-    
-    @media (max-width: $sm) {
-      margin: $spacing-8 0;
+    &:not(.about-contact-container &) {
+      margin: $spacing-16 0;
+      
+      @media (min-width: $xl) {
+        margin: $spacing-20 0;
+      }
+      
+      @media (max-width: $md) {
+        margin: $spacing-12 0;
+      }
+      
+      @media (max-width: $sm) {
+        margin: $spacing-8 0;
+      }
     }
   }
   
@@ -140,62 +193,93 @@
     font-weight: 400 !important;
     font-size: clamp(2rem, 4vw, 3rem) !important;
     color: $text-color;
-    margin-bottom: $spacing-8;
+    margin-bottom: $spacing-4; /* Reduced from $spacing-8 */
     letter-spacing: 0.02em !important;
     line-height: 1.2 !important;
-    text-align: center;
+    
+    /* Make the contact header left-aligned when in the side-by-side layout */
+    .about-contact-container & {
+      text-align: left;
+      font-size: clamp(2rem, 4vw, 3rem) !important;
+      margin-bottom: $spacing-4; /* Reduced */
+      
+      @media (min-width: $xl) {
+        font-size: clamp(2rem, 4vw, 3rem) !important;
+      }
+      
+      /* Keep center alignment when not in side-by-side layout */
+      @media (max-width: $lg) {
+        text-align: center;
+      }
+    }
+    
+    /* Keep center alignment when not in about-contact-container */
+    &:not(.about-contact-container &) {
+      text-align: center;
+    }
     
     @media (min-width: $xl) {
-      margin-bottom: $spacing-10;
+      margin-bottom: $spacing-6; /* Reduced from $spacing-10 */
     }
     
     @media (max-width: $md) {
       font-size: clamp(1.75rem, 3vw, 2.5rem) !important;
-      margin-bottom: $spacing-6;
+      margin-bottom: $spacing-4; /* Reduced */
     }
     
     @media (max-width: $sm) {
       font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
-      margin-bottom: $spacing-4;
+      margin-bottom: $spacing-3; /* Reduced */
     }
   }
   
-  /* Social media links in a row layout */
+  /* Social media links in a column layout for side-by-side view */
   .social-media-row {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: $spacing-12;
+    gap: $spacing-3; /* Reduced gap between social links */
     
-    @media (max-width: $md) {
-      gap: $spacing-4;
+    .about-contact-container & {
+      align-items: flex-start;
     }
     
-    @media (max-width: $sm) {
-      flex-direction: column;
-      align-items: center;
-      gap: $spacing-3;
+    &:not(.about-contact-container &) {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: $spacing-12;
+      flex-direction: row;
+      
+      @media (max-width: $md) {
+        gap: $spacing-4;
+      }
+      
+      @media (max-width: $sm) {
+        flex-direction: column;
+        align-items: center;
+        gap: $spacing-3;
+      }
     }
     
     .contact-link {
       display: flex;
       align-items: center;
-      font-size: clamp(1rem, 1.5vw, 1.3rem);
+      font-size: clamp(0.85rem, 1vw, 0.95rem); /* Reduced font size */
       font-weight: 500;
       color: $text-color;
       text-decoration: none;
       transition: color 0.3s ease;
       
       @media (min-width: $xl) {
-        font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+        font-size: clamp(1.1rem, 1.6vw, 1.3rem);/* Reduced */
       }
       
       @media (max-width: $md) {
-        font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+        font-size: clamp(0.95rem, 1.4vw, 1.1rem); /* Reduced */
       }
       
       @media (max-width: $sm) {
-        font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+        font-size: clamp(0.9rem, 1.3vw, 1rem); /* Reduced */
       }
       
       &:hover {
@@ -203,54 +287,54 @@
       }
       
       .contact-icon {
-        margin-right: $spacing-4;
+        margin-right: $spacing-3; /* Reduced from $spacing-4 */
         display: flex;
         align-items: center;
         
         @media (max-width: $md) {
-          margin-right: $spacing-3;
+          margin-right: $spacing-2; /* Reduced */
         }
         
         svg {
-          width: 28px;
-          height: 28px;
+          width: 24px; /* Reduced size */
+          height: 24px;
           
           @media (min-width: $xl) {
-            width: 32px;
-            height: 32px;
+            width: 26px; /* Reduced */
+            height: 26px;
           }
           
           @media (max-width: $md) {
-            width: 24px;
-            height: 24px;
+            width: 20px; /* Reduced */
+            height: 20px;
           }
           
           @media (max-width: $sm) {
-            width: 20px;
-            height: 20px;
+            width: 18px; /* Reduced */
+            height: 18px;
           }
         }
         
         /* TikTok icon placeholder */
         .tiktok-icon-placeholder {
-          width: 28px;
-          height: 28px;
+          width: 24px; /* Reduced size */
+          height: 24px;
           background-image: url('../../../public/images/tiktok.jpg');
           background-size: cover;
           
           @media (min-width: $xl) {
-            width: 32px;
-            height: 32px;
+            width: 26px; /* Reduced */
+            height: 26px;
           }
           
           @media (max-width: $md) {
-            width: 24px;
-            height: 24px;
+            width: 20px; /* Reduced */
+            height: 20px;
           }
           
           @media (max-width: $sm) {
-            width: 20px;
-            height: 20px;
+            width: 18px; /* Reduced */
+            height: 18px;
           }
         }
       }
@@ -266,12 +350,12 @@
     display: flex;
     flex-direction: row;
     gap: $spacing-8;
-    margin-top: $spacing-16;
+    margin-top: $spacing-6; /* Reduced from $spacing-16 */
     margin-bottom: $spacing-16;
     
     @media (min-width: $xl) {
       gap: $spacing-12;
-      margin-top: $spacing-24;
+      margin-top: $spacing-8; /* Reduced from $spacing-24 */
       margin-bottom: $spacing-24;
     }
     
@@ -282,13 +366,13 @@
     
     @media (max-width: $md) {
       gap: $spacing-12;
-      margin-top: $spacing-12;
+      margin-top: $spacing-6; /* Reduced */
       margin-bottom: $spacing-12;
     }
     
     @media (max-width: $sm) {
       gap: $spacing-8;
-      margin-top: $spacing-8;
+      margin-top: $spacing-4; /* Reduced */
       margin-bottom: $spacing-8;
     }
     

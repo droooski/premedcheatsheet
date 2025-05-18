@@ -1,6 +1,4 @@
-// Update your AboutPage.js form submission handler
-// This is a focused solution for your existing codebase
-
+// src/pages/About/AboutPage.js
 import React, { useState } from 'react';
 // import { Link } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -105,57 +103,63 @@ const AboutPage = () => {
       
       <div className="about-content">
         <div className="container">
-          <h1 className="about-header">About</h1>
-          
-          <div className="about-text-container">
-            <p className="about-paragraph">
-              We have gone through the pre-med process and understand how hard it is to know what extra-curriculars are worth pursuing, how many hours of shadowing are needed, and how much focus should be put on academics.
-            </p>
-            
-            <p className="about-paragraph">
-              That's why we created the Premed Cheatsheet.
-            </p>
-            
-            <p className="about-paragraph">
-              The Cheatsheet is your big bro who has gone through the process. It's a role model that shows the many flavors of students that make up a medical school.
-            </p>
-            
-            <p className="about-paragraph">
-              We hope the Premed Cheatsheet can help many of you on the journey towards becoming a physician.
-            </p>
-          </div>
-          
-          {/* Contact section with social media links in a row */}
-          <div className="contact-section">
-            <h2 className="contact-header">CONTACT</h2>
-            <div className="social-media-row">
-              <a href="mailto:staff@premedcheatsheet.com" className="contact-link">
-                <span className="contact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                </span>
-                <span className="contact-text">staff@premedcheatsheet.com</span>
-              </a>
+          {/* Two-column layout for About and Contact sections */}
+          <div className="about-contact-container">
+            {/* Left column - About section */}
+            <div className="about-column">
+              <h1 className="about-header">About</h1>
               
-              <a href="https://www.instagram.com/orthrobro/" target="_blank" rel="noopener noreferrer" className="contact-link">
-                <span className="contact-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </span>
-                <span className="contact-text">@orthrobro</span>
-              </a>
-              
-              <a href="https://www.tiktok.com/@orthrobro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" className="contact-link">
-                <span className="contact-icon">
-                  <div className="tiktok-icon-placeholder"></div>
-                </span>
-                <span className="contact-text">@orthrobro</span>
-              </a>
+              <div className="about-text-container">
+                <p className="about-paragraph">
+                  We have gone through the pre-med process and understand how hard it is to know what extra-curriculars are worth pursuing, how many hours of shadowing are needed, and how much focus should be put on academics.
+                </p>
+                
+                <p className="about-paragraph">
+                  That's why we created the Premed Cheatsheet.
+                </p>
+                
+                <p className="about-paragraph">
+                  The Cheatsheet is your big bro who has gone through the process. It's a role model that shows the many flavors of students that make up a medical school.
+                </p>
+                
+                <p className="about-paragraph">
+                  We hope the Premed Cheatsheet can help many of you on the journey towards becoming a physician.
+                </p>
+              </div>
+            </div>
+            
+            {/* Right column - Contact section */}
+            <div className="contact-column">
+              <h2 className="contact-header">Contact</h2>
+              <div className="social-media-row">
+                <a href="mailto:staff@premedcheatsheet.com" className="contact-link">
+                  <span className="contact-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </span>
+                  <span className="contact-text">staff@premedcheatsheet.com</span>
+                </a>
+                
+                <a href="https://www.instagram.com/orthrobro/" target="_blank" rel="noopener noreferrer" className="contact-link">
+                  <span className="contact-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </span>
+                  <span className="contact-text">@orthrobro</span>
+                </a>
+                
+                <a href="https://www.tiktok.com/@orthrobro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" className="contact-link">
+                  <span className="contact-icon">
+                    <div className="tiktok-icon-placeholder"></div>
+                  </span>
+                  <span className="contact-text">@orthrobro</span>
+                </a>
+              </div>
             </div>
           </div>
           

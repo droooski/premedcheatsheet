@@ -24,17 +24,19 @@
 .pricing-card {
   background-color: #f7f7f7;
   border: 1px solid #000;
-  border-radius: 8px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   padding: 30px 20px;
   width: 100%;
+  height: 750px;
+  position: relative;
   
   h3 {
-    font-size: 1.5rem;
-    font-weight: 500;
+    font-size: 1.8rem;
+    font-weight: 300;
     color: #000;
     margin-bottom: 15px;
     text-align: center;
@@ -46,7 +48,7 @@
     
     .amount {
       font-size: 2.5rem;
-      font-weight: 500;
+      font-weight: 400;
       color: #000;
       display: block;
     }
@@ -92,10 +94,10 @@
   }
   
   .features-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     list-style: none;
-    padding: 0;
-    margin: 0 0 20px 0;
-    width: 100%;
     text-align: left;
     
     li {
@@ -118,10 +120,12 @@
   
   /* Coupon section styled to match screenshots */
   .coupon-section {
-    width: 100%;
-    padding-top: 10px;
-    border-top: 1px dashed #ddd;
-    text-align: center;
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    padding-left: 20px;
+    padding-right: 20px;
   }
   
   .coupon-prompt {
@@ -189,6 +193,15 @@
       font-weight: 600;
       color: #000;
       font-size: 1.1rem;
+    }
+  }
+
+  /* Make additional space for cards with active discount info */
+  &.has-discount {
+    height: 560px; /* Increase height when discount is applied */
+    
+    .coupon-section {
+      bottom: 30px; /* Adjust position when discount is shown */
     }
   }
 }

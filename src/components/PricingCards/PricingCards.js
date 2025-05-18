@@ -140,7 +140,7 @@ const PricingCards = ({ onSelectPlan }) => {
       {/* First row: The Cheatsheet and Application Cheatsheet */}
       <div className="pricing-row">
         {/* The Cheatsheet card */}
-        <div className="pricing-card">
+        <div className={`pricing-card ${appliedCoupons['cheatsheet'].applied ? 'has-discount' : ''}`}>
           <h3>The Cheatsheet</h3>
           <div className="price">
             <span className="amount">$14.99</span>
@@ -172,7 +172,7 @@ const PricingCards = ({ onSelectPlan }) => {
         </div>
         
         {/* Application Cheatsheet card */}
-        <div className="pricing-card">
+        <div className={`pricing-card ${appliedCoupons['application'].applied ? 'has-discount' : ''}`}>
           <h3>Application Cheatsheet</h3>
           <div className="price">
             <span className="amount">$19.99</span>
@@ -201,7 +201,7 @@ const PricingCards = ({ onSelectPlan }) => {
       {/* Second row: The Cheatsheet+ and Application Cheatsheet+ */}
       <div className="pricing-row">
         {/* The Cheatsheet+ card */}
-        <div className="pricing-card">
+        <div className={`pricing-card ${appliedCoupons['cheatsheet-plus'].applied ? 'has-discount' : ''}`}>
           <h3>The Cheatsheet +</h3>
           <div className="price">
             <span className="amount">$29.99</span>
@@ -233,7 +233,7 @@ const PricingCards = ({ onSelectPlan }) => {
         </div>
         
         {/* Application Cheatsheet+ card - Styled like Image 1 */}
-        <div className="pricing-card">
+        <div className={`pricing-card ${appliedCoupons['application-plus'].applied ? 'has-discount' : ''}`}>
           <h3>Application Cheatsheet +</h3>
           <div className="price">
             <span className="amount">$34.99</span>
