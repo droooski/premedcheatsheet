@@ -267,7 +267,7 @@ const AuthModal = ({
                   : (isLogin 
                      ? "Sign in" 
                      : (dataCollectionOnly 
-                        ? "Continue to Payment" 
+                        ? "Create account" 
                         : "Create account"))}
               </button>
             </form>
