@@ -160,7 +160,7 @@
         
         a {
           color: $text-color;
-          font-weight: 500;
+          font-weight: 300;
           @include mix.transition(color);
           font-size: 0.95rem;
           padding: $spacing-2 0;
@@ -176,7 +176,7 @@
           
           // Active state with underline
           &.active {
-            font-weight: 600;
+            font-weight: 500;
             
             &:after {
               content: '';
