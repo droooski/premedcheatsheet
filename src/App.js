@@ -17,6 +17,7 @@ import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/Application
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import EmailVerificationPage from './components/auth/EmailVerificationPage'; // New component for handling verifications
 import { onAuthChange } from './firebase/authService';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/main.scss';
 
 // Function to check if user has guest access
@@ -53,6 +54,7 @@ function App() {
   const isGuest = hasGuestAccess() && !user;
 
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         {/* Public routes */}
@@ -141,6 +143,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
+  </AuthProvider>
   );
 }
 

@@ -1,7 +1,7 @@
 // src/components/payment/SavedPaymentMethods.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import './SavedPaymentMethods.scss';
 
@@ -11,20 +11,71 @@ const SavedPaymentMethods = () => {
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
-  const { currentUser, userProfile } = useAuth();
+  // Safely use the auth context with fallbacks
+  const auth = useAuth() || {}; // Make sure useAuth doesn't crash if undefined
+  const currentUser = auth.currentUser || null;
+  const userProfile = auth.userProfile || null;
+  
   const navigate = useNavigate();
   const db = getFirestore();
 
   // Load payment methods from user profile
   useEffect(() => {
+    // Check if auth is available
+    if (!auth || auth.loading) {
+      return; // Wait for auth to initialize
+    }
+    
     if (userProfile) {
       setPaymentMethods(userProfile.paymentMethods || []);
+    } else if (currentUser) {
+      // If we have a user but no profile, try to fetch it
+      const fetchUserProfile = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setPaymentMethods(userData.paymentMethods || []);
+          }
+        } catch (err) {
+          console.error("Error fetching user profile:", err);
+          setError("Failed to load payment methods. Please try again later.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchUserProfile();
+    } else {
+      // No user, no loading needed
+      setLoading(false);
     }
-    setLoading(false);
-  }, [userProfile]);
+  }, [auth, userProfile, currentUser, db]);
+
+  // Show login message if not authenticated
+  if (!currentUser && !loading) {
+    return (
+      <div className="saved-payment-methods">
+        <div className="no-payment-methods">
+          <p>You need to be logged in to view payment methods.</p>
+          <button 
+            className="login-button"
+            onClick={() => navigate('/login')}
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Handle making a payment method the default
   const handleSetDefault = async (paymentId) => {
+    if (!currentUser) {
+      setError("You must be logged in to perform this action.");
+      return;
+    }
+    
     try {
       setLoading(true);
       
@@ -51,6 +102,11 @@ const SavedPaymentMethods = () => {
 
   // Handle deleting a payment method
   const handleDeletePayment = async (paymentId) => {
+    if (!currentUser) {
+      setError("You must be logged in to perform this action.");
+      return;
+    }
+    
     try {
       setLoading(true);
       
@@ -80,6 +136,8 @@ const SavedPaymentMethods = () => {
 
   // Get card logo based on card type
   const getCardLogo = (cardType) => {
+    if (!cardType) return '💳 Card';
+    
     const type = cardType.toLowerCase();
     if (type.includes('visa')) {
       return '💳 Visa';
@@ -131,10 +189,10 @@ const SavedPaymentMethods = () => {
                   {getCardLogo(payment.cardType)}
                 </div>
                 <p className="card-info">
-                  <span className="card-number">•••• •••• •••• {payment.lastFourDigits}</span>
-                  <span className="card-expiry">Expires: {payment.expiryDate}</span>
+                  <span className="card-number">•••• •••• •••• {payment.lastFourDigits || '****'}</span>
+                  <span className="card-expiry">Expires: {payment.expiryDate || 'N/A'}</span>
                 </p>
-                <p className="cardholder-name">{payment.cardholderName}</p>
+                <p className="cardholder-name">{payment.cardholderName || 'Cardholder'}</p>
               </div>
               
               <div className="payment-actions">
