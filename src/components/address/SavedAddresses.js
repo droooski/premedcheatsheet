@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
+import { countries } from '../../utils/countries';
 import './SavedAddresses.scss';
 
 const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true, showInfoSection = true }) => {
@@ -351,18 +352,23 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
                         />
                       </div>
                       
-                      <div className="form-group">
-                        <label htmlFor="country">Country</label>
-                        <input
-                          type="text"
-                          id="country"
-                          name="country"
-                          value={editFormData.country}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
+                  <div className="form-group">
+                    <label htmlFor="country">Country</label>
+                    <select
+                      id="country"
+                      name="country"
+                      value={editFormData.country}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select a country</option>
+                      {countries.map(country => (
+                        <option key={country.code || country} value={country.name || country}>
+                          {country.name || country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                     
                     <div className="form-group">
                       <label htmlFor="phone">Phone (Optional)</label>
@@ -407,7 +413,7 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
               ) : (
                 // Display Mode
                 <>
-                  {address.isDefault && <span className="default-badge">Default</span>}
+                  {/* {address.isDefault && <span className="default-badge">Default</span>} */}
                   
                   <div className="address-icon">📍</div>
                   <div className="address-details">
