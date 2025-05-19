@@ -15,6 +15,7 @@ import {
   doc, 
   updateDoc 
 } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -57,6 +58,18 @@ const Checkout = () => {
   });
   const [pendingUserData, setPendingUserData] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+  // Add these state variables to your existing state declarations (around line 48-80)
+  const [savePaymentMethod, setSavePaymentMethod] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [billingAddress, setBillingAddress] = useState({
+    name: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'United States'
+  });
   
   const navigate = useNavigate();
 
@@ -92,40 +105,40 @@ const Checkout = () => {
   }, [mode]);
 
   // Set subscription details based on selected plan
-useEffect(() => {
-  // Set pricing based on the plan
-  switch(selectedPlan) {
-    case 'cheatsheet':
-      setSubscription({
-        type: 'onetime', // Changed from 'monthly' to 'onetime'
-        price: 14.99     // Updated from 5.99 to 14.99
-      });
-      break;
-    case 'cheatsheet-plus':
-      setSubscription({
-        type: 'onetime',  // Changed from 'monthly' to 'onetime'
-        price: 29.99      // Updated from 9.99 to 29.99
-      });
-      break;
-    case 'application':
-      setSubscription({
-        type: 'onetime',
-        price: 19.99
-      });
-      break;
-    case 'application-plus':
-      setSubscription({
-        type: 'onetime',
-        price: 34.99
-      });
-      break;
-    default:
-      setSubscription({
-        type: 'onetime',
-        price: 14.99  // Updated default price
-      });
-  }
-}, [selectedPlan]);
+  useEffect(() => {
+    // Set pricing based on the plan
+    switch(selectedPlan) {
+      case 'cheatsheet':
+        setSubscription({
+          type: 'onetime', // Changed from 'monthly' to 'onetime'
+          price: 14.99     // Updated from 5.99 to 14.99
+        });
+        break;
+      case 'cheatsheet-plus':
+        setSubscription({
+          type: 'onetime',  // Changed from 'monthly' to 'onetime'
+          price: 29.99      // Updated from 9.99 to 29.99
+        });
+        break;
+      case 'application':
+        setSubscription({
+          type: 'onetime',
+          price: 19.99
+        });
+        break;
+      case 'application-plus':
+        setSubscription({
+          type: 'onetime',
+          price: 34.99
+        });
+        break;
+      default:
+        setSubscription({
+          type: 'onetime',
+          price: 14.99  // Updated default price
+        });
+    }
+  }, [selectedPlan]);
 
   // Redirect to profile after confirmation
   useEffect(() => {
@@ -137,6 +150,15 @@ useEffect(() => {
       return () => clearTimeout(timer);
     }
   }, [checkoutStep, orderId, navigate]);
+
+  // Add this function with your other handlers
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setBillingAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   // Proper step change that records previous step for back navigation
   const changeCheckoutStep = (newStep) => {
@@ -563,46 +585,46 @@ useEffect(() => {
     if (!cardInfo.cardType) {
       return (
         <div className="card-icons">
-          <div className="card-icon visa-faded"></div>
-          <div className="card-icon mastercard-faded"></div>
-          <div className="card-icon amex-faded"></div>
+          <img src={require('../../assets/images/card-visa.png')} alt="Visa" className="card-icon visa-faded" style={{opacity: 0.3}} />
+          <img src={require('../../assets/images/card-mastercard.png')} alt="Mastercard" className="card-icon mastercard-faded" style={{opacity: 0.3}} />
+          <img src={require('../../assets/images/card-amex.png')} alt="Amex" className="card-icon amex-faded" style={{opacity: 0.3}} />
         </div>
       );
     }
     
     switch(cardInfo.cardType) {
       case 'visa':
-        return <div className="card-icon visa"></div>;
+        return <img src={require('../../assets/images/card-visa.png')} alt="Visa" className="card-icon visa" />;
       case 'mastercard':
-        return <div className="card-icon mastercard"></div>;
+        return <img src={require('../../assets/images/card-mastercard.png')} alt="Mastercard" className="card-icon mastercard" />;
       case 'amex':
-        return <div className="card-icon amex"></div>;
+        return <img src={require('../../assets/images/card-amex.png')} alt="Amex" className="card-icon amex" />;
       default:
-        return null;
+        return <img src={require('../../assets/images/card-visa.png')} alt="Card" className="card-icon" style={{opacity: 0.3}} />;
     }
   };
 
   // Handle registration data collection but don't create account yet
-const handleAuthDataCollection = (userData) => {
-  console.log("Registration data collected:", userData);
-  
-  // Store pending user data
-  setPendingUserData({
-    email: userData.email,
-    password: userData.password,
-    firstName: userData.firstName || '',
-    lastName: userData.lastName || ''
-  });
-  
-  // Mark registration step as complete
-  setRegistrationComplete(true);
-  
-  // Close auth modal
-  setShowAuthModal(false);
-  
-  // Move to payment step without creating Firebase account
-  changeCheckoutStep('payment');
-};
+  const handleAuthDataCollection = (userData) => {
+    console.log("Registration data collected:", userData);
+    
+    // Store pending user data
+    setPendingUserData({
+      email: userData.email,
+      password: userData.password,
+      firstName: userData.firstName || '',
+      lastName: userData.lastName || ''
+    });
+    
+    // Mark registration step as complete
+    setRegistrationComplete(true);
+    
+    // Close auth modal
+    setShowAuthModal(false);
+    
+    // Move to payment step without creating Firebase account
+    changeCheckoutStep('payment');
+  };
 
   // Calculate subscription end date based on plan type
   const getSubscriptionEndDate = () => {
@@ -665,7 +687,44 @@ const handleAuthDataCollection = (userData) => {
         status: 'completed'
       });
 
-      // 5. Update user document with subscription details
+      // 5. Save payment method if the user opted to
+      if (savePaymentMethod) {
+        const paymentMethod = {
+          id: uuidv4(),
+          cardholderName: cardInfo.name,
+          lastFourDigits: cardInfo.last4,
+          expiryDate: cardInfo.expiry || 'MM/YY',
+          cardType: cardInfo.brand || 'card',
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
+        
+        await updateDoc(doc(db, "users", registrationResult.user.uid), {
+          paymentMethods: [paymentMethod]
+        });
+      }
+
+      // 6. Save billing address if the user opted to
+      if (saveAddress && billingAddress.name) {
+        const address = {
+          id: uuidv4(),
+          fullName: billingAddress.name,
+          addressLine1: billingAddress.line1,
+          addressLine2: billingAddress.line2 || '',
+          city: billingAddress.city,
+          state: billingAddress.state,
+          zipCode: billingAddress.postalCode,
+          country: billingAddress.country,
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
+        
+        await updateDoc(doc(db, "users", registrationResult.user.uid), {
+          addresses: [address]
+        });
+      }
+
+      // 7. Update user document with subscription details
       await updateDoc(doc(db, "users", registrationResult.user.uid), {
         paymentVerified: true,
         purchaseDate: new Date().toISOString(),
@@ -680,10 +739,10 @@ const handleAuthDataCollection = (userData) => {
         }]
       });
 
-      // 6. Set payment verification in session storage for immediate access
+      // 8. Set payment verification in session storage for immediate access
       sessionStorage.setItem('paymentVerified', 'true');
 
-      // 7. Move to confirmation step
+      // 9. Move to confirmation step
       setOrderId(paymentResult.orderId);
       changeCheckoutStep('confirmation');
       
@@ -770,23 +829,23 @@ const handleAuthDataCollection = (userData) => {
 
 
   // This function collects user registration data without creating the account
-const handleRegistrationDataCollection = (userData) => {
-  console.log("Registration data collected:", userData);
-  
-  // Store pending user data for later account creation
-  setPendingUserData({
-    email: userData.email,
-    password: userData.password,
-    firstName: userData.firstName || '',
-    lastName: userData.lastName || ''
-  });
-  
-  // Mark registration as complete
-  setRegistrationComplete(true);
-  
-  // Close the auth modal
-  setShowAuthModal(false);
-};
+  const handleRegistrationDataCollection = (userData) => {
+    console.log("Registration data collected:", userData);
+    
+    // Store pending user data for later account creation
+    setPendingUserData({
+      email: userData.email,
+      password: userData.password,
+      firstName: userData.firstName || '',
+      lastName: userData.lastName || ''
+    });
+    
+    // Mark registration as complete
+    setRegistrationComplete(true);
+    
+    // Close the auth modal
+    setShowAuthModal(false);
+  };
 
   // Add this explicit handler for confirming free purchases
   const handleConfirmFreePurchase = async () => {
@@ -837,9 +896,45 @@ const handleRegistrationDataCollection = (userData) => {
         
         console.log("Order created successfully:", orderResult.orderId);
         
-        // 4. Update the user document to mark payment as verified
+        // 4. Save payment method if the user opted to (even for free purchases)
+        if (savePaymentMethod) {
+          const paymentMethod = {
+            id: uuidv4(),
+            cardholderName: "Free Purchase",
+            lastFourDigits: "0000",
+            expiryDate: "N/A",
+            cardType: "Coupon",
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await updateDoc(doc(db, "users", registrationResult.user.uid), {
+            paymentMethods: [paymentMethod]
+          });
+        }
+
+        // 5. Save billing address if the user opted to
+        if (saveAddress && billingAddress.name) {
+          const address = {
+            id: uuidv4(),
+            fullName: billingAddress.name,
+            addressLine1: billingAddress.line1,
+            addressLine2: billingAddress.line2 || '',
+            city: billingAddress.city,
+            state: billingAddress.state,
+            zipCode: billingAddress.postalCode,
+            country: billingAddress.country,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await updateDoc(doc(db, "users", registrationResult.user.uid), {
+            addresses: [address]
+          });
+        }
+        
+        // 6. Update the user document to mark payment as verified
         try {
-          const db = getFirestore();
           await updateDoc(doc(db, "users", registrationResult.user.uid), {
             paymentVerified: true,
             purchaseDate: new Date().toISOString(),
@@ -861,7 +956,7 @@ const handleRegistrationDataCollection = (userData) => {
           // Continue anyway since the core account and order were created
         }
         
-        // 5. Move to confirmation step
+        // 7. Move to confirmation step
         setOrderId(orderResult.orderId);
         changeCheckoutStep('confirmation');
       } else if (user && user.uid) {
@@ -885,6 +980,42 @@ const handleRegistrationDataCollection = (userData) => {
         }
         
         console.log("Free order created:", result.orderId);
+
+        // Save payment method and address for existing users too
+        if (savePaymentMethod) {
+          const paymentMethod = {
+            id: uuidv4(),
+            cardholderName: "Free Purchase",
+            lastFourDigits: "0000",
+            expiryDate: "N/A",
+            cardType: "Coupon",
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await updateDoc(doc(db, "users", user.uid), {
+            paymentMethods: [paymentMethod]
+          });
+        }
+
+        if (saveAddress && billingAddress.name) {
+          const address = {
+            id: uuidv4(),
+            fullName: billingAddress.name,
+            addressLine1: billingAddress.line1,
+            addressLine2: billingAddress.line2 || '',
+            city: billingAddress.city,
+            state: billingAddress.state,
+            zipCode: billingAddress.postalCode,
+            country: billingAddress.country,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await updateDoc(doc(db, "users", user.uid), {
+            addresses: [address]
+          });
+        }
         
         // Set order ID and move to confirmation
         setOrderId(result.orderId);
@@ -1208,8 +1339,18 @@ const handleRegistrationDataCollection = (userData) => {
               <h4>Payment Method</h4>
               <div className="card-info">
                 <div className="card-icon">
-                  {/* You can use a simple text representation for now */}
-                  {cardInfo.brand && <span>{cardInfo.brand.toUpperCase()}</span>}
+                  {cardInfo.brand === 'visa' && (
+                    <img src={require('../../assets/images/card-visa.png')} alt="Visa" className="card-icon" />
+                  )}
+                  {cardInfo.brand === 'mastercard' && (
+                    <img src={require('../../assets/images/card-mastercard.png')} alt="Mastercard" className="card-icon" />
+                  )}
+                  {cardInfo.brand === 'amex' && (
+                    <img src={require('../../assets/images/card-amex.png')} alt="Amex" className="card-icon" />
+                  )}
+                  {(!cardInfo.brand || !['visa', 'mastercard', 'amex'].includes(cardInfo.brand)) && (
+                    <img src={require('../../assets/images/card-visa.png')} alt="Card" className="card-icon" style={{opacity: 0.3}} />
+                  )}
                 </div>
                 <div className="card-details">
                   <p>**** **** **** {cardInfo.last4 || '****'}</p>
