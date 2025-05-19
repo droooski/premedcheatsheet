@@ -5,7 +5,7 @@
 .medical-schools-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
+  gap: 25px;
   margin-bottom: $spacing-8;
   
   @media (max-width: $lg) {
