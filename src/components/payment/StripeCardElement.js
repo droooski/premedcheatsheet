@@ -140,13 +140,13 @@ const StripeCardElement = ({ onSuccess, onError, processingPayment }) => {
         </div>
         
         {/* This button will be rendered after the billing address via CSS */}
-        <button 
+        {/* <button 
           type="submit" 
           className="payment-button"
           disabled={!stripe || processingPayment}
         >
           {processingPayment ? 'Processing...' : 'Pay Now'}
-        </button>
+        </button> */}
       </form>
     </div>
   );

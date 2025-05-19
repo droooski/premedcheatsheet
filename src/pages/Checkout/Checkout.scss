@@ -1252,3 +1252,34 @@
     margin-top: $spacing-3;
   }
 }
+
+/* Add this to your CSS */
+.payment-button {
+  order: 50; /* Any number higher than 3 and lower than 100 */
+  margin-top: $spacing-6;
+  margin-bottom: $spacing-4;
+  width: 100%;
+  background-color: #1A3A34;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: $spacing-4;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: darken(#1A3A34, 5%);
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}

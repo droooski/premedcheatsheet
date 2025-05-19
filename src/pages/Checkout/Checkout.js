@@ -1379,26 +1379,28 @@ const Checkout = () => {
             </div>
           )}
           
-          {/* Replace your custom form with the Stripe Elements component */}
-          <StripeWrapper
-            onSuccess={(paymentMethod) => {
-              console.log("Payment method created:", paymentMethod);
-              // Store the payment method details and proceed to review
-              setCardInfo({
-                ...cardInfo,
-                brand: paymentMethod.card?.brand || 'unknown',
-                last4: paymentMethod.card?.last4 || '****',
-                id: paymentMethod.id
-              });
-              changeCheckoutStep('review');
-            }}
-            onError={(errorMessage) => {
-              setError(errorMessage);
-            }}
-            processingPayment={loading}
-          />
+          {/* Card details first */}
+          <div className="card-info-section">
+            <StripeWrapper
+              onSuccess={(paymentMethod) => {
+                console.log("Payment method created:", paymentMethod);
+                // Store the payment method details and proceed to review
+                setCardInfo({
+                  ...cardInfo,
+                  brand: paymentMethod.card?.brand || 'unknown',
+                  last4: paymentMethod.card?.last4 || '****',
+                  id: paymentMethod.id
+                });
+                changeCheckoutStep('review');
+              }}
+              onError={(errorMessage) => {
+                setError(errorMessage);
+              }}
+              processingPayment={loading}
+            />
+          </div>
           
-          {/* Save Payment Method Option */}
+          {/* Save Payment Method Option - MOVED ABOVE BILLING ADDRESS */}
           <div className="form-group checkbox" style={{marginTop: '20px'}}>
             <input
               type="checkbox"
@@ -1412,7 +1414,7 @@ const Checkout = () => {
             </label>
           </div>
 
-          {/* Billing Address Fields */}
+          {/* Billing Address Fields ONLY shows if savePaymentMethod is checked */}
           {savePaymentMethod && (
             <div className="billing-address-section" style={{marginTop: '20px', marginBottom: '20px'}}>
               <h3>
@@ -1526,6 +1528,29 @@ const Checkout = () => {
               </div>
             </div>
           )}
+          
+          {/* Payment button ALWAYS AFTER EVERYTHING */}
+          <button 
+            type="button"
+            className="payment-button" 
+            onClick={handleProcessPayment}
+            disabled={loading}
+            style={{
+              width: '100%',
+              backgroundColor: '#1A3A34',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '16px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              marginTop: '24px',
+              marginBottom: '16px'
+            }}
+          >
+            {loading ? 'Processing...' : 'PAY NOW'}
+          </button>
           
           <div className="secure-checkout">
             <div className="secure-icon">🔒</div>

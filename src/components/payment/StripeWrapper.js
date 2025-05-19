@@ -1,15 +1,22 @@
-// src/components/payment/StripeWrapper.js 
-// Update this file to solve the Stripe.js loading issues
-
-import React, { useEffect, useState } from 'react';
+// src/components/payment/StripeWrapper.js - Updated to handle the payment submission differently
+import React, { useEffect, useState, useRef } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import StripeCardElement from './StripeCardElement';
 
-const StripeWrapper = ({ onSuccess, onError, processingPayment }) => {
+const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
   const [stripePromise, setStripePromise] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const stripeElementRef = useRef(null);
+
+  // Expose payment submission method to parent
+  const handleSubmitPayment = () => {
+    if (stripeElementRef.current) {
+      return StripeCardElement.handlePaymentSubmit(stripeElementRef);
+    }
+    return false;
+  };
 
   useEffect(() => {
     // Use a try-catch to handle potential errors when loading Stripe
@@ -39,6 +46,19 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment }) => {
     initializeStripe();
   }, [onError]);
 
+  // Expose the submit payment method to the parent component
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.submitStripePayment = handleSubmitPayment;
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete window.submitStripePayment;
+      }
+    };
+  }, []);
+
   if (loading) {
     return <div className="stripe-loading">Loading payment system...</div>;
   }
@@ -51,12 +71,22 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment }) => {
   return stripePromise ? (
     <Elements stripe={stripePromise}>
       <StripeCardElement 
+        ref={stripeElementRef}
         onSuccess={onSuccess}
         onError={onError}
         processingPayment={processingPayment}
       />
+      {children}
     </Elements>
   ) : null;
+};
+
+// Expose the payment submission method
+StripeWrapper.submitPayment = function() {
+  if (typeof window !== 'undefined' && window.submitStripePayment) {
+    return window.submitStripePayment();
+  }
+  return false;
 };
 
 export default StripeWrapper;
