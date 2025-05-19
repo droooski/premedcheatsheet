@@ -6,7 +6,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { countries } from '../../utils/countries';
 import './SavedAddresses.scss';
 
-const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true, showInfoSection = true }) => {
+const SavedAddresses = ({ 
+  onSelectAddress, 
+  selectedAddressId, 
+  showAddNew = true, 
+  showInfoSection = true,
+  addresses: propAddresses, // Added prop
+  setAddresses: propSetAddresses, // Added prop
+  loading: propLoading, // Added prop
+  forceDataFromProps = false
+}) => {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -17,21 +26,35 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
   
   const { currentUser, userProfile } = useAuth();
   const db = getFirestore();
-  // Load addresses from user profile
+  
+  // Use either provided addresses or load from userProfile
   useEffect(() => {
-    if (userProfile) {
+    if (propAddresses && (forceDataFromProps || !userProfile)) {
+      // Always use props data if forceDataFromProps is true
+      setAddresses(propAddresses);
+      setLoading(propLoading !== undefined ? propLoading : false);
+    } else if (userProfile && !forceDataFromProps) {
+      // Load from profile if no forced props
       console.log("Loading addresses from profile:", userProfile.addresses || []);
       setAddresses(userProfile.addresses || []);
       setLoading(false);
+    } else if (propLoading !== undefined) {
+      // Use loading state from props if provided
+      setLoading(propLoading);
     } else {
       setLoading(false);
     }
-  }, [userProfile]);
+  }, [userProfile, propAddresses, propLoading, forceDataFromProps]);
 
   // Handle making an address the default
+  // Update handleSetDefault and handleDeleteAddress
   const handleSetDefault = async (addressId) => {
     try {
       setLoading(true);
+      
+      // Get the latest user data first
+      const userRef = doc(db, "users", currentUser.uid);
+      await getDoc(userRef); // Just to verify the doc exists
       
       // Update all addresses, setting only the selected one as default
       const updatedAddresses = addresses.map(address => ({
@@ -39,23 +62,20 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
         isDefault: address.id === addressId
       }));
       
-      console.log("Setting default address:", addressId);
-      console.log("Updated addresses:", updatedAddresses);
-      
-      // First get the latest user data to avoid overwriting recent changes
-      const userRef = doc(db, "users", currentUser.uid);
-      await getDoc(userRef); // Just to verify the doc exists
-      
       // Update in Firestore
       await updateDoc(userRef, {
         addresses: updatedAddresses
       });
       
+      // Update local state without reloading
       setAddresses(updatedAddresses);
-      setLoading(false);
       
-      // Reload the page to reflect changes
-      window.location.reload();
+      // Also update parent state if a setter was provided
+      if (propSetAddresses) {
+        propSetAddresses(updatedAddresses);
+      }
+      
+      setLoading(false);
     } catch (error) {
       console.error("Error setting default address:", error);
       setError("Failed to update default address. Please try again.");
@@ -63,7 +83,7 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
     }
   };
 
-  // Handle deleting an address
+  // Similar update for handleDeleteAddress
   const handleDeleteAddress = async (addressId) => {
     try {
       setLoading(true);
@@ -82,20 +102,21 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
       // Filter out the address to delete
       const updatedAddresses = currentAddresses.filter(address => address.id !== addressId);
       
-      console.log("Deleting address:", addressId);
-      console.log("Updated addresses after deletion:", updatedAddresses);
-      
       // Update in Firestore
       await updateDoc(userRef, {
         addresses: updatedAddresses
       });
       
+      // Update local state
       setAddresses(updatedAddresses);
+      
+      // Also update parent state if a setter was provided
+      if (propSetAddresses) {
+        propSetAddresses(updatedAddresses);
+      }
+      
       setShowDeleteConfirm(null);
       setLoading(false);
-      
-      // Force reload to ensure all components reflect the update
-      window.location.reload();
     } catch (error) {
       console.error("Error deleting address:", error);
       setError("Failed to delete address. Please try again.");
@@ -219,6 +240,11 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
       setEditingAddressId(null);
       setEditFormData({});
       setSaveLoading(false);
+
+        // Also update parent state if a setter was provided
+        if (propSetAddresses) {
+          propSetAddresses(updatedAddresses);
+        }
       
       // Reload the page to ensure all components reflect the update
       window.location.reload();
@@ -465,29 +491,32 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
                   </div>
                   
                   {showDeleteConfirm === address.id && (
-                    <div className="delete-confirm">
-                      <p>Are you sure you want to delete this address?</p>
-                      <div className="confirm-actions">
-                        <button 
-                          className="confirm-yes"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteAddress(address.id);
-                          }}
-                          disabled={loading}
-                        >
-                          Yes, Delete
-                        </button>
-                        <button 
-                          className="confirm-no"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowDeleteConfirm(null);
-                          }}
-                          disabled={loading}
-                        >
-                          Cancel
-                        </button>
+                    <div className="delete-confirm-overlay">
+                      <div className="delete-confirm-dialog">
+                        <h4>Delete Address</h4>
+                        <p>Are you sure you want to delete this address?</p>
+                        <div className="confirm-actions">
+                          <button 
+                            className="confirm-no"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDeleteConfirm(null);
+                            }}
+                            disabled={loading}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            className="confirm-yes"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteAddress(address.id);
+                            }}
+                            disabled={loading}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}

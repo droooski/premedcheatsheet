@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
-import userService from '../../services/userService';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { countries } from '../../utils/countries';
 import './AddressForm.scss';
 
@@ -21,9 +21,10 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [saveToAccount, setSaveToAccount] = useState(false);
+  const [saveToAccount, setSaveToAccount] = useState(true); // Default to true for better UX
   
   const { currentUser } = useAuth();
+  const db = getFirestore();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,17 +47,76 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
 
       // If user is logged in and wants to save the address
       if (currentUser && saveToAccount) {
-        // Use userService to save address
-        const result = await userService.saveAddress(currentUser.uid, address);
+        // Get reference to user doc
+        const userRef = doc(db, "users", currentUser.uid);
         
-        if (!result.success) {
-          throw new Error(result.error || "Failed to save address");
+        // Get current user data first to manage defaults properly
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) {
+          throw new Error("User document not found");
         }
-      }
-
-      // Call the onSave callback with the address data
-      if (onSave) {
-        onSave(address);
+        
+        const userData = userDoc.data();
+        const currentAddresses = userData.addresses || [];
+        
+        // Create new address object with proper properties
+        const newAddress = {
+          id: address.id,
+          name: address.name,
+          line1: address.line1,
+          line2: address.line2,
+          city: address.city,
+          state: address.state,
+          postalCode: address.postalCode,
+          country: address.country,
+          phone: address.phone,
+          isDefault: address.isDefault
+        };
+        
+        let updatedAddresses;
+        if (address.isDefault) {
+          // If this address is being set as default, make all other addresses non-default
+          updatedAddresses = currentAddresses.map(addr => ({
+            ...addr,
+            isDefault: false // Set all existing addresses to non-default
+          }));
+          
+          // Check if we're editing an existing address or adding a new one
+          const existingIndex = updatedAddresses.findIndex(addr => addr.id === newAddress.id);
+          if (existingIndex >= 0) {
+            // Replace existing address
+            updatedAddresses[existingIndex] = newAddress;
+          } else {
+            // Add new address
+            updatedAddresses.push(newAddress);
+          }
+        } else {
+          // If not setting as default, just add or update normally
+          const existingIndex = currentAddresses.findIndex(addr => addr.id === newAddress.id);
+          if (existingIndex >= 0) {
+            // Update existing address
+            updatedAddresses = [...currentAddresses];
+            updatedAddresses[existingIndex] = newAddress;
+          } else {
+            // Add new address
+            updatedAddresses = [...currentAddresses, newAddress];
+          }
+        }
+        
+        // Update in Firestore
+        await updateDoc(userRef, {
+          addresses: updatedAddresses
+        });
+        
+        // Call onSave with the updated list - this is important for immediate UI update
+        if (onSave) {
+          onSave(newAddress, updatedAddresses);
+        }
+      } else {
+        // Just pass back the new address if not saving to account
+        if (onSave) {
+          onSave(address);
+        }
       }
     } catch (error) {
       console.error("Error saving address:", error);
@@ -155,6 +215,7 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
               value={address.country}
               onChange={handleChange}
               required
+              className="country-select"
             >
               <option value="">Select a country</option>
               {countries.map(country => (

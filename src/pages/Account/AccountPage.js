@@ -333,25 +333,32 @@ const AccountPage = () => {
               <h2 className="section-title">Address</h2>
               {userProfile?.addresses && userProfile.addresses.length > 0 ? (
                 <div className="section-content">
-                  <p className="section-summary">{userProfile.addresses.length} Saved {userProfile.addresses.length === 1 ? 'Address' : 'Addresses'}</p>
-                  <div className="addresses-list">
-                    {userProfile.addresses.slice(0, 1).map(address => (
-                      <div key={address.id} className="address-item">
-                        <p className="address-name">{address.name || address.fullName}</p>
-                        <p className="address-details">
-                          {address.line1 || address.addressLine1}{address.line2 || address.addressLine2 ? `, ${address.line2 || address.addressLine2}` : ''}
-                          <br />
-                          {address.city}, {address.state} {address.postalCode || address.zipCode}
-                          <br />
-                          {address.country}
-                        </p>
-                        {address.isDefault && <span className="default-tag">Default</span>}
+                  {/* Find default address, or fall back to first address if no default is set */}
+                  {(() => {
+                    const defaultAddress = userProfile.addresses.find(addr => addr.isDefault) || 
+                                          userProfile.addresses[0];
+                    
+                    return (
+                      <div className="addresses-list">
+                        <div className="address-item">
+                          <p className="address-name">{defaultAddress.name || defaultAddress.fullName}</p>
+                          <p className="address-details">
+                            {defaultAddress.line1 || defaultAddress.addressLine1}
+                            {(defaultAddress.line2 || defaultAddress.addressLine2) && 
+                              `, ${defaultAddress.line2 || defaultAddress.addressLine2}`}
+                            <br />
+                            {defaultAddress.city}, {defaultAddress.state} {defaultAddress.postalCode || defaultAddress.zipCode}
+                            <br />
+                            {defaultAddress.country}
+                          </p>
+                          {defaultAddress.isDefault && <span className="default-tag">Default</span>}
+                        </div>
+                        <button className="view-all-button" onClick={() => navigate('/account/addresses')}>
+                          {userProfile.addresses.length > 1 ? 'Manage Addresses' : 'Manage Address'}
+                        </button>
                       </div>
-                    ))}
-                    <button className="view-all-button" onClick={() => navigate('/account/addresses')}>
-                      Manage Addresses
-                    </button>
-                  </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="section-content empty">

@@ -1,19 +1,74 @@
 // src/pages/Account/AddressesPage.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import SavedAddresses from '../../components/address/SavedAddresses';
 import AddressForm from '../../components/address/AddressForm';
+import { useAuth } from '../../contexts/AuthContext';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import './AddressesPage.scss';
 
 const AddressesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { currentUser } = useAuth(); // Removed userProfile since it's not used
+  const db = getFirestore();
 
-  const handleSaveComplete = () => {
-    setShowAddForm(false);
-    // You could add a success message here if desired
+  // Fetch the latest addresses directly from Firestore
+  useEffect(() => {
+    const fetchUserAddresses = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Always get the latest data directly from Firestore
+        const userRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setAddresses(userData.addresses || []);
+        } else {
+          setAddresses([]);
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAddresses();
+  }, [currentUser, db]);// Re-fetch when currentUser changes
+
+  // Handle saved address
+  const handleSaveComplete = (newAddress, updatedAddresses) => {
+    // If we got the complete updated list, use it directly
+    if (updatedAddresses) {
+      setAddresses(updatedAddresses);
+    } else {
+      // Otherwise update the local list with the new address
+      setAddresses(prevAddresses => {
+        const existingIndex = prevAddresses.findIndex(addr => addr.id === newAddress.id);
+        
+        if (existingIndex >= 0) {
+          // Replace existing address
+          const newAddresses = [...prevAddresses];
+          newAddresses[existingIndex] = newAddress;
+          return newAddresses;
+        } else {
+          // Add new address
+          return [...prevAddresses, newAddress];
+        }
+      });
+    }
+    
+    setShowAddForm(false); // Hide form after save
   };
 
   return (
@@ -33,8 +88,15 @@ const AddressesPage = () => {
           
           {!showAddForm ? (
             <div className="addresses-section">
-              {/* Show info section only in the AddressesPage component */}
-              <SavedAddresses showAddNew={false} showInfoSection={false} />
+              {/* Pass setAddresses to SavedAddresses to allow it to update state directly */}
+              <SavedAddresses 
+                showAddNew={false} 
+                showInfoSection={false} 
+                addresses={addresses}
+                setAddresses={setAddresses}
+                loading={loading}
+                forceDataFromProps={true} // Add this prop to force using the prop data
+              />
               
               <div className="add-address">
                 <button 

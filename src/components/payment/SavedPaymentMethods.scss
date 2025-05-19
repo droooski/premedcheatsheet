@@ -6,157 +6,303 @@
   margin-bottom: $spacing-6;
   
   .section-title {
-    font-size: 0.95rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: $spacing-3;
+    margin-bottom: $spacing-4;
     color: $text-color;
+    text-align: center;
   }
   
-  .methods-list {
+  .payment-methods-list {
     display: flex;
     flex-direction: column;
     gap: $spacing-3;
-    margin-bottom: $spacing-4;
+    margin-bottom: $spacing-6;
   }
   
-  .method-card {
+  .payment-method-card {
     display: flex;
-    align-items: center;
-    padding: $spacing-3 $spacing-4;
+    align-items: flex-start;
+    padding: $spacing-4 $spacing-5;
     border: 1px solid $gray-300;
     border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
     position: relative;
+    transition: all 0.2s ease;
+    background-color: $white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     
     &:hover {
       border-color: $primary-color;
-      background-color: rgba($primary-color, 0.02);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     
-    &.selected {
+    &.default {
       border-color: $primary-color;
-      background-color: rgba($primary-color, 0.05);
-      box-shadow: 0 0 0 1px $primary-color;
-      
-      &::after {
-        content: "✓";
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        width: 20px;
-        height: 20px;
-        background-color: $primary-color;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-      }
+      background-color: rgba($primary-color, 0.03);
     }
     
-    .card-icon {
+    .payment-icon {
+      font-size: 1.5rem;
       margin-right: $spacing-4;
-      min-width: 48px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid $gray-300;
-      border-radius: 4px;
-      
-      .visa-icon {
-        color: #1434CB;
-        font-weight: bold;
-        font-size: 0.9rem;
-      }
-      
-      .mastercard-icon {
-        color: #EB001B;
-        font-weight: bold;
-        font-size: 0.9rem;
-      }
-      
-      .amex-icon {
-        color: #006FCF;
-        font-weight: bold;
-        font-size: 0.8rem;
-      }
-      
-      .generic-card-icon {
-        color: $text-color-light;
-        font-size: 0.8rem;
-      }
+      color: $text-color;
     }
     
-    .card-details {
+    .payment-details {
       flex: 1;
-      display: flex;
-      flex-direction: column;
       
-      .card-number {
-        font-weight: 500;
-        font-size: 0.95rem;
+      .payment-type {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: $spacing-1;
+        color: $text-color;
+        
+        .card-last4 {
+          font-weight: normal;
+        }
+      }
+      
+      .payment-expiry {
+        font-size: 0.9rem;
+        color: $text-color-light;
         margin-bottom: $spacing-1;
       }
       
-      .card-expiry {
-        font-size: 0.8rem;
-        color: $text-color-light;
+      .payment-name {
+        font-size: 0.9rem;
+        color: $text-color;
+        margin-bottom: $spacing-3;
       }
       
-      .card-name {
-        font-size: 0.8rem;
-        color: $text-color-light;
-        margin-top: $spacing-1;
+      .payment-actions {
+        display: flex;
+        gap: $spacing-4;
+        
+        .set-default-button,
+        .delete-button {
+          background: none;
+          border: none;
+          padding: 0;
+          font-size: 0.9rem;
+          cursor: pointer;
+          text-decoration: underline;
+          transition: color 0.2s ease;
+        }
+        
+        .set-default-button {
+          color: $primary-color;
+          
+          &:hover {
+            color: darken($primary-color, 10%);
+          }
+        }
+        
+        .delete-button {
+          color: #dc2626; // Red color
+          
+          &:hover {
+            color: darken(#dc2626, 10%);
+          }
+        }
       }
     }
     
-    .remove-card-btn {
+    .default-tag {
+      position: absolute;
+      top: -10px;
+      right: 10px;
+      background-color: $primary-color;
+      color: white;
+      font-size: 0.8rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+  }
+  
+  .no-payment-methods {
+    text-align: center;
+    padding: $spacing-4;
+    color: $text-color-light;
+    background-color: $white;
+    border-radius: 8px;
+    border: 1px dashed $gray-300;
+    margin-bottom: $spacing-6;
+  }
+  
+  .loading-message {
+    text-align: center;
+    padding: $spacing-4;
+    color: $text-color-light;
+    font-style: italic;
+  }
+  
+  .error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: $spacing-3;
+    border-radius: 6px;
+    margin-bottom: $spacing-4;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .add-payment-section {
+    text-align: center;
+    margin-top: $spacing-6;
+  }
+  
+  .add-payment-button {
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: $spacing-3 $spacing-6;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: darken($primary-color, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  .delete-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: $spacing-4;
+  }
+  
+  .delete-confirm-dialog {
+    background-color: white;
+    border-radius: 8px;
+    padding: $spacing-6;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    
+    h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
+      color: $text-color;
+    }
+    
+    p {
+      margin-bottom: $spacing-6;
+      font-size: 1rem;
+      color: $text-color;
+      line-height: 1.5;
+    }
+    
+    .confirm-actions {
+      display: flex;
+      justify-content: center;
+      gap: $spacing-3;
+      
+      .confirm-yes, 
+      .confirm-no {
+        padding: $spacing-2 $spacing-6;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        min-width: 100px;
+      }
+      
+      .confirm-yes {
+        background-color: #dc2626; // Red
+        color: white;
+        border: none;
+        
+        &:hover {
+          background-color: darken(#dc2626, 5%);
+        }
+      }
+      
+      .confirm-no {
+        background-color: $white;
+        color: $text-color;
+        border: 1px solid $gray-300;
+        
+        &:hover {
+          background-color: $gray-100;
+        }
+      }
+    }
+  }
+}
+
+/* Styles for PaymentMethodsPage */
+.payment-methods-page {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-6;
+    
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .back-button {
+      color: $primary-color;
       background: none;
       border: none;
-      color: $text-color-light;
-      font-size: 0.8rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      padding: $spacing-1 $spacing-2;
-      opacity: 0.6;
-      transition: opacity 0.2s ease;
       
       &:hover {
-        opacity: 1;
-        color: #dc2626;
+        text-decoration: underline;
       }
     }
   }
   
-  .no-saved-methods {
-    color: $text-color-light;
-    padding: $spacing-2 0;
-    font-size: 0.9rem;
+  .add-payment-method {
+    margin: $spacing-6 0;
+    text-align: center;
   }
   
-  .add-new-section {
-    margin-top: $spacing-4;
-    padding-top: $spacing-4;
-    border-top: 1px solid $gray-200;
+  .payment-info-note {
+    background-color: rgba($primary-color, 0.05);
+    border-left: 3px solid $primary-color;
+    padding: $spacing-4;
+    border-radius: 6px;
+    margin-bottom: $spacing-6;
     
-    .add-new-text {
-      font-weight: 500;
-      font-size: 0.9rem;
-      margin-bottom: $spacing-1;
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
     }
     
-    .add-new-note {
-      font-size: 0.85rem;
-      color: $text-color-light;
+    ul {
+      padding-left: $spacing-5;
+      margin: 0;
+      
+      li {
+        margin-bottom: $spacing-2;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
     }
-  }
-  
-  .loading-saved-methods {
-    color: $text-color-light;
-    font-size: 0.9rem;
-    padding: $spacing-2 0;
-    font-style: italic;
   }
 }

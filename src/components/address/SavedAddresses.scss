@@ -257,6 +257,17 @@
           margin-bottom: $spacing-2;
           color: $text-color;
         }
+
+        select {
+          width: 100%;
+          padding: $spacing-2 $spacing-3;
+          border: 1px solid $gray-300;
+          border-radius: 6px;
+          font-size: 0.95rem;
+          background-color: white;
+          height: 40px;
+        }
+
         
         input {
           width: 100%;
@@ -440,43 +451,87 @@
 }
 
 
-.form-group {
-  select {
-    width: 100%;
-    padding: $spacing-2 $spacing-3;
-    border: 1px solid $gray-300;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    background-color: white;
-    height: 40px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-    padding-right: 30px;
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: $spacing-4;
+}
+
+.delete-confirm-dialog {
+  background-color: white;
+  border-radius: 8px;
+  padding: $spacing-6;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-3;
+    color: $text-color;
+  }
+  
+  p {
+    margin-bottom: $spacing-6;
+    font-size: 1rem;
+    color: $text-color;
+    line-height: 1.5;
+  }
+  
+  .confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-3;
     
-    &:focus {
-      outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    .confirm-yes, 
+    .confirm-no {
+      padding: $spacing-2 $spacing-6;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      min-width: 100px;
     }
     
-    /* Add these properties to fix the dropdown appearance */
-    position: relative;
-    z-index: 10; /* Ensure dropdown appears above other elements */
+    .confirm-yes {
+      background-color: #dc2626; // Red
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: darken(#dc2626, 5%);
+      }
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+    
+    .confirm-no {
+      background-color: $white;
+      color: $text-color;
+      border: 1px solid $gray-300;
+      
+      &:hover {
+        background-color: $gray-100;
+      }
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
   }
 }
 
-/* Add styling for the dropdown menu itself */
-.form-group select option {
-  padding: $spacing-2;
-  font-size: 0.95rem;
-}
-
-/* Make sure the container doesn't have overflow:hidden */
-.address-edit-form, .form-row, .form-group {
-  overflow: visible !important;
-}

@@ -44,13 +44,45 @@ export const saveAddress = async (userId, address) => {
     }
     
     const userData = userDoc.data();
+    const currentAddresses = userData.addresses || [];
+    
+    let updatedAddresses;
+    
+    // If this is being set as default, update all other addresses
+    if (address.isDefault) {
+      updatedAddresses = currentAddresses.map(addr => ({
+        ...addr,
+        isDefault: false // Set all existing to non-default
+      }));
+      
+      // Find if this address already exists
+      const existingIndex = updatedAddresses.findIndex(addr => addr.id === address.id);
+      if (existingIndex >= 0) {
+        // Update existing
+        updatedAddresses[existingIndex] = address;
+      } else {
+        // Add new
+        updatedAddresses.push(address);
+      }
+    } else {
+      // Check if we're updating an existing address
+      const existingIndex = currentAddresses.findIndex(addr => addr.id === address.id);
+      if (existingIndex >= 0) {
+        // Update existing address
+        updatedAddresses = [...currentAddresses];
+        updatedAddresses[existingIndex] = address;
+      } else {
+        // Add new address
+        updatedAddresses = [...currentAddresses, address];
+      }
+    }
     
     // Update user document with the new address
     await updateDoc(userRef, {
-      addresses: [...(userData.addresses || []), address]
+      addresses: updatedAddresses
     });
     
-    return { success: true };
+    return { success: true, addresses: updatedAddresses };
   } catch (error) {
     console.error('Error saving address:', error);
     return {

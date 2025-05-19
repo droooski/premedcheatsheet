@@ -1,19 +1,74 @@
 // src/pages/Account/PaymentMethodsPage.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import SavedPaymentMethods from '../../components/payment/SavedPaymentMethods';
 import SavePaymentMethodForm from '../../components/payment/SavePaymentMethodForm';
+import { useAuth } from '../../contexts/AuthContext';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import './PaymentMethodsPage.scss';
 
 const PaymentMethodsPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const db = getFirestore();
 
-  const handleSaveComplete = () => {
-    setShowAddForm(false);
-    // You could add a success message here if desired
+  // Fetch the latest payment methods directly from Firestore
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Always get the latest data directly from Firestore
+        const userRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setPaymentMethods(userData.paymentMethods || []);
+        } else {
+          setPaymentMethods([]);
+        }
+      } catch (error) {
+        console.error("Error fetching payment methods:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentMethods();
+  }, [currentUser, db]);
+
+  // Handle saving a new payment method
+  const handleSaveComplete = (newMethod, updatedMethods) => {
+    // If we got the complete updated list, use it directly
+    if (updatedMethods) {
+      setPaymentMethods(updatedMethods);
+    } else {
+      // Otherwise update the local list with the new method
+      setPaymentMethods(prevMethods => {
+        const existingIndex = prevMethods.findIndex(method => method.id === newMethod.id);
+        
+        if (existingIndex >= 0) {
+          // Replace existing method
+          const newMethods = [...prevMethods];
+          newMethods[existingIndex] = newMethod;
+          return newMethods;
+        } else {
+          // Add new method
+          return [...prevMethods, newMethod];
+        }
+      });
+    }
+    
+    setShowAddForm(false); // Hide form after save
   };
 
   return (
@@ -33,7 +88,13 @@ const PaymentMethodsPage = () => {
           
           {!showAddForm ? (
             <div className="payment-methods-section">
-              <SavedPaymentMethods showAddNew={false} />
+              <SavedPaymentMethods 
+                showAddNew={false} 
+                paymentMethods={paymentMethods}
+                setPaymentMethods={setPaymentMethods}
+                loading={loading}
+                forceDataFromProps={true}
+              />
               
               <div className="add-payment-method">
                 <button 
