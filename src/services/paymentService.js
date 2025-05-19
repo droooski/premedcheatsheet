@@ -1,5 +1,5 @@
 // src/services/paymentService.js
-import { getFirestore, doc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, addDoc, collection, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore';
 import app from '../firebase/config'; // Import the Firebase app instance, not db directly
 
 // Initialize Firestore directly in this file to ensure it's properly set up
@@ -45,8 +45,9 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
       userId: userId || 'guest',
       amount: orderDetails.amount,
       plan: orderDetails.plan,
+      planName: getPlanDisplayName(orderDetails.plan), // Add a human-readable plan name
       status: 'processing',
-      createdAt: new Date().toISOString(), // Use direct date instead of serverTimestamp()
+      createdAt: new Date().toISOString(),
     };
     
     // Add order to Firestore - make sure db is properly initialized
@@ -59,29 +60,56 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
     await updateDoc(doc(db, 'orders', orderRef.id), {
       status: 'completed',
       paymentId: `sim_${Math.random().toString(36).substring(2, 15)}`,
-      completedAt: new Date().toISOString(), // Use direct date
+      completedAt: new Date().toISOString(),
     });
     
-    // If user is authenticated, add subscription to user document
+    // If user is authenticated, update user document
     if (userId) {
       // Get user document reference
       const userRef = doc(db, 'users', userId);
       
-      // Add subscription to user document
+      // First get the current user data to properly update arrays
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        throw new Error('User document not found');
+      }
+      
+      const userData = userDoc.data();
+      
+      // Prepare the order data for user document
+      const userOrderData = {
+        orderId: orderRef.id,
+        plan: orderDetails.plan,
+        planName: getPlanDisplayName(orderDetails.plan),
+        amount: orderDetails.amount,
+        status: 'completed',
+        createdAt: new Date().toISOString()
+      };
+      
+      // Prepare the subscription data
+      const subscriptionData = {
+        plan: orderDetails.plan,
+        startDate: new Date().toISOString(),
+        endDate: orderDetails.plan === 'monthly' 
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        orderId: orderRef.id,
+        active: true,
+      };
+      
+      // Update user document with both orders and subscriptions
       await updateDoc(userRef, {
-        subscriptions: [
-          // Add new subscription
-          {
-            plan: orderDetails.plan,
-            startDate: new Date().toISOString(),
-            endDate: orderDetails.plan === 'monthly' 
-              ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-              : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-            orderId: orderRef.id,
-            active: true,
-          }
-        ]
+        // Preserve existing orders and add the new one
+        orders: [...(userData.orders || []), userOrderData],
+        
+        // Preserve existing subscriptions and add the new one
+        subscriptions: [...(userData.subscriptions || []), subscriptionData],
+        
+        // Also set payment verified flag
+        paymentVerified: true
       });
+      
+      console.log('User document updated with order:', userOrderData);
     }
     
     return {
@@ -96,6 +124,22 @@ export const processPayment = async (paymentDetails, userId, orderDetails) => {
     };
   }
 };
+
+// Helper function to get readable plan name
+function getPlanDisplayName(planCode) {
+  switch(planCode) {
+    case 'cheatsheet':
+      return 'The Cheatsheet';
+    case 'cheatsheet-plus':
+      return 'The Cheatsheet+';
+    case 'application':
+      return 'Application Cheatsheet';
+    case 'application-plus':
+      return 'Application Cheatsheet+';
+    default:
+      return planCode;
+  }
+}
 
 // For Stripe integration in a real-world scenario
 export const processStripePayment = async (paymentDetails, userId, orderDetails) => {

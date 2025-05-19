@@ -31,18 +31,24 @@ export const registerUser = async (email, password, firstName, lastName) => {
       handleCodeInApp: false
     });
     
-    // Create user profile in Firestore
-    await setDoc(doc(db, "users", userCredential.user.uid), {
+    // Create user profile in Firestore with initialized arrays
+    const userData = {
       firstName: firstName || '',
       lastName: lastName || '',
       email: email,
       createdAt: new Date().toISOString(),
       subscriptions: [],
       paymentVerified: false,
-      emailVerified: false // Track email verification status in Firestore
-    });
+      emailVerified: false,
+      paymentMethods: [],  // Initialize empty payment methods array
+      addresses: [],       // Initialize empty addresses array
+      orders: []           // Initialize empty orders array
+    };
+    
+    await setDoc(doc(db, "users", userCredential.user.uid), userData);
     
     console.log("User registered successfully:", userCredential.user.uid);
+    console.log("User data initialized:", userData);
     return { user: userCredential.user, success: true };
   } catch (error) {
     console.error("Error registering user:", error);
@@ -227,10 +233,18 @@ export const completePasswordReset = async (code, newPassword) => {
 // Get user profile from Firestore
 export const getUserProfile = async (userId) => {
   try {
+    console.log(`Fetching user profile for ID: ${userId}`);
     const userDoc = await getDoc(doc(db, "users", userId));
+    
     if (userDoc.exists()) {
-      return { profile: userDoc.data(), success: true };
+      const userData = userDoc.data();
+      console.log("User profile data:", userData);
+      console.log("Payment methods:", userData.paymentMethods || []);
+      console.log("Addresses:", userData.addresses || []);
+      console.log("Orders:", userData.orders || []);
+      return { profile: userData, success: true };
     } else {
+      console.warn(`User profile not found for ID: ${userId}`);
       return { error: "User profile not found", success: false };
     }
   } catch (error) {

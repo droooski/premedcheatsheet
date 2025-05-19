@@ -11,10 +11,11 @@ const SavedPaymentMethods = () => {
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
-  // Safely use the auth context with fallbacks
-  const auth = useAuth() || {}; // Make sure useAuth doesn't crash if undefined
-  const currentUser = auth.currentUser || null;
-  const userProfile = auth.userProfile || null;
+  // Call useAuth at the top level - this is crucial for hooks rules
+  const auth = useAuth();
+  const currentUser = auth?.currentUser || null;
+  const userProfile = auth?.userProfile || null;
+  const authLoading = auth?.loading || false;
   
   const navigate = useNavigate();
   const db = getFirestore();
@@ -22,12 +23,13 @@ const SavedPaymentMethods = () => {
   // Load payment methods from user profile
   useEffect(() => {
     // Check if auth is available
-    if (!auth || auth.loading) {
+    if (authLoading) {
       return; // Wait for auth to initialize
     }
     
     if (userProfile) {
       setPaymentMethods(userProfile.paymentMethods || []);
+      setLoading(false);
     } else if (currentUser) {
       // If we have a user but no profile, try to fetch it
       const fetchUserProfile = async () => {
@@ -50,7 +52,7 @@ const SavedPaymentMethods = () => {
       // No user, no loading needed
       setLoading(false);
     }
-  }, [auth, userProfile, currentUser, db]);
+  }, [authLoading, userProfile, currentUser, db]);
 
   // Show login message if not authenticated
   if (!currentUser && !loading) {
