@@ -4,7 +4,7 @@
 
 .medical-schools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
   margin-bottom: $spacing-8;
   
@@ -39,7 +39,7 @@
     
     .school-image-container {
       width: 100%;
-      height: 180px;
+      height: 350px;
       overflow: hidden;
       
       .school-image {
@@ -55,12 +55,14 @@
     }
     
     .school-name {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-family: $font-family-mincho;
+      font-size: 1rem;
+      font-weight: 500;
       margin: $spacing-4;
       padding: 0;
       color: $text-color;
       line-height: 1.3;
+      text-align: center;
     }
     
     .profile-count {

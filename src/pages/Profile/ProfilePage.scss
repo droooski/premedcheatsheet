@@ -103,6 +103,7 @@
     color: $text-color;
     font-weight: 500;
     font-size: 1rem;
+    font-family: $font-family-mincho;
     cursor: pointer;
     transition: all 0.3s ease;
     
@@ -146,6 +147,7 @@
       border: 1px solid $gray-300;
       border-radius: 4px;
       font-size: 1rem;
+      font-family: $font-family-mincho;
       
       &:focus {
         outline: none;
@@ -161,6 +163,7 @@
     
     label {
       font-size: 1rem;
+      font-family: $font-family-mincho;
       color: $text-color-light;
       white-space: nowrap;
     }
@@ -170,6 +173,7 @@
       border: 1px solid $gray-300;
       border-radius: 4px;
       font-size: 0.95rem;
+      font-family: $font-family-mincho;
       background-color: $white;
       
       &:focus {

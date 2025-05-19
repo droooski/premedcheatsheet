@@ -23,6 +23,7 @@
       border: 1px solid $gray-300;
       border-radius: 4px;
       font-size: 0.95rem;
+      font-family: 'BIZ UDPMincho', serif;
       
       &:focus {
         outline: none;
@@ -38,6 +39,7 @@
     
     label {
       font-size: 0.9rem;
+      font-family: 'BIZ UDPMincho', serif;
       color: $text-color-light;
       white-space: nowrap;
     }
@@ -47,6 +49,7 @@
       border: 1px solid $gray-300;
       border-radius: 4px;
       font-size: 0.9rem;
+      font-family: 'BIZ UDPMincho', serif;
       background-color: $white;
       
       &:focus {

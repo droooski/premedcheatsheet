@@ -9,21 +9,47 @@ const schoolNameMap = {
   'pitt': 'University of Pittsburgh',
   'upmc': 'University of Pittsburgh',
   
-  'columbia': 'Columbia',
-  
-  'uva': 'UVA',
-  'university of virginia': 'UVA',
-  'university of virgnia': 'UVA',
-  
+  'columbia': 'Columbia University',
+
+  'cornell': 'Cornell University',
+
+  'dartmouth': 'Dartmouth College',
+
+  'dmucom': 'Des Moines University College of Osteopathic Medicine (DMUCOM)',
+
+  'emory': 'Emory University',
+
+  'lecom': 'Lake Erie College of Osteopathic Medicine (LECOM)',
+
+  'mayo clinic': 'Mayo Clinic Alix School of Medicine',
+
+  'mcw': 'Medical College of Wisconsin (MCW)',
+
   'new york medical college': 'New York Medical College',
+
   'nymc': 'New York Medical College',
-  
-  'mcw': 'MCW',
-  
-  'tourocom': 'TouroCOM',
-  'touro': 'TouroCOM',
-  
-  'pcom': 'PCOM',
+
+  'nyitcom': 'New York Institute of Technology College of Osteopathic Medicine (NYITCOM)',
+
+  'nsumd': 'Nova Southeastern University (NSUMD)',
+
+  'nyu': 'New York University (NYU)',
+
+  'ohio state': 'Ohio State University',
+
+  'pcom': 'Philadelphia College of Osteopathic Medicine (PCOM)',
+
+  'penn': 'University of Pennsylvania',
+
+  'perelman': 'Perelman School of Medicine',
+
+  'rwjms': 'Rutgers Robert Wood Johnson Medical School (RWJMS)',
+
+  'uva': 'University of Virginia (UVA)',
+  'university of virginia': 'University of Virginia (UVA)',
+  'university of virgnia': 'University of Virginia (UVA)',
+
+  'quinipiac': 'Quinipiac University',
   
   'university of michigan': 'University of Michigan',
   'michigan': 'University of Michigan',
@@ -33,7 +59,51 @@ const schoolNameMap = {
   'northwestern feinberg': 'Feinberg school of medicine',
   
   'wake forest': 'Wake Forest University School of Medicine',
-  'wake forest university': 'Wake Forest University School of Medicine'
+  'wake forest university': 'Wake Forest University School of Medicine',
+
+  'slu': 'Saint Louis University (SLU)',
+
+  'suny downstate': 'SUNY Downstate Health Sciences University',
+
+  'tourocom': 'Touro College of Osteopathic Medicine (TouroCOM)',
+  'touro': 'Touro College of Osteopathic Medicine (TouroCOM)',
+  
+
+  'umass': 'University of Massachusetts Amherst (UMass)',
+
+  'umiami': 'University of Miami (UMiami)',
+
+  'ccom': 'CCOM',
+
+  'case western': 'Case Western Reserve University',
+
+  'case': 'Case Western Reserve University',
+
+  'brown': 'Brown University',
+
+  'boston u': 'Boston University',
+
+  'at stills': 'A.T. Still University',
+
+  'mount sinai': 'Icahn School of Medicine - Mount Sinai',
+
+  'and usuhs. waitlisted: stanford': 'Uniformed Services University of the Health Sciences (USUHS)',
+
+  'university Of north carolina': 'University of North Carolina',
+
+  'university Of rochester': 'University Of Rochester',
+
+  'usc': 'University of Southern California (USC)',
+
+  'ut southwestern': 'UT Southwestern Medical Center',
+
+  'uwsmph': 'University of Wisconsin School of Medicine and Public Health (UWSMPH)',
+
+  'vanderbilt': 'Vanderbilt University School of Medicine',
+
+  'washu': 'WASHU',
+
+  'wayne state': 'Wayne State University School of Medicine',
 };
 
 // Normalize school name to ensure consistent naming
