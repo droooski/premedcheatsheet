@@ -251,6 +251,7 @@ const ProfilePage = () => {
       <div className="profile-content">
         <div className="container">
           <h1 className="page-title">The Cheatsheet</h1>
+          <p className="page-subtitle">Look at patterns. What works? What doesn’t? Take inspiration from the profiles of successful applicants.</p>
           
           <div className="view-toggle-container">
             <button 
