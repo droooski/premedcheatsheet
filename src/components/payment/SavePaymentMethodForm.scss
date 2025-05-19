@@ -1,0 +1,165 @@
+/* src/components/payment/SavePaymentMethodForm.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.save-payment-method-form {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: $white;
+  border-radius: 10px;
+  padding: $spacing-6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: $spacing-6;
+    color: $text-color;
+    text-align: center;
+    
+    @media (max-width: $sm) {
+      font-size: 1.3rem;
+      margin-bottom: $spacing-4;
+    }
+  }
+  
+  .error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: $spacing-3;
+    border-radius: 6px;
+    margin-bottom: $spacing-4;
+    font-size: 0.9rem;
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-5;
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: $text-color;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+      
+      &:disabled {
+        background-color: $gray-100;
+        cursor: not-allowed;
+      }
+    }
+    
+    .error {
+      display: block;
+      color: #dc2626;
+      font-size: 0.85rem;
+      margin-top: $spacing-1;
+    }
+    
+    &.checkbox {
+      display: flex;
+      align-items: center;
+      
+      input[type="checkbox"] {
+        margin-right: $spacing-2;
+        width: auto;
+      }
+      
+      label {
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+    }
+  }
+  
+  .card-input-container {
+    position: relative;
+    
+    .card-type {
+      position: absolute;
+      right: $spacing-4;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: $text-color-light;
+    }
+  }
+  
+  .form-row {
+    display: flex;
+    gap: $spacing-4;
+    
+    @media (max-width: $sm) {
+      flex-direction: column;
+      gap: $spacing-5;
+    }
+    
+    .form-group {
+      flex: 1;
+      
+      @media (min-width: $md) {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-3;
+    margin-top: $spacing-6;
+    
+    button {
+      padding: $spacing-2 $spacing-4;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+    
+    .cancel-button {
+      background-color: $white;
+      color: $text-color;
+      border: 1px solid $gray-300;
+      
+      &:hover:not(:disabled) {
+        background-color: $gray-100;
+      }
+    }
+    
+    .save-button {
+      background-color: $primary-color;
+      color: $white;
+      border: none;
+      
+      &:hover:not(:disabled) {
+        background-color: darken($primary-color, 5%);
+      }
+    }
+  }
+}

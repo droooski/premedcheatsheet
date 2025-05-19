@@ -1,0 +1,136 @@
+/* src/components/address/SavedAddresses.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.saved-addresses {
+  margin-bottom: $spacing-6;
+  
+  .section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: $spacing-3;
+    color: $text-color;
+  }
+  
+  .addresses-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-3;
+    margin-bottom: $spacing-4;
+  }
+  
+  .address-card {
+    display: flex;
+    align-items: flex-start;
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $gray-300;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    
+    &:hover {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.02);
+    }
+    
+    &.selected {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.05);
+      box-shadow: 0 0 0 1px $primary-color;
+      
+      &::after {
+        content: "✓";
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 20px;
+        height: 20px;
+        background-color: $primary-color;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+      }
+    }
+    
+    .address-icon {
+      margin-right: $spacing-3;
+      margin-top: $spacing-1;
+      color: $primary-color;
+    }
+    
+    .address-details {
+      flex: 1;
+      
+      .address-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: $spacing-1;
+      }
+      
+      .address-line, 
+      .address-city-state, 
+      .address-country,
+      .address-phone {
+        font-size: 0.85rem;
+        margin-bottom: $spacing-1;
+        color: $text-color;
+        line-height: 1.4;
+      }
+      
+      .address-phone {
+        color: $text-color-light;
+      }
+    }
+    
+    .remove-address-btn {
+      background: none;
+      border: none;
+      color: $text-color-light;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: $spacing-1 $spacing-2;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+      margin-top: $spacing-1;
+      
+      &:hover {
+        opacity: 1;
+        color: #dc2626;
+      }
+    }
+  }
+  
+  .no-saved-addresses {
+    color: $text-color-light;
+    padding: $spacing-2 0;
+    font-size: 0.9rem;
+  }
+  
+  .add-new-section {
+    margin-top: $spacing-4;
+    padding-top: $spacing-4;
+    border-top: 1px solid $gray-200;
+    
+    .add-new-text {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: $spacing-1;
+    }
+    
+    .add-new-note {
+      font-size: 0.85rem;
+      color: $text-color-light;
+    }
+  }
+  
+  .loading-saved-addresses {
+    color: $text-color-light;
+    font-size: 0.9rem;
+    padding: $spacing-2 0;
+    font-style: italic;
+  }
+}

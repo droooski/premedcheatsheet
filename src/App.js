@@ -9,6 +9,8 @@ import AccountPage from './pages/Account/AccountPage';
 import AdminPanel from './pages/Admin/AdminPanel';
 import GuestPage from './pages/Guest/GuestPage';
 import AboutPage from './pages/About/AboutPage';
+import PaymentMethodsPage from './pages/Account/PaymentMethodsPage';
+import AddressesPage from './pages/Account/AddressesPage';
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
@@ -115,7 +117,15 @@ function App() {
         <Route path="/account" element={
           user ? <AccountPage /> : <Navigate to="/" />
         } />
-        
+
+        {/* Add these new routes */}
+        <Route path="/account/payment-methods" element={
+          user ? <PaymentMethodsPage /> : <Navigate to="/" />
+        } />
+        <Route path="/account/addresses" element={
+          user ? <AddressesPage /> : <Navigate to="/" />
+        } />
+
         <Route path="/admin" element={
           <AdminRoute>
             <AdminPanel />

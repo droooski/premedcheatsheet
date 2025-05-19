@@ -278,12 +278,12 @@ const AccountPage = () => {
               </div>
             </div>
             
-            {/* Address Section (Moved up) */}
+            {/* Address Section */}
             <div className="account-card">
               <h2 className="section-title">Address</h2>
               <div className="section-content empty">
                 <p className="section-summary">No saved addresses</p>
-                {/* <button className="add-new-button">Add Address</button> */}
+                <button className="add-new-button" onClick={() => navigate('/account/addresses')}>Add Address</button>
               </div>
             </div>
             
@@ -332,7 +332,7 @@ const AccountPage = () => {
               <h2 className="section-title">Payment</h2>
               <div className="section-content empty">
                 <p className="section-summary">No saved payments</p>
-                {/* <button className="add-new-button">Add Payment Method</button> */}
+                <button className="add-new-button" onClick={() => navigate('/account/payment-methods')}>Add Payment Method</button>
               </div>
             </div>
           </div>

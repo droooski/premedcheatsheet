@@ -1,0 +1,133 @@
+/* src/components/address/AddressForm.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.address-form-container {
+  margin-bottom: $spacing-6;
+  
+  .error-message {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: $spacing-3;
+    border-radius: 6px;
+    margin-bottom: $spacing-4;
+    font-size: 0.9rem;
+  }
+  
+  .address-form {
+    .form-group {
+      margin-bottom: $spacing-4;
+      
+      label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: $spacing-2;
+        color: $text-color;
+        
+        .required {
+          color: #dc2626;
+        }
+      }
+      
+      input, select {
+        width: 100%;
+        padding: $spacing-3 $spacing-4;
+        border: 1px solid $gray-300;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+        }
+      }
+      
+      select {
+        background-color: $white;
+        cursor: pointer;
+      }
+    }
+    
+    .form-row {
+      display: flex;
+      gap: $spacing-4;
+      
+      @media (max-width: $sm) {
+        flex-direction: column;
+        gap: $spacing-4;
+      }
+      
+      .form-group {
+        flex: 1;
+      }
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      margin-bottom: $spacing-4;
+      
+      input[type="checkbox"] {
+        margin-right: $spacing-2;
+        cursor: pointer;
+      }
+      
+      label {
+        font-size: 0.9rem;
+        color: $text-color;
+        cursor: pointer;
+      }
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: $spacing-3;
+      
+      .save-button, .cancel-button {
+        padding: $spacing-3 $spacing-5;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .save-button {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        
+        &:hover {
+          background-color: darken($primary-color, 5%);
+          transform: translateY(-2px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+        
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
+      
+      .cancel-button {
+        background-color: $white;
+        color: $text-color;
+        border: 1px solid $gray-300;
+        
+        &:hover {
+          background-color: $gray-100;
+          transform: translateY(-2px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}

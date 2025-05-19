@@ -1,0 +1,162 @@
+/* src/components/payment/SavedPaymentMethods.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.saved-payment-methods {
+  margin-bottom: $spacing-6;
+  
+  .section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: $spacing-3;
+    color: $text-color;
+  }
+  
+  .methods-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-3;
+    margin-bottom: $spacing-4;
+  }
+  
+  .method-card {
+    display: flex;
+    align-items: center;
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $gray-300;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    
+    &:hover {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.02);
+    }
+    
+    &.selected {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.05);
+      box-shadow: 0 0 0 1px $primary-color;
+      
+      &::after {
+        content: "✓";
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 20px;
+        height: 20px;
+        background-color: $primary-color;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+      }
+    }
+    
+    .card-icon {
+      margin-right: $spacing-4;
+      min-width: 48px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      
+      .visa-icon {
+        color: #1434CB;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      
+      .mastercard-icon {
+        color: #EB001B;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      
+      .amex-icon {
+        color: #006FCF;
+        font-weight: bold;
+        font-size: 0.8rem;
+      }
+      
+      .generic-card-icon {
+        color: $text-color-light;
+        font-size: 0.8rem;
+      }
+    }
+    
+    .card-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      
+      .card-number {
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: $spacing-1;
+      }
+      
+      .card-expiry {
+        font-size: 0.8rem;
+        color: $text-color-light;
+      }
+      
+      .card-name {
+        font-size: 0.8rem;
+        color: $text-color-light;
+        margin-top: $spacing-1;
+      }
+    }
+    
+    .remove-card-btn {
+      background: none;
+      border: none;
+      color: $text-color-light;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: $spacing-1 $spacing-2;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+      
+      &:hover {
+        opacity: 1;
+        color: #dc2626;
+      }
+    }
+  }
+  
+  .no-saved-methods {
+    color: $text-color-light;
+    padding: $spacing-2 0;
+    font-size: 0.9rem;
+  }
+  
+  .add-new-section {
+    margin-top: $spacing-4;
+    padding-top: $spacing-4;
+    border-top: 1px solid $gray-200;
+    
+    .add-new-text {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: $spacing-1;
+    }
+    
+    .add-new-note {
+      font-size: 0.85rem;
+      color: $text-color-light;
+    }
+  }
+  
+  .loading-saved-methods {
+    color: $text-color-light;
+    font-size: 0.9rem;
+    padding: $spacing-2 0;
+    font-style: italic;
+  }
+}

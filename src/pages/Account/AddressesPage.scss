@@ -1,0 +1,148 @@
+/* src/pages/Account/AddressesPage.scss */
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.addresses-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+}
+
+.addresses-content {
+  flex: 1;
+  padding: $spacing-8 0;
+  
+  @media (max-width: $md) {
+    padding: $spacing-6 0;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4 0;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+    
+    @media (max-width: $sm) {
+      padding: 0 $spacing-2;
+    }
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  padding-bottom: $spacing-4;
+  border-bottom: 1px solid $gray-200;
+  
+  @media (max-width: $sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-3;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .header-actions {
+    .back-button {
+      background: none;
+      border: none;
+      color: $primary-color;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: darken($primary-color, 10%);
+      }
+    }
+  }
+}
+
+.addresses-section {
+  .add-address {
+    margin: $spacing-6 0;
+    text-align: center;
+    
+    .add-address-button {
+      background-color: $primary-color;
+      color: $white;
+      border: none;
+      border-radius: 6px;
+      padding: $spacing-3 $spacing-6;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: darken($primary-color, 5%);
+        transform: translateY(-2px);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .address-info-note {
+    background-color: rgba($primary-color, 0.05);
+    border-left: 3px solid $primary-color;
+    padding: $spacing-4 $spacing-6;
+    margin-bottom: $spacing-8;
+    border-radius: 6px;
+    
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: $spacing-3;
+      color: $text-color;
+    }
+    
+    ul {
+      margin: 0;
+      padding-left: $spacing-4;
+      
+      li {
+        margin-bottom: $spacing-2;
+        color: $text-color;
+        font-size: 0.95rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+.add-address-form-section {
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: $spacing-6;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.25rem;
+      margin-bottom: $spacing-4;
+    }
+  }
+}
