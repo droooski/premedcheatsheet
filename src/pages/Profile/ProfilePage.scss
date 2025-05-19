@@ -88,6 +88,34 @@
   }
 }
 
+.page-subtitle {
+  text-align: center;
+  color: $text-color-light;
+  font-size: 1rem;
+  max-width: 1200px;
+  margin: -$spacing-8 auto $spacing-8;
+  line-height: 1.6;
+  
+  @media (min-width: $xl) {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: -$spacing-16 auto $spacing-12;
+  }
+  
+  @media (max-width: $md) {
+    font-size: 1rem;
+    max-width: 500px;
+    margin: -$spacing-20 auto $spacing-6;
+  }
+  
+  @media (max-width: $sm) {
+    font-size: 0.8rem;
+    margin: 0 auto $spacing-4;
+    max-width: 100%;
+    padding: 0 $spacing-2;
+  }
+}
+
 /* View Toggle Styles - keep this at original width */
 .view-toggle-container {
   display: flex;
@@ -95,6 +123,7 @@
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  margin-top: calc( $spacing-32 + $spacing-8 );
   
   .toggle-button {
     flex: 1;
