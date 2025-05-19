@@ -33,7 +33,8 @@ const AddressesPage = () => {
           
           {!showAddForm ? (
             <div className="addresses-section">
-              <SavedAddresses showAddNew={false} />
+              {/* Show info section only in the AddressesPage component */}
+              <SavedAddresses showAddNew={false} showInfoSection={false} />
               
               <div className="add-address">
                 <button 
@@ -44,6 +45,7 @@ const AddressesPage = () => {
                 </button>
               </div>
               
+              {/* Add the info section here in the page */}
               <div className="address-info-note">
                 <h3>Why save your addresses?</h3>
                 <ul>

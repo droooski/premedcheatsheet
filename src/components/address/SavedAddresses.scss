@@ -6,28 +6,31 @@
   margin-bottom: $spacing-6;
   
   .section-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: $spacing-3;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: $spacing-6;
     color: $text-color;
+    padding-bottom: $spacing-3;
+    border-bottom: 1px solid #e5e7eb;
   }
   
   .addresses-list {
     display: flex;
     flex-direction: column;
-    gap: $spacing-3;
-    margin-bottom: $spacing-4;
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
   }
   
   .address-card {
     display: flex;
     align-items: flex-start;
-    padding: $spacing-3 $spacing-4;
-    border: 1px solid $gray-300;
+    padding: $spacing-4 $spacing-5;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    background-color: white;
     
     &:hover {
       border-color: $primary-color;
@@ -38,21 +41,19 @@
       border-color: $primary-color;
       background-color: rgba($primary-color, 0.05);
       box-shadow: 0 0 0 1px $primary-color;
-      
-      &::after {
-        content: "✓";
+    }
+    
+    &.default {
+      .default-badge {
         position: absolute;
-        top: -8px;
-        right: -8px;
-        width: 20px;
-        height: 20px;
-        background-color: $primary-color;
+        top: 12px;
+        right: 12px;
+        background-color: #125342;
         color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
       }
     }
     
@@ -60,77 +61,210 @@
       margin-right: $spacing-3;
       margin-top: $spacing-1;
       color: $primary-color;
+      font-size: 1.1rem;
     }
     
     .address-details {
       flex: 1;
       
       .address-name {
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin-bottom: $spacing-1;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: $spacing-2;
+        color: #000;
       }
       
       .address-line, 
       .address-city-state, 
       .address-country,
       .address-phone {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         margin-bottom: $spacing-1;
-        color: $text-color;
-        line-height: 1.4;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+    }
+    
+    .address-actions {
+      display: flex;
+      gap: $spacing-3;
+      margin-top: $spacing-2;
+      
+      .edit-button,
+      .delete-button,
+      .set-default-button {
+        background: none;
+        border: none;
+        color: #007bff;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: underline;
+        
+        &:hover {
+          color: darken(#007bff, 10%);
+        }
       }
       
-      .address-phone {
-        color: $text-color-light;
+      .delete-button {
+        color: #dc2626;
+        
+        &:hover {
+          color: darken(#dc2626, 10%);
+        }
       }
     }
     
     .remove-address-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
       background: none;
       border: none;
-      color: $text-color-light;
-      font-size: 0.8rem;
+      color: #9ca3af;
+      font-size: 1rem;
       cursor: pointer;
-      padding: $spacing-1 $spacing-2;
-      opacity: 0.6;
-      transition: opacity 0.2s ease;
-      margin-top: $spacing-1;
+      padding: $spacing-1;
+      line-height: 1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
       
       &:hover {
-        opacity: 1;
+        background-color: #f3f4f6;
         color: #dc2626;
+      }
+    }
+    
+    .delete-confirm {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-4;
+      border-radius: 8px;
+      z-index: 5;
+      
+      p {
+        margin-bottom: $spacing-4;
+        font-weight: 500;
+        text-align: center;
+      }
+      
+      .confirm-actions {
+        display: flex;
+        gap: $spacing-3;
+        
+        .confirm-yes,
+        .confirm-no {
+          padding: $spacing-2 $spacing-4;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        
+        .confirm-yes {
+          background-color: #dc2626;
+          color: white;
+          border: none;
+          
+          &:hover {
+            background-color: darken(#dc2626, 10%);
+          }
+        }
+        
+        .confirm-no {
+          background-color: #f3f4f6;
+          color: #4b5563;
+          border: 1px solid #d1d5db;
+          
+          &:hover {
+            background-color: darken(#f3f4f6, 5%);
+          }
+        }
       }
     }
   }
   
   .no-saved-addresses {
-    color: $text-color-light;
-    padding: $spacing-2 0;
-    font-size: 0.9rem;
+    color: #6b7280;
+    padding: $spacing-4 0;
+    font-size: 1rem;
+    text-align: center;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border: 1px dashed #d1d5db;
+    margin-bottom: $spacing-6;
   }
   
   .add-new-section {
-    margin-top: $spacing-4;
-    padding-top: $spacing-4;
-    border-top: 1px solid $gray-200;
+    text-align: center;
     
-    .add-new-text {
+    .add-new-button {
+      background-color: #125342;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: $spacing-3 $spacing-5;
+      font-size: 1rem;
       font-weight: 500;
-      font-size: 0.9rem;
-      margin-bottom: $spacing-1;
-    }
-    
-    .add-new-note {
-      font-size: 0.85rem;
-      color: $text-color-light;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      
+      &:hover {
+        background-color: darken(#125342, 5%);
+        transform: translateY(-2px);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
     }
   }
   
   .loading-saved-addresses {
-    color: $text-color-light;
-    font-size: 0.9rem;
-    padding: $spacing-2 0;
-    font-style: italic;
+    color: #6b7280;
+    font-size: 1rem;
+    padding: $spacing-4 0;
+    text-align: center;
+  }
+  
+  .address-info-note {
+    margin-top: $spacing-8;
+    background-color: #f3f4f6;
+    border-left: 3px solid #125342;
+    padding: $spacing-4 $spacing-5;
+    border-radius: 6px;
+    
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
+      color: #111827;
+    }
+    
+    ul {
+      padding-left: $spacing-5;
+      
+      li {
+        margin-bottom: $spacing-2;
+        color: #4b5563;
+        font-size: 0.95rem;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
   }
 }
