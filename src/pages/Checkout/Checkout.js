@@ -16,6 +16,7 @@ import {
   updateDoc 
 } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import { countries } from '../../utils/countries';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -1217,11 +1218,11 @@ const Checkout = () => {
                         value={billingAddress.country}
                         onChange={handleAddressChange}
                       >
-                        <option value="United States">United States</option>
-                        <option value="Canada">Canada</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Other">Other</option>
+                        {countries.map(country => (
+                          <option key={country.code} value={country.name}>
+                            {country.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -1505,11 +1506,11 @@ const Checkout = () => {
                     value={billingAddress.country}
                     onChange={handleAddressChange}
                   >
-                    <option value="United States">United States</option>
-                    <option value="Canada">Canada</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Australia">Australia</option>
-                    <option value="Other">Other</option>
+                    {countries.map(country => (
+                      <option key={country.code} value={country.name}>
+                        {country.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
