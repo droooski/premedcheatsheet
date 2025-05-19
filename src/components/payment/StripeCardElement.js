@@ -1,3 +1,4 @@
+// Modified StripeCardElement.js to position the Pay Now button after billing address
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -98,44 +99,47 @@ const StripeCardElement = ({ onSuccess, onError, processingPayment }) => {
   return (
     <div className="stripe-card-element">
       <form onSubmit={handleSubmit} className="stripe-form">
-        <div className="form-group">
-          <label htmlFor="cardholderName">NAME ON CARD</label>
-          <input
-            id="cardholderName"
-            type="text"
-            placeholder="Jane Smith"
-            required
-            value={cardholderName}
-            onChange={(e) => setCardholderName(e.target.value)}
-            className="name-input"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="cardElement">CARD DETAILS</label>
-          <div className="card-element-container">
-            <CardElement 
-              id="cardElement"
-              options={CARD_ELEMENT_OPTIONS} 
-              onChange={(e) => {
-                setCardComplete(e.complete);
-                if (e.error) {
-                  setCardError(e.error.message);
-                  onError(e.error.message);
-                } else {
-                  setCardError(null);
-                }
-              }}
+        <div className="card-input-section">
+          <div className="form-group">
+            <label htmlFor="cardholderName">NAME ON CARD</label>
+            <input
+              id="cardholderName"
+              type="text"
+              placeholder="Jane Smith"
+              required
+              value={cardholderName}
+              onChange={(e) => setCardholderName(e.target.value)}
+              className="name-input"
             />
           </div>
+          
+          <div className="form-group">
+            <label htmlFor="cardElement">CARD DETAILS</label>
+            <div className="card-element-container">
+              <CardElement 
+                id="cardElement"
+                options={CARD_ELEMENT_OPTIONS} 
+                onChange={(e) => {
+                  setCardComplete(e.complete);
+                  if (e.error) {
+                    setCardError(e.error.message);
+                    onError(e.error.message);
+                  } else {
+                    setCardError(null);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          
+          {cardError && (
+            <div className="card-error">
+              {cardError}
+            </div>
+          )}
         </div>
         
-        {cardError && (
-          <div className="card-error">
-            {cardError}
-          </div>
-        )}
-        
+        {/* This button will be rendered after the billing address via CSS */}
         <button 
           type="submit" 
           className="payment-button"

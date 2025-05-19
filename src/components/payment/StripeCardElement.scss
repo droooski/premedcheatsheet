@@ -1,3 +1,4 @@
+/* Corrected syntax for src/components/payment/StripeCardElement.scss */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -6,6 +7,46 @@
   
   .stripe-form {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* This ensures the card input section stays at the top */
+  .card-input-section {
+    order: 1;
+  }
+  
+  /* The payment button will be positioned after the billing address in the parent component */
+  .payment-button {
+    order: 99; /* High value to ensure it comes after the billing address */
+    width: 100%;
+    background-color: #1A3A34;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: $spacing-4;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* Add margin top to create space from the billing section */
+    margin-top: $spacing-8;
+    
+    &:hover:not(:disabled) {
+      background-color: darken(#1A3A34, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
   }
   
   .form-group {
@@ -56,34 +97,5 @@
     background-color: #fee2e2;
     padding: $spacing-3;
     border-radius: 6px;
-  }
-  
-  .payment-button {
-    width: 100%;
-    background-color: #1A3A34;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: $spacing-4;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    
-    &:hover:not(:disabled) {
-      background-color: darken(#1A3A34, 5%);
-      transform: translateY(-2px);
-    }
-    
-    &:active {
-      transform: translateY(0);
-    }
-    
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
   }
 }

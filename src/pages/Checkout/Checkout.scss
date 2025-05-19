@@ -407,6 +407,33 @@
 
 // Payment Form
 .payment-form {
+  /* Make it a flex container to control order of children */
+  display: flex;
+  flex-direction: column;
+  
+  /* Styles for the Stripe component container */
+  > .stripe-card-element {
+    order: 1;
+  }
+  
+  /* Save payment method checkbox */
+  > .form-group.checkbox {
+    order: 2;
+    margin-top: $spacing-4;
+    margin-bottom: $spacing-4;
+  }
+  
+  /* Billing address section */
+  > .billing-address-section {
+    order: 3;
+  }
+  
+  /* Force secure checkout info to end */
+  > .secure-checkout {
+    order: 100;
+    margin-top: $spacing-6;
+  }
+  
   h3 {
     display: flex;
     align-items: center;
@@ -436,7 +463,7 @@
     }
   }
 
-    .form-icon {
+  .form-icon {
     width: 28px;
     height: 24px;
     margin-right: 10px;
@@ -1056,5 +1083,172 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+  }
+}
+
+/* Add these styles to your src/pages/Checkout/Checkout.scss file */
+
+/* Billing Address Section Styles */
+.billing-address-section {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  padding: $spacing-6;
+  margin: $spacing-6 0;
+  
+  h3 {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+    
+    .form-icon {
+      width: 24px;
+      height: auto;
+      margin-right: $spacing-2;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.1rem;
+      margin-bottom: $spacing-3;
+    }
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-4;
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: $text-color;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: $spacing-3 $spacing-4;
+      border: 1px solid $gray-300;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background-color: white;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+    }
+  }
+
+  .form-checkbox {
+    display: flex;
+    align-items: center;
+    margin-top: $spacing-4;
+    
+    input[type="checkbox"] {
+      margin-right: $spacing-2;
+      width: auto;
+    }
+    
+    label {
+      font-size: 0.9rem;
+      color: $text-color;
+      cursor: pointer;
+    }
+  }
+}
+
+/* User Info Summary */
+.user-info-summary {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+  padding: $spacing-4;
+  margin-bottom: $spacing-6;
+  border-radius: 4px;
+  
+  p {
+    margin: 0 0 $spacing-2 0;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    &.pending-note {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: $text-color-light;
+    }
+  }
+}
+
+/* Checkbox style improvements */
+.form-group.checkbox {
+  display: flex;
+  align-items: center;
+  
+  input[type="checkbox"] {
+    width: auto;
+    margin-right: $spacing-2;
+    cursor: pointer;
+  }
+  
+  label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+}
+
+/* Confirm Free Access Button */
+.confirm-free-access {
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  background-color: #1A3A34;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: $spacing-6 0;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: darken(#1A3A34, 5%);
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+/* Address display in review step */
+.billing-address {
+  margin-top: $spacing-6;
+  padding-top: $spacing-4;
+  border-top: 1px solid $gray-200;
+  
+  h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: $spacing-3;
+    color: $text-color;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  
+  .address-info {
+    p {
+      margin-bottom: $spacing-1;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+  }
+  
+  .save-preferences {
+    margin-top: $spacing-3;
   }
 }
