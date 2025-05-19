@@ -1,8 +1,9 @@
 // src/components/payment/SavePaymentMethodForm.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
+import userService from '../../services/userService';
 import { v4 as uuidv4 } from 'uuid';
 import './SavePaymentMethodForm.scss';
 
@@ -149,34 +150,36 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
         paymentMethod.createdAt = new Date().toISOString();
       }
       
-      // Update user document in Firestore
-      const userRef = doc(db, "users", currentUser.uid);
-      
+      // Determine if this is an update or a new payment method
       if (existingPaymentMethod) {
-        // Update existing payment method
-        // This is a simplified approach - in a real app, you might need to handle
-        // array updates more carefully to maintain other payment methods
+        // For updating an existing payment method
+        // Get current payment methods
+        const userRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          throw new Error('User document not found');
+        }
+        
+        const userData = userDoc.data();
+        const existingMethods = userData.paymentMethods || [];
+        
+        // Replace the existing payment method with the updated one
+        const updatedMethods = existingMethods.map(pm => 
+          pm.id === paymentMethod.id ? paymentMethod : pm
+        );
+        
+        // Update in Firestore
         await updateDoc(userRef, {
-          'paymentMethods': currentUser.paymentMethods?.map(pm => 
-            pm.id === paymentMethod.id ? paymentMethod : pm
-          ) || [paymentMethod]
+          paymentMethods: updatedMethods
         });
       } else {
-        // Add new payment method
-        const existingPaymentMethods = currentUser.paymentMethods || [];
+        // For adding a new payment method
+        const result = await userService.savePaymentMethod(currentUser.uid, paymentMethod);
         
-        // If this is set as default, update all others to not be default
-        let updatedPaymentMethods = existingPaymentMethods.map(pm => ({
-          ...pm,
-          isDefault: isDefault ? false : pm.isDefault
-        }));
-        
-        // Add the new payment method
-        updatedPaymentMethods.push(paymentMethod);
-        
-        await updateDoc(userRef, {
-          'paymentMethods': updatedPaymentMethods
-        });
+        if (!result.success) {
+          throw new Error(result.error || "Failed to save payment method");
+        }
       }
       
       // Call the onSave callback if provided

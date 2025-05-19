@@ -1,8 +1,8 @@
 // src/components/address/AddressForm.js
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getFirestore, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import userService from '../../services/userService';
 import './AddressForm.scss';
 
 const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
@@ -23,7 +23,6 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
   const [saveToAccount, setSaveToAccount] = useState(false);
   
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,10 +45,12 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
 
       // If user is logged in and wants to save the address
       if (currentUser && saveToAccount) {
-        const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, {
-          addresses: arrayUnion(address)
-        });
+        // Use userService to save address
+        const result = await userService.saveAddress(currentUser.uid, address);
+        
+        if (!result.success) {
+          throw new Error(result.error || "Failed to save address");
+        }
       }
 
       // Call the onSave callback with the address data

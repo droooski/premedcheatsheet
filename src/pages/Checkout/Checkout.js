@@ -13,8 +13,10 @@ import StripeWrapper from '../../components/payment/StripeWrapper';
 import { 
   getFirestore, 
   doc, 
-  updateDoc 
+  updateDoc,
+  getDoc, 
 } from 'firebase/firestore';
+import userService from '../../services/userService';
 import { v4 as uuidv4 } from 'uuid';
 import { countries } from '../../utils/countries';
 import './Checkout.scss';
@@ -700,29 +702,27 @@ const Checkout = () => {
           createdAt: new Date().toISOString()
         };
         
-        await updateDoc(doc(db, "users", registrationResult.user.uid), {
-          paymentMethods: [paymentMethod]
-        });
+        // Use userService to save payment method
+        await userService.savePaymentMethod(registrationResult.user.uid, paymentMethod);
       }
 
       // 6. Save billing address if the user opted to
       if (saveAddress && billingAddress.name) {
         const address = {
           id: uuidv4(),
-          fullName: billingAddress.name,
-          addressLine1: billingAddress.line1,
-          addressLine2: billingAddress.line2 || '',
+          name: billingAddress.name,
+          line1: billingAddress.line1,
+          line2: billingAddress.line2 || '',
           city: billingAddress.city,
           state: billingAddress.state,
-          zipCode: billingAddress.postalCode,
+          postalCode: billingAddress.postalCode,
           country: billingAddress.country,
           isDefault: true,
           createdAt: new Date().toISOString()
         };
         
-        await updateDoc(doc(db, "users", registrationResult.user.uid), {
-          addresses: [address]
-        });
+        // Use userService to save address
+        await userService.saveAddress(registrationResult.user.uid, address);
       }
 
       // 7. Update user document with subscription details
@@ -737,6 +737,15 @@ const Checkout = () => {
           endDate: getSubscriptionEndDate(),
           orderId: paymentResult.orderId,
           active: true
+        }],
+        // Also add an order to the user's orders array
+        orders: [{
+          orderId: paymentResult.orderId,
+          plan: selectedPlan,
+          planName: getPlanDisplayName(),
+          amount: parseFloat(getFinalPrice()),
+          status: 'completed',
+          createdAt: new Date().toISOString()
         }]
       });
 
@@ -848,192 +857,223 @@ const Checkout = () => {
     setShowAuthModal(false);
   };
 
-  // Add this explicit handler for confirming free purchases
-  const handleConfirmFreePurchase = async () => {
-    console.log("Confirming free purchase");
-    setLoading(true);
-    setError('');
-    
-    try {
-      // We need to check if we have pending user data (new user) or existing user
-      if (!user && pendingUserData) {
-        console.log("Creating account from pending data:", pendingUserData.email);
-        
-        // 1. First create the user account
-        const registrationResult = await registerUser(
-          pendingUserData.email,
-          pendingUserData.password,
-          pendingUserData.firstName,
-          pendingUserData.lastName
-        );
-        
-        if (!registrationResult.user || !registrationResult.success) {
-          console.error("Failed to create user account:", registrationResult.error);
-          throw new Error(registrationResult.error || 'Failed to create your account');
+// Add this explicit handler for confirming free purchases
+const handleConfirmFreePurchase = async () => {
+  console.log("Confirming free purchase");
+  setLoading(true);
+  setError('');
+  
+  try {
+    // We need to check if we have pending user data (new user) or existing user
+    if (!user && pendingUserData) {
+      console.log("Creating account from pending data:", pendingUserData.email);
+      
+      // 1. First create the user account
+      const registrationResult = await registerUser(
+        pendingUserData.email,
+        pendingUserData.password,
+        pendingUserData.firstName,
+        pendingUserData.lastName
+      );
+      
+      if (!registrationResult.user || !registrationResult.success) {
+        console.error("Failed to create user account:", registrationResult.error);
+        throw new Error(registrationResult.error || 'Failed to create your account');
+      }
+      
+      console.log("Account created successfully:", registrationResult.user.uid);
+      
+      // 2. Set the user state with the newly created user
+      setUser(registrationResult.user);
+      
+      // 3. Create a free order for this user
+      const orderResult = await processPayment(
+        null, // No payment details for free purchase
+        registrationResult.user.uid,
+        {
+          amount: 0,
+          plan: selectedPlan,
+          discount: discount,
+          couponCode: couponCode,
+          isFree: true
         }
+      );
+      
+      if (!orderResult.success) {
+        console.error("Failed to create order:", orderResult.error);
+        throw new Error(orderResult.error || 'Failed to process your free access');
+      }
+      
+      console.log("Order created successfully:", orderResult.orderId);
+      
+      // 4. Save payment method if the user opted to (even for free purchases)
+      if (savePaymentMethod) {
+        const paymentMethod = {
+          id: uuidv4(),
+          cardholderName: "Free Purchase",
+          lastFourDigits: "0000",
+          expiryDate: "N/A",
+          cardType: "Coupon",
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
         
-        console.log("Account created successfully:", registrationResult.user.uid);
+        // Use userService to save payment method
+        await userService.savePaymentMethod(registrationResult.user.uid, paymentMethod);
+      }
+
+      // 5. Save billing address if the user opted to
+      if (saveAddress && billingAddress.name) {
+        const address = {
+          id: uuidv4(),
+          name: billingAddress.name,
+          line1: billingAddress.line1,
+          line2: billingAddress.line2 || '',
+          city: billingAddress.city,
+          state: billingAddress.state,
+          postalCode: billingAddress.postalCode,
+          country: billingAddress.country,
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
         
-        // 2. Set the user state with the newly created user
-        setUser(registrationResult.user);
-        
-        // 3. Create a free order for this user
-        const orderResult = await processPayment(
-          null, // No payment details for free purchase
-          registrationResult.user.uid,
-          {
-            amount: 0,
+        // Use userService to save address
+        await userService.saveAddress(registrationResult.user.uid, address);
+      }
+      
+      // 6. Update the user document to mark payment as verified
+      try {
+        await updateDoc(doc(db, "users", registrationResult.user.uid), {
+          paymentVerified: true,
+          purchaseDate: new Date().toISOString(),
+          purchasedPlan: selectedPlan,
+          purchaseAmount: 0, // Free purchase
+          subscriptions: [{
             plan: selectedPlan,
-            discount: discount,
-            couponCode: couponCode,
-            isFree: true
-          }
-        );
-        
-        if (!orderResult.success) {
-          console.error("Failed to create order:", orderResult.error);
-          throw new Error(orderResult.error || 'Failed to process your free access');
-        }
-        
-        console.log("Order created successfully:", orderResult.orderId);
-        
-        // 4. Save payment method if the user opted to (even for free purchases)
-        if (savePaymentMethod) {
-          const paymentMethod = {
-            id: uuidv4(),
-            cardholderName: "Free Purchase",
-            lastFourDigits: "0000",
-            expiryDate: "N/A",
-            cardType: "Coupon",
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await updateDoc(doc(db, "users", registrationResult.user.uid), {
-            paymentMethods: [paymentMethod]
-          });
-        }
-
-        // 5. Save billing address if the user opted to
-        if (saveAddress && billingAddress.name) {
-          const address = {
-            id: uuidv4(),
-            fullName: billingAddress.name,
-            addressLine1: billingAddress.line1,
-            addressLine2: billingAddress.line2 || '',
-            city: billingAddress.city,
-            state: billingAddress.state,
-            zipCode: billingAddress.postalCode,
-            country: billingAddress.country,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await updateDoc(doc(db, "users", registrationResult.user.uid), {
-            addresses: [address]
-          });
-        }
-        
-        // 6. Update the user document to mark payment as verified
-        try {
-          await updateDoc(doc(db, "users", registrationResult.user.uid), {
-            paymentVerified: true,
-            purchaseDate: new Date().toISOString(),
-            purchasedPlan: selectedPlan,
-            purchaseAmount: 0, // Free purchase
-            subscriptions: [{
-              plan: selectedPlan,
-              startDate: new Date().toISOString(),
-              endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
-              orderId: orderResult.orderId,
-              active: true
-            }]
-          });
-          
-          // Set payment verification in session storage for immediate access
-          sessionStorage.setItem('paymentVerified', 'true');
-        } catch (updateError) {
-          console.error("Failed to update user document:", updateError);
-          // Continue anyway since the core account and order were created
-        }
-        
-        // 7. Move to confirmation step
-        setOrderId(orderResult.orderId);
-        changeCheckoutStep('confirmation');
-      } else if (user && user.uid) {
-        // Handle existing user free purchase
-        console.log("Processing free purchase for existing user:", user.uid);
-        
-        const result = await processPayment(
-          null, // No payment details needed for free purchase
-          user.uid,
-          {
-            amount: 0,
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+            orderId: orderResult.orderId,
+            active: true
+          }],
+          // Also add an order to the user's orders array
+          orders: [{
+            orderId: orderResult.orderId,
             plan: selectedPlan,
-            discount: discount,
-            couponCode: couponCode,
-            isFree: true
-          }
-        );
-        
-        if (!result.success) {
-          throw new Error(result.error || 'Error processing your free access');
-        }
-        
-        console.log("Free order created:", result.orderId);
-
-        // Save payment method and address for existing users too
-        if (savePaymentMethod) {
-          const paymentMethod = {
-            id: uuidv4(),
-            cardholderName: "Free Purchase",
-            lastFourDigits: "0000",
-            expiryDate: "N/A",
-            cardType: "Coupon",
-            isDefault: true,
+            planName: getPlanDisplayName(),
+            amount: 0,
+            status: 'completed',
             createdAt: new Date().toISOString()
-          };
-          
-          await updateDoc(doc(db, "users", user.uid), {
-            paymentMethods: [paymentMethod]
-          });
-        }
-
-        if (saveAddress && billingAddress.name) {
-          const address = {
-            id: uuidv4(),
-            fullName: billingAddress.name,
-            addressLine1: billingAddress.line1,
-            addressLine2: billingAddress.line2 || '',
-            city: billingAddress.city,
-            state: billingAddress.state,
-            zipCode: billingAddress.postalCode,
-            country: billingAddress.country,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await updateDoc(doc(db, "users", user.uid), {
-            addresses: [address]
-          });
-        }
-        
-        // Set order ID and move to confirmation
-        setOrderId(result.orderId);
-        changeCheckoutStep('confirmation');
+          }]
+        });
         
         // Set payment verification in session storage for immediate access
         sessionStorage.setItem('paymentVerified', 'true');
-      } else {
-        throw new Error('Missing user information. Please try again.');
+      } catch (updateError) {
+        console.error("Failed to update user document:", updateError);
+        // Continue anyway since the core account and order were created
       }
-    } catch (error) {
-      console.error("Free purchase error:", error);
-      setError(error.message || 'An error occurred while processing your order');
-    } finally {
-      setLoading(false);
+      
+      // 7. Move to confirmation step
+      setOrderId(orderResult.orderId);
+      changeCheckoutStep('confirmation');
+    } else if (user && user.uid) {
+      // Handle existing user free purchase
+      console.log("Processing free purchase for existing user:", user.uid);
+      
+      const result = await processPayment(
+        null, // No payment details needed for free purchase
+        user.uid,
+        {
+          amount: 0,
+          plan: selectedPlan,
+          discount: discount,
+          couponCode: couponCode,
+          isFree: true
+        }
+      );
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error processing your free access');
+      }
+      
+      console.log("Free order created:", result.orderId);
+
+      // Save payment method and address for existing users too
+      if (savePaymentMethod) {
+        const paymentMethod = {
+          id: uuidv4(),
+          cardholderName: "Free Purchase",
+          lastFourDigits: "0000",
+          expiryDate: "N/A",
+          cardType: "Coupon",
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Use userService to save payment method
+        await userService.savePaymentMethod(user.uid, paymentMethod);
+      }
+
+      if (saveAddress && billingAddress.name) {
+        const address = {
+          id: uuidv4(),
+          name: billingAddress.name,
+          line1: billingAddress.line1,
+          line2: billingAddress.line2 || '',
+          city: billingAddress.city,
+          state: billingAddress.state,
+          postalCode: billingAddress.postalCode,
+          country: billingAddress.country,
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Use userService to save address
+        await userService.saveAddress(user.uid, address);
+      }
+      
+      // Add the order to the user's orders array
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          await updateDoc(userRef, {
+            orders: [
+              ...(userData.orders || []),
+              {
+                orderId: result.orderId,
+                plan: selectedPlan,
+                planName: getPlanDisplayName(),
+                amount: 0,
+                status: 'completed',
+                createdAt: new Date().toISOString()
+              }
+            ]
+          });
+        }
+      } catch (error) {
+        console.error("Failed to update user orders:", error);
+        // Continue anyway since the order was created
+      }
+      
+      // Set order ID and move to confirmation
+      setOrderId(result.orderId);
+      changeCheckoutStep('confirmation');
+      
+      // Set payment verification in session storage for immediate access
+      sessionStorage.setItem('paymentVerified', 'true');
+    } else {
+      throw new Error('Missing user information. Please try again.');
     }
-  };
+  } catch (error) {
+    console.error("Free purchase error:", error);
+    setError(error.message || 'An error occurred while processing your order');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Render payment form step
   const renderPaymentForm = () => {
