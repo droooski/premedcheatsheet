@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import userService from '../../services/userService';
+import { countries } from '../../utils/countries';
 import './AddressForm.scss';
 
 const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
@@ -155,11 +156,12 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
               onChange={handleChange}
               required
             >
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="Mexico">Mexico</option>
-              <option value="United Kingdom">United Kingdom</option>
-              {/* Add more countries as needed */}
+              <option value="">Select a country</option>
+              {countries.map(country => (
+                <option key={country.code || country} value={country.name || country}>
+                  {country.name || country}
+                </option>
+              ))}
             </select>
           </div>
         </div>

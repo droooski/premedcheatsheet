@@ -439,6 +439,7 @@
   }
 }
 
+
 .form-group {
   select {
     width: 100%;
@@ -462,5 +463,20 @@
       border-color: $primary-color;
       box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
     }
+    
+    /* Add these properties to fix the dropdown appearance */
+    position: relative;
+    z-index: 10; /* Ensure dropdown appears above other elements */
   }
+}
+
+/* Add styling for the dropdown menu itself */
+.form-group select option {
+  padding: $spacing-2;
+  font-size: 0.95rem;
+}
+
+/* Make sure the container doesn't have overflow:hidden */
+.address-edit-form, .form-row, .form-group {
+  overflow: visible !important;
 }

@@ -352,23 +352,24 @@ const SavedAddresses = ({ onSelectAddress, selectedAddressId, showAddNew = true,
                         />
                       </div>
                       
-                  <div className="form-group">
-                    <label htmlFor="country">Country</label>
-                    <select
-                      id="country"
-                      name="country"
-                      value={editFormData.country}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Select a country</option>
-                      {countries.map(country => (
-                        <option key={country.code || country} value={country.name || country}>
-                          {country.name || country}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="country">Country</label>
+                      <select
+                        id="country"
+                        name="country"
+                        value={editFormData.country}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Select a country</option>
+                        {countries.map(country => (
+                          <option key={country.code || country} value={country.name || country}>
+                            {country.name || country}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    </div>
                     
                     <div className="form-group">
                       <label htmlFor="phone">Phone (Optional)</label>
