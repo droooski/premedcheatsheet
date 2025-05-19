@@ -692,7 +692,7 @@ const Checkout = () => {
         const paymentMethod = {
           id: uuidv4(),
           cardholderName: cardInfo.name,
-          lastFourDigits: cardInfo.last4,
+          lastFourDigits: cardInfo.last4 || '0000',
           expiryDate: cardInfo.expiry || 'MM/YY',
           cardType: cardInfo.brand || 'card',
           isDefault: true,
@@ -1111,6 +1111,135 @@ const Checkout = () => {
                   </p>
                 </div>
               )}
+
+              {/* Save Payment Method Option (even for free purchases) */}
+              <div className="form-group checkbox" style={{marginTop: '20px'}}>
+                <input
+                  type="checkbox"
+                  id="savePaymentMethod"
+                  checked={savePaymentMethod}
+                  onChange={(e) => setSavePaymentMethod(e.target.checked)}
+                  disabled={loading}
+                />
+                <label htmlFor="savePaymentMethod">
+                  Save payment method for future purchases
+                </label>
+              </div>
+
+              {/* Billing Address Fields */}
+              {savePaymentMethod && (
+                <div className="billing-address-section" style={{marginTop: '20px', marginBottom: '20px'}}>
+                  <h3>
+                    <img src={require('../../assets/images/location.png')} alt="Location" className="form-icon" />
+                    Billing Address
+                  </h3>
+                  
+                  <div className="form-group">
+                    <label htmlFor="billingName">Full Name</label>
+                    <input
+                      type="text"
+                      id="billingName"
+                      name="name"
+                      value={billingAddress.name}
+                      onChange={handleAddressChange}
+                      placeholder="Full Name"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="billingLine1">Address Line 1</label>
+                    <input
+                      type="text"
+                      id="billingLine1"
+                      name="line1"
+                      value={billingAddress.line1}
+                      onChange={handleAddressChange}
+                      placeholder="Street address, P.O. box"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="billingLine2">Address Line 2 (Optional)</label>
+                    <input
+                      type="text"
+                      id="billingLine2"
+                      name="line2"
+                      value={billingAddress.line2}
+                      onChange={handleAddressChange}
+                      placeholder="Apartment, suite, unit, building, etc."
+                    />
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="billingCity">City</label>
+                      <input
+                        type="text"
+                        id="billingCity"
+                        name="city"
+                        value={billingAddress.city}
+                        onChange={handleAddressChange}
+                        placeholder="City"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="billingState">State</label>
+                      <input
+                        type="text"
+                        id="billingState"
+                        name="state"
+                        value={billingAddress.state}
+                        onChange={handleAddressChange}
+                        placeholder="State"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="billingPostalCode">Postal Code</label>
+                      <input
+                        type="text"
+                        id="billingPostalCode"
+                        name="postalCode"
+                        value={billingAddress.postalCode}
+                        onChange={handleAddressChange}
+                        placeholder="Postal Code"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="billingCountry">Country</label>
+                      <select
+                        id="billingCountry"
+                        name="country"
+                        value={billingAddress.country}
+                        onChange={handleAddressChange}
+                      >
+                        <option value="United States">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group checkbox">
+                    <input
+                      type="checkbox"
+                      id="saveAddress"
+                      checked={saveAddress}
+                      onChange={(e) => setSaveAddress(e.target.checked)}
+                      disabled={loading}
+                    />
+                    <label htmlFor="saveAddress">
+                      Save address for future purchases
+                    </label>
+                  </div>
+                </div>
+              )}
               
               {/* Show a prominent confirm button */}
               <button 
@@ -1151,132 +1280,261 @@ const Checkout = () => {
       );
     }
     
-    // Regular payment form for non-free purchases (your existing code)
+    // Regular payment form for non-free purchases
     return (
       <div className="payment-form-container">
-          <div className="payment-header">
-            <h2>Payment & Discounts</h2>
-            <p>Transactions are secure and encrypted.</p>
-          </div>
-          
-          {/* Back button */}
-          <div className="navigation-controls">
-            <button className="back-button" onClick={handleGoBack}>
-              ← Back
-            </button>
-          </div>
-          
-          <div className="order-summary">
-            <h3>Subscription Summary</h3>
-            <div className="order-details">
-              <div className="plan-name">
-                <h4>{getPlanDisplayName()}</h4>
-                <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
-                <p className="plan-description">New full applicant profile added every couple days.</p>
-              </div>
+        <div className="payment-header">
+          <h2>Payment & Discounts</h2>
+          <p>Transactions are secure and encrypted.</p>
+        </div>
+        
+        {/* Back button */}
+        <div className="navigation-controls">
+          <button className="back-button" onClick={handleGoBack}>
+            ← Back
+          </button>
+        </div>
+        
+        <div className="order-summary">
+          <h3>Subscription Summary</h3>
+          <div className="order-details">
+            <div className="plan-name">
+              <h4>{getPlanDisplayName()}</h4>
+              <p className="subscription-period">${subscription.price.toFixed(2)} {getSubscriptionPeriodText()}</p>
+              <p className="plan-description">New full applicant profile added every couple days.</p>
+            </div>
+            
+            {/* GIFT OR DISCOUNT CODE SECTION */}
+            <div className="discount-section">
+              <h4>GIFT OR DISCOUNT CODE</h4>
               
-              {/* GIFT OR DISCOUNT CODE SECTION */}
-              <div className="discount-section">
-                <h4>GIFT OR DISCOUNT CODE</h4>
-                
-                {!couponApplied ? (
-                  <div className="coupon-input-group">
-                    <input
-                      type="text"
-                      placeholder="Gift or Discount Code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="coupon-input"
-                    />
-                    <button 
-                      className="apply-coupon-btn"
-                      onClick={applyCoupon}
-                    >
-                      APPLY
-                    </button>
-                  </div>
-                ) : (
-                  <div className="applied-discount">
-                    <div className="discount-info">
-                      <span>Discount ({discount}% off)</span>
-                      <span>-${getDiscountAmount().toFixed(2)}</span>
-                    </div>
-                    <button className="remove-discount-btn" onClick={removeCoupon}>
-                      Remove
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="checkout-summary">
-                <div className="summary-row">
-                  <span>Subtotal</span>
-                  <span>${subscription.price.toFixed(2)}</span>
+              {!couponApplied ? (
+                <div className="coupon-input-group">
+                  <input
+                    type="text"
+                    placeholder="Gift or Discount Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="coupon-input"
+                  />
+                  <button 
+                    className="apply-coupon-btn"
+                    onClick={applyCoupon}
+                  >
+                    APPLY
+                  </button>
                 </div>
-                
-                {couponApplied && (
-                  <div className="summary-row discount">
-                    <span>Discount ({discount}%)</span>
+              ) : (
+                <div className="applied-discount">
+                  <div className="discount-info">
+                    <span>Discount ({discount}% off)</span>
                     <span>-${getDiscountAmount().toFixed(2)}</span>
                   </div>
-                )}
-                
-                <div className="summary-row">
-                  <span>Tax</span>
-                  <span>$0.00</span>
+                  <button className="remove-discount-btn" onClick={removeCoupon}>
+                    Remove
+                  </button>
                 </div>
-                
-                <div className="summary-row total">
-                  <span>Total</span>
-                  <span>${getFinalPrice()}</span>
-                </div>
-              </div>
+              )}
             </div>
-          </div>
-          
-          <div className="payment-form">
-            <h3>
-              <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
-              Card Information
-            </h3>
-              
-            {error && <div className="payment-error">{error}</div>}
             
-            {/* If we have pending user data (from auth modal), show their email */}
-            {pendingUserData && (
-              <div className="user-info-summary">
-                <p>Account will be created for: <strong>{pendingUserData.email}</strong></p>
-                <p className="pending-note">Your account will be created after successful payment.</p>
+            <div className="checkout-summary">
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>${subscription.price.toFixed(2)}</span>
               </div>
-            )}
-            
-            {/* Replace your custom form with the Stripe Elements component */}
-            <StripeWrapper
-              onSuccess={(paymentMethod) => {
-                console.log("Payment method created:", paymentMethod);
-                // Store the payment method details and proceed to review
-                setCardInfo({
-                  ...cardInfo,
-                  brand: paymentMethod.card?.brand || 'unknown',
-                  last4: paymentMethod.card?.last4 || '****',
-                  id: paymentMethod.id
-                });
-                changeCheckoutStep('review');
-              }}
-              onError={(errorMessage) => {
-                setError(errorMessage);
-              }}
-              processingPayment={loading}
-            />
-            
-            <div className="secure-checkout">
-              <div className="secure-icon">🔒</div>
-              <span>SECURE SSL CHECKOUT</span>
+              
+              {couponApplied && (
+                <div className="summary-row discount">
+                  <span>Discount ({discount}%)</span>
+                  <span>-${getDiscountAmount().toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="summary-row">
+                <span>Tax</span>
+                <span>$0.00</span>
+              </div>
+              
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>${getFinalPrice()}</span>
+              </div>
             </div>
           </div>
         </div>
-      );
-    };
+        
+        <div className="payment-form">
+          <h3>
+            <img src={require('../../assets/images/credit-card.png')} alt="Card" className="form-icon" />
+            Card Information
+          </h3>
+            
+          {error && <div className="payment-error">{error}</div>}
+          
+          {/* If we have pending user data (from auth modal), show their email */}
+          {pendingUserData && (
+            <div className="user-info-summary">
+              <p>Account will be created for: <strong>{pendingUserData.email}</strong></p>
+              <p className="pending-note">Your account will be created after successful payment.</p>
+            </div>
+          )}
+          
+          {/* Replace your custom form with the Stripe Elements component */}
+          <StripeWrapper
+            onSuccess={(paymentMethod) => {
+              console.log("Payment method created:", paymentMethod);
+              // Store the payment method details and proceed to review
+              setCardInfo({
+                ...cardInfo,
+                brand: paymentMethod.card?.brand || 'unknown',
+                last4: paymentMethod.card?.last4 || '****',
+                id: paymentMethod.id
+              });
+              changeCheckoutStep('review');
+            }}
+            onError={(errorMessage) => {
+              setError(errorMessage);
+            }}
+            processingPayment={loading}
+          />
+          
+          {/* Save Payment Method Option */}
+          <div className="form-group checkbox" style={{marginTop: '20px'}}>
+            <input
+              type="checkbox"
+              id="savePaymentMethod"
+              checked={savePaymentMethod}
+              onChange={(e) => setSavePaymentMethod(e.target.checked)}
+              disabled={loading}
+            />
+            <label htmlFor="savePaymentMethod">
+              Save payment method for future purchases
+            </label>
+          </div>
+
+          {/* Billing Address Fields */}
+          {savePaymentMethod && (
+            <div className="billing-address-section" style={{marginTop: '20px', marginBottom: '20px'}}>
+              <h3>
+                <img src={require('../../assets/images/location.png')} alt="Location" className="form-icon" />
+                Billing Address
+              </h3>
+              
+              <div className="form-group">
+                <label htmlFor="billingName">Full Name</label>
+                <input
+                  type="text"
+                  id="billingName"
+                  name="name"
+                  value={billingAddress.name}
+                  onChange={handleAddressChange}
+                  placeholder="Full Name"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="billingLine1">Address Line 1</label>
+                <input
+                  type="text"
+                  id="billingLine1"
+                  name="line1"
+                  value={billingAddress.line1}
+                  onChange={handleAddressChange}
+                  placeholder="Street address, P.O. box"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="billingLine2">Address Line 2 (Optional)</label>
+                <input
+                  type="text"
+                  id="billingLine2"
+                  name="line2"
+                  value={billingAddress.line2}
+                  onChange={handleAddressChange}
+                  placeholder="Apartment, suite, unit, building, etc."
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="billingCity">City</label>
+                  <input
+                    type="text"
+                    id="billingCity"
+                    name="city"
+                    value={billingAddress.city}
+                    onChange={handleAddressChange}
+                    placeholder="City"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="billingState">State</label>
+                  <input
+                    type="text"
+                    id="billingState"
+                    name="state"
+                    value={billingAddress.state}
+                    onChange={handleAddressChange}
+                    placeholder="State"
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="billingPostalCode">Postal Code</label>
+                  <input
+                    type="text"
+                    id="billingPostalCode"
+                    name="postalCode"
+                    value={billingAddress.postalCode}
+                    onChange={handleAddressChange}
+                    placeholder="Postal Code"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="billingCountry">Country</label>
+                  <select
+                    id="billingCountry"
+                    name="country"
+                    value={billingAddress.country}
+                    onChange={handleAddressChange}
+                  >
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-group checkbox">
+                <input
+                  type="checkbox"
+                  id="saveAddress"
+                  checked={saveAddress}
+                  onChange={(e) => setSaveAddress(e.target.checked)}
+                  disabled={loading}
+                />
+                <label htmlFor="saveAddress">
+                  Save address for future purchases
+                </label>
+              </div>
+            </div>
+          )}
+          
+          <div className="secure-checkout">
+            <div className="secure-icon">🔒</div>
+            <span>SECURE SSL CHECKOUT</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Render review step
   const renderReviewStep = () => {
@@ -1358,6 +1616,30 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Display billing address if provided */}
+            {savePaymentMethod && billingAddress.name && (
+              <div className="billing-address">
+                <h4>Billing Address</h4>
+                <div className="address-info">
+                  <p>{billingAddress.name}</p>
+                  <p>{billingAddress.line1}</p>
+                  {billingAddress.line2 && <p>{billingAddress.line2}</p>}
+                  <p>{billingAddress.city}, {billingAddress.state} {billingAddress.postalCode}</p>
+                  <p>{billingAddress.country}</p>
+                </div>
+                
+                <div className="save-preferences">
+                  <p style={{fontSize: '0.9rem', color: '#065f46', fontWeight: '500', marginTop: '10px'}}>
+                    {savePaymentMethod && saveAddress 
+                      ? "Your payment method and address will be saved for future purchases."
+                      : savePaymentMethod 
+                        ? "Your payment method will be saved for future purchases."
+                        : ""}
+                  </p>
+                </div>
+              </div>
+            )}
             
             <div className="checkout-summary">
               <div className="summary-row">
