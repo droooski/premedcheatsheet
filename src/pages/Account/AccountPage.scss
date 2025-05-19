@@ -1,4 +1,4 @@
-/* src/pages/Account/AccountPage.scss - Updated with verification styles */
+/* src/pages/Account/AccountPage.scss - Complete updated styles */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
@@ -93,7 +93,7 @@
 
 /* Email verification banners */
 .verification-banner {
-  background-color: rgba(#fbbf24, 0.1); // Light amber background
+  background-color: rgba(#fbbf24, 0.1); /* Light amber background */
   border: 1px solid #fbbf24;
   border-radius: 4px;
   padding: $spacing-4;
@@ -109,7 +109,7 @@
   
   .resend-button {
     background-color: transparent;
-    color: #0284c7; // Blue
+    color: #0284c7; /* Blue */
     border: none;
     padding: 0;
     font-size: 0.9rem;
@@ -217,7 +217,7 @@
     
     .view-all-button, .add-new-button, .edit-button {
       background: none;
-      color: #0284c7; // Blue
+      color: #0284c7; /* Blue */
       border: none;
       padding: 0;
       font-size: 0.875rem;
@@ -250,11 +250,11 @@
       
       .product-status {
         &.active {
-          color: #10B981; // Green
+          color: #10B981; /* Green */
         }
         
         &.inactive {
-          color: #DC2626; // Red
+          color: #DC2626; /* Red */
         }
       }
     }
@@ -284,6 +284,115 @@
       &::before {
         content: "✓";
         margin-right: 0.25rem;
+      }
+    }
+  }
+}
+
+/* Addresses and Payment Methods lists */
+.addresses-list, .payment-methods-list {
+  margin-bottom: $spacing-4;
+  
+  .address-item, .payment-item {
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $gray-200;
+    border-radius: 6px;
+    margin-bottom: $spacing-3;
+    position: relative;
+    
+    .address-name, .payment-info {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: $spacing-1;
+    }
+    
+    .address-details, .payment-expiry {
+      font-size: 0.85rem;
+      color: $text-color-light;
+      line-height: 1.4;
+    }
+    
+    .default-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: $primary-color;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+  }
+  
+  .view-all-button {
+    display: inline-block;
+    color: $primary-color;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-top: $spacing-2;
+    
+    &:hover {
+      color: darken($primary-color, 10%);
+    }
+  }
+}
+
+/* Orders summary styling */
+.orders-summary {
+  margin-top: $spacing-3;
+  
+  .order-item {
+    padding: $spacing-3;
+    border: 1px solid $gray-200;
+    border-radius: 6px;
+    margin-bottom: $spacing-3;
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: $spacing-2;
+      
+      .order-id {
+        font-weight: 500;
+      }
+      
+      .order-date {
+        color: $text-color-light;
+        font-size: 0.85rem;
+      }
+    }
+    
+    .order-details {
+      font-size: 0.9rem;
+      
+      .order-plan {
+        margin-bottom: $spacing-1;
+      }
+      
+      .order-total {
+        font-weight: 500;
+      }
+      
+      .order-status {
+        display: inline-block;
+        margin-left: $spacing-2;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        
+        &.completed {
+          background-color: rgba(16, 185, 129, 0.1);
+          color: #10B981;
+        }
+        
+        &.processing {
+          background-color: rgba(245, 158, 11, 0.1);
+          color: #F59E0B;
+        }
       }
     }
   }

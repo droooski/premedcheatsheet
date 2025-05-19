@@ -1,4 +1,4 @@
-// src/pages/Account/AccountPage.js - Updated with email verification
+// src/pages/Account/AccountPage.js - Fully updated with proper data display
 
 /* eslint-disable no-unused-vars */
 
@@ -90,6 +90,10 @@ const AccountPage = () => {
             const userDoc = await getDoc(doc(db, "users", currentUser.uid));
             if (userDoc.exists()) {
               const profileData = userDoc.data();
+              console.log("LOADED USER PROFILE:", profileData); // Debug log
+              console.log("Payment methods:", profileData.paymentMethods || []); // Debug payment methods
+              console.log("Addresses:", profileData.addresses || []); // Debug addresses
+              console.log("Orders:", profileData.orders || []); // Debug orders
               setUserProfile(profileData);
               
               // Check subscription status
@@ -102,17 +106,63 @@ const AccountPage = () => {
                   setSubscriptionStatus('active');
                   setSubscriptionDetails(activeSubscription);
                   setRenewalDate(new Date(activeSubscription.endDate));
-                  setDigitalProducts([
-                    { id: 1, name: "PremedCheatsheet Members Access", status: "Active" },
-                    { id: 2, name: "Application Cheatsheet", status: "Active" }
-                  ]);
+                  
+                  // Use actual purchased plan instead of hardcoded values
+                  const digitalProductList = [];
+                  if (activeSubscription.plan) {
+                    let productName;
+                    switch(activeSubscription.plan) {
+                      case 'cheatsheet':
+                        productName = "PremedCheatsheet Members Access";
+                        break;
+                      case 'cheatsheet-plus':
+                        productName = "PremedCheatsheet+ Members Access";
+                        break;
+                      case 'application':
+                        productName = "Application Cheatsheet";
+                        break;
+                      case 'application-plus':
+                        productName = "Application Cheatsheet+";
+                        break;
+                      default:
+                        productName = "PremedCheatsheet Access";
+                    }
+                    digitalProductList.push({ 
+                      id: 1, 
+                      name: productName, 
+                      status: "Active" 
+                    });
+
+                    // If they have the application-plus plan, they have access to both products
+                    if (activeSubscription.plan === 'application-plus') {
+                      digitalProductList.push({
+                        id: 2,
+                        name: "Application Cheatsheet",
+                        status: "Active"
+                      });
+                    }
+                  }
+                  
+                  // Set digital products from actual subscription data
+                  setDigitalProducts(digitalProductList);
                 }
               }
               
-              // Set exact order data to match the screenshot
-              setOrders([
-                { id: "00650", date: "2023-04-15", status: "completed", total: "$59.99" }
-              ]);
+              // Use actual orders from user profile instead of hardcoded values
+              if (profileData.orders && profileData.orders.length > 0) {
+                const formattedOrders = profileData.orders.map((order, index) => ({
+                  id: order.orderId || `00${650 + index}`,
+                  date: order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : "2023-04-15",
+                  status: order.status || "completed",
+                  total: `$${order.amount ? order.amount.toFixed(2) : "0.00"}`,
+                  plan: order.plan || "",
+                  planName: order.planName || ""
+                }));
+                
+                setOrders(formattedOrders);
+              } else {
+                setOrders([]);
+              }
             }
           } catch (error) {
             console.error("Error fetching user profile:", error);
@@ -264,7 +314,7 @@ const AccountPage = () => {
               </button>
             </div>
             
-            {/* Profile Section (Moved to top) */}
+            {/* Profile Section */}
             <div className="account-card">
               <h2 className="section-title">Profile</h2>
               <div className="section-content">
@@ -281,10 +331,34 @@ const AccountPage = () => {
             {/* Address Section */}
             <div className="account-card">
               <h2 className="section-title">Address</h2>
-              <div className="section-content empty">
-                <p className="section-summary">No saved addresses</p>
-                <button className="add-new-button" onClick={() => navigate('/account/addresses')}>Add Address</button>
-              </div>
+              {userProfile?.addresses && userProfile.addresses.length > 0 ? (
+                <div className="section-content">
+                  <p className="section-summary">{userProfile.addresses.length} Saved {userProfile.addresses.length === 1 ? 'Address' : 'Addresses'}</p>
+                  <div className="addresses-list">
+                    {userProfile.addresses.slice(0, 1).map(address => (
+                      <div key={address.id} className="address-item">
+                        <p className="address-name">{address.name || address.fullName}</p>
+                        <p className="address-details">
+                          {address.line1 || address.addressLine1}{address.line2 || address.addressLine2 ? `, ${address.line2 || address.addressLine2}` : ''}
+                          <br />
+                          {address.city}, {address.state} {address.postalCode || address.zipCode}
+                          <br />
+                          {address.country}
+                        </p>
+                        {address.isDefault && <span className="default-tag">Default</span>}
+                      </div>
+                    ))}
+                    <button className="view-all-button" onClick={() => navigate('/account/addresses')}>
+                      Manage Addresses
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="section-content empty">
+                  <p className="section-summary">No saved addresses</p>
+                  <button className="add-new-button" onClick={() => navigate('/account/addresses')}>Add Address</button>
+                </div>
+              )}
             </div>
             
             {/* Digital Products Section */}
@@ -319,6 +393,23 @@ const AccountPage = () => {
                   <p className="section-summary">
                     Last order #{orders[0].id} is {orders[0].status}
                   </p>
+                  <div className="orders-summary">
+                    {orders.slice(0, 1).map(order => (
+                      <div key={order.id} className="order-item">
+                        <div className="order-header">
+                          <span className="order-id">Order #{order.id}</span>
+                          <span className="order-date">{order.date}</span>
+                        </div>
+                        <div className="order-details">
+                          {order.planName && (
+                            <p className="order-plan">{order.planName}</p>
+                          )}
+                          <span className="order-total">{order.total}</span>
+                          <span className={`order-status ${order.status}`}>{order.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="section-content empty">
@@ -330,10 +421,34 @@ const AccountPage = () => {
             {/* Payment Section */}
             <div className="account-card">
               <h2 className="section-title">Payment</h2>
-              <div className="section-content empty">
-                <p className="section-summary">No saved payments</p>
-                <button className="add-new-button" onClick={() => navigate('/account/payment-methods')}>Add Payment Method</button>
-              </div>
+              {userProfile?.paymentMethods && userProfile.paymentMethods.length > 0 ? (
+                <div className="section-content">
+                  <p className="section-summary">{userProfile.paymentMethods.length} Saved Payment {userProfile.paymentMethods.length === 1 ? 'Method' : 'Methods'}</p>
+                  <div className="payment-methods-list">
+                    {userProfile.paymentMethods.slice(0, 1).map(payment => (
+                      <div key={payment.id} className="payment-item">
+                        <p className="payment-info">
+                          <span className="card-type">
+                            {payment.cardType === 'Coupon' ? 'Free Purchase' : payment.cardType || 'Card'}
+                          </span> ending in <span className="card-last4">{payment.lastFourDigits || '****'}</span>
+                        </p>
+                        <p className="payment-expiry">
+                          {payment.expiryDate && payment.expiryDate !== 'N/A' ? `Expires: ${payment.expiryDate}` : ''}
+                        </p>
+                        {payment.isDefault && <span className="default-tag">Default</span>}
+                      </div>
+                    ))}
+                    <button className="view-all-button" onClick={() => navigate('/account/payment-methods')}>
+                      Manage Payment Methods
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="section-content empty">
+                  <p className="section-summary">No saved payments</p>
+                  <button className="add-new-button" onClick={() => navigate('/account/payment-methods')}>Add Payment Method</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
