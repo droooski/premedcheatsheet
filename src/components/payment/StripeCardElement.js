@@ -1,6 +1,7 @@
-// Modified StripeCardElement.js to position the Pay Now button after billing address
-import React, { useState } from 'react';
+// src/components/payment/StripeCardElement.js
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import './StripeCardElement.scss';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -21,59 +22,46 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: true,
 };
 
-const StripeCardElement = ({ onSuccess, onError, processingPayment }) => {
+/**
+ * This component renders a Stripe card input and handles payment submissions.
+ * It processes payments directly on your site without redirecting to third-party sites.
+ */
+const StripeCardElement = forwardRef(({ onSuccess, onError, processingPayment }, ref) => {
   const stripe = useStripe();
   const elements = useElements();
   const [cardComplete, setCardComplete] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [cardError, setCardError] = useState(null);
 
+  // The handleSubmit function that processes the payment
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
 
     if (!stripe || !elements) {
-      // Stripe.js has not loaded yet. Make sure to disable
-      // form submission until Stripe.js has loaded.
-      return;
+      setCardError("Payment system is not ready. Please try again.");
+      onError && onError("Payment system is not ready. Please try again.");
+      return false;
     }
 
     if (!cardholderName) {
       setCardError("Please enter the cardholder's name");
-      onError("Please enter the cardholder's name");
-      return;
+      onError && onError("Please enter the cardholder's name");
+      return false;
     }
 
     if (!cardComplete) {
       setCardError("Please complete your card information");
-      onError("Please complete your card information");
-      return;
+      onError && onError("Please complete your card information");
+      return false;
     }
 
-    // Get a reference to a mounted CardElement
-    const cardElement = elements.getElement(CardElement);
-
-    // For demo/test purposes - simulate success
-    // In production, this would call your backend API to create a payment intent
-    // and then confirm the payment with Stripe
-    
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(() => {
-        onSuccess({
-          paymentMethod: {
-            id: `pm_${Math.random().toString(36).substr(2, 9)}`,
-            card: {
-              brand: 'visa',
-              last4: '4242'
-            }
-          }
-        });
-      }, 2000);
-      return;
-    }
-
-    // For production use:
     try {
-      // Create a payment method
+      // Get a reference to a mounted CardElement
+      const cardElement = elements.getElement(CardElement);
+
+      // Create a payment method with the card element
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -83,73 +71,73 @@ const StripeCardElement = ({ onSuccess, onError, processingPayment }) => {
       });
 
       if (error) {
+        console.error('Error creating payment method:', error);
         setCardError(error.message);
-        onError(error.message);
-        return;
+        onError && onError(error.message);
+        return false;
       }
 
+      console.log('Payment method created successfully:', paymentMethod);
+      
       // Pass the payment method to parent component
-      onSuccess(paymentMethod);
+      onSuccess && onSuccess(paymentMethod);
+      return true;
     } catch (err) {
+      console.error('Stripe payment error:', err);
       setCardError(err.message);
-      onError(err.message);
+      onError && onError(err.message);
+      return false;
     }
   };
 
+  // Expose the handleSubmit method to parent components
+  useImperativeHandle(ref, () => ({
+    handleSubmit
+  }));
+
   return (
     <div className="stripe-card-element">
-      <form onSubmit={handleSubmit} className="stripe-form">
-        <div className="card-input-section">
-          <div className="form-group">
-            <label htmlFor="cardholderName">NAME ON CARD</label>
-            <input
-              id="cardholderName"
-              type="text"
-              placeholder="Jane Smith"
-              required
-              value={cardholderName}
-              onChange={(e) => setCardholderName(e.target.value)}
-              className="name-input"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="cardElement">CARD DETAILS</label>
-            <div className="card-element-container">
-              <CardElement 
-                id="cardElement"
-                options={CARD_ELEMENT_OPTIONS} 
-                onChange={(e) => {
-                  setCardComplete(e.complete);
-                  if (e.error) {
-                    setCardError(e.error.message);
-                    onError(e.error.message);
-                  } else {
-                    setCardError(null);
-                  }
-                }}
-              />
-            </div>
-          </div>
-          
-          {cardError && (
-            <div className="card-error">
-              {cardError}
-            </div>
-          )}
+      <div className="card-input-section">
+        <div className="form-group">
+          <label htmlFor="cardholderName">NAME ON CARD</label>
+          <input
+            id="cardholderName"
+            type="text"
+            placeholder="Jane Smith"
+            required
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value)}
+            className="name-input"
+          />
         </div>
         
-        {/* This button will be rendered after the billing address via CSS */}
-        {/* <button 
-          type="submit" 
-          className="payment-button"
-          disabled={!stripe || processingPayment}
-        >
-          {processingPayment ? 'Processing...' : 'Pay Now'}
-        </button> */}
-      </form>
+        <div className="form-group">
+          <label htmlFor="cardElement">CARD DETAILS</label>
+          <div className="card-element-container">
+            <CardElement 
+              id="cardElement"
+              options={CARD_ELEMENT_OPTIONS} 
+              onChange={(e) => {
+                setCardComplete(e.complete);
+                if (e.error) {
+                  setCardError(e.error.message);
+                  onError && onError(e.error.message);
+                } else {
+                  setCardError(null);
+                }
+              }}
+            />
+          </div>
+        </div>
+        
+        {cardError && (
+          <div className="card-error">
+            {cardError}
+          </div>
+        )}
+      </div>
     </div>
   );
-};
+});
 
 export default StripeCardElement;

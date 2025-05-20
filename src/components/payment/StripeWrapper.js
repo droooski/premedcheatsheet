@@ -1,37 +1,35 @@
-// src/components/payment/StripeWrapper.js - Updated to handle the payment submission differently
+// src/components/payment/StripeWrapper.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import StripeCardElement from './StripeCardElement';
 
+/**
+ * This component initializes Stripe and provides the Elements context
+ * for the Stripe card element. It uses your Stripe publishable key from .env
+ */
 const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
   const [stripePromise, setStripePromise] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const stripeElementRef = useRef(null);
+  const stripeCardRef = useRef(null);
 
-  // Expose payment submission method to parent
-  const handleSubmitPayment = () => {
-    if (stripeElementRef.current) {
-      return StripeCardElement.handlePaymentSubmit(stripeElementRef);
-    }
-    return false;
-  };
-
+  // Initialize Stripe when component mounts
   useEffect(() => {
-    // Use a try-catch to handle potential errors when loading Stripe
     const initializeStripe = async () => {
       try {
         // Load the Stripe publishable key from environment variables
         const stripeKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
         
         if (!stripeKey) {
-          console.warn('Stripe publishable key not found in environment variables. Using test key.');
-          // Fallback to a test key if environment variable is missing
-          setStripePromise(loadStripe('pk_test_51POBOwHQeGJfTtmjdl7zRS7BIfXaBMlhDX3w3swTGiRc8qNmm0eKZpQUypPcH0nzPtxfUsrYpUDlO4xxSGURwWjY00qM4Kjv55'));
-        } else {
-          setStripePromise(loadStripe(stripeKey));
+          console.warn('Stripe publishable key not found in environment variables.');
+          throw new Error('Missing Stripe publishable key');
         }
+        
+        // Initialize Stripe with the publishable key
+        console.log('Initializing Stripe with key:', stripeKey.substring(0, 8) + '...');
+        const stripe = await loadStripe(stripeKey);
+        setStripePromise(stripe);
         setLoading(false);
       } catch (err) {
         console.error('Error initializing Stripe:', err);
@@ -46,18 +44,26 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
     initializeStripe();
   }, [onError]);
 
-  // Expose the submit payment method to the parent component
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.submitStripePayment = handleSubmitPayment;
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        delete window.submitStripePayment;
+  // Handle payment submission
+  const handleSubmitPayment = async () => {
+    if (stripeCardRef.current && stripeCardRef.current.handleSubmit) {
+      try {
+        return await stripeCardRef.current.handleSubmit();
+      } catch (error) {
+        console.error('Error submitting payment:', error);
+        return false;
       }
-    };
-  }, []);
+    }
+    return false;
+  };
+
+  // Expose the payment submission method to parent components
+  React.useImperativeHandle(
+    React.useRef,
+    () => ({
+      submitPayment: handleSubmitPayment
+    })
+  );
 
   if (loading) {
     return <div className="stripe-loading">Loading payment system...</div>;
@@ -71,7 +77,7 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
   return stripePromise ? (
     <Elements stripe={stripePromise}>
       <StripeCardElement 
-        ref={stripeElementRef}
+        ref={stripeCardRef}
         onSuccess={onSuccess}
         onError={onError}
         processingPayment={processingPayment}
@@ -79,14 +85,6 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
       {children}
     </Elements>
   ) : null;
-};
-
-// Expose the payment submission method
-StripeWrapper.submitPayment = function() {
-  if (typeof window !== 'undefined' && window.submitStripePayment) {
-    return window.submitStripePayment();
-  }
-  return false;
 };
 
 export default StripeWrapper;

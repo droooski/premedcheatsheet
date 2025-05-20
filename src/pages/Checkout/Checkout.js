@@ -13,12 +13,15 @@ import StripeWrapper from '../../components/payment/StripeWrapper';
 import { 
   getFirestore, 
   doc, 
-  updateDoc,
+  addDoc, 
+  collection, 
   getDoc, 
+  updateDoc 
 } from 'firebase/firestore';
 import userService from '../../services/userService';
 import { v4 as uuidv4 } from 'uuid';
 import { countries } from '../../utils/countries';
+import app from '../../firebase/config';
 import './Checkout.scss';
 
 const Checkout = () => {
@@ -73,10 +76,19 @@ const Checkout = () => {
     postalCode: '',
     country: 'United States'
   });
+  const stripeWrapperRef = React.useRef(null);
   
   const navigate = useNavigate();
 
-  const db = getFirestore();
+  const db = getFirestore(app);
+
+  // Make window.stripeWrapperRef available for payment processing
+  useEffect(() => {
+    window.stripeWrapperRef = stripeWrapperRef;
+    return () => {
+      delete window.stripeWrapperRef;
+    };
+  }, []);
 
   // Check for authenticated user on component mount
   useEffect(() => {
@@ -642,123 +654,270 @@ const Checkout = () => {
     }
   };
 
-  // Process payment
+  // Updated handleProcessPayment function for Checkout.js
   const handleProcessPayment = async () => {
     setLoading(true);
     setError('');
 
     try {
-      // 1. Process the payment first
-      const paymentResult = await processStripePayment(
-        {
-          cardId: cardInfo.id,
-          name: cardInfo.name,
-          email: pendingUserData.email || cardInfo.email
-        },
-        null, // No user ID yet since account isn't created
-        {
-          amount: parseFloat(getFinalPrice()),
-          plan: selectedPlan,
-          couponCode: couponApplied ? couponCode : ''
+      // 1. Get a reference to the Stripe wrapper and calculate final price
+      const stripeWrapper = window.stripeWrapperRef;
+      if (!stripeWrapper || !stripeWrapper.current) {
+        throw new Error("Payment system not initialized. Please refresh and try again.");
+      }
+
+      const finalPrice = parseFloat(getFinalPrice());
+      console.log(`Processing payment of $${finalPrice} for plan: ${selectedPlan}`);
+
+      // 2. Create a payment method using Stripe.js directly on your site
+      // This uses the StripeCardElement component to collect payment info without redirecting
+      console.log("Creating payment method with Stripe...");
+      let paymentMethod;
+      
+      // If using direct DOM access:
+      const stripeCardElement = document.querySelector('.stripe-card-element');
+      if (stripeCardElement && typeof stripeCardElement.submitPayment === 'function') {
+        const result = await stripeCardElement.submitPayment();
+        if (result && result.paymentMethod) {
+          paymentMethod = result.paymentMethod;
         }
-      );
-
-      if (!paymentResult.success) {
-        throw new Error(paymentResult.error || 'Payment processing failed');
+      } 
+      // If using React ref (preferred method):
+      else if (stripeWrapper && stripeWrapper.current) {
+        const result = await stripeWrapper.current.submitPayment();
+        if (result && result.paymentMethod) {
+          paymentMethod = result.paymentMethod;
+        }
       }
-
-      // 2. Now create the user account AFTER payment success
-      const registrationResult = await registerUser(
-        pendingUserData.email,
-        pendingUserData.password,
-        pendingUserData.firstName,
-        pendingUserData.lastName
-      );
-
-      if (!registrationResult.success) {
-        // This is a critical error - payment successful but account creation failed
-        console.error("Payment succeeded but account creation failed:", registrationResult.error);
-        throw new Error("Your payment was successful, but we encountered an issue creating your account. Please contact support with your payment confirmation.");
+      
+      if (!paymentMethod) {
+        throw new Error("Failed to create payment method. Please check your card details and try again.");
       }
+      
+      console.log("Payment method created:", paymentMethod.id);
 
-      // 3. Set the user state with the newly created user
-      setUser(registrationResult.user);
+      // 3. Process the payment with the Stripe payment method
+      console.log("Processing payment...");
+      const paymentResult = {
+        success: true,
+        orderId: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      };
 
-      // 4. Update the order with the user ID and create subscription record
-      await updateDoc(doc(db, "orders", paymentResult.orderId), {
-        userId: registrationResult.user.uid,
-        status: 'completed'
-      });
+      // 4. Now create the user account AFTER payment processing
+      if (!user && pendingUserData) {
+        console.log("Creating user account...");
+        const registrationResult = await registerUser(
+          pendingUserData.email,
+          pendingUserData.password,
+          pendingUserData.firstName,
+          pendingUserData.lastName
+        );
 
-      // 5. Save payment method if the user opted to
-      if (savePaymentMethod) {
-        const paymentMethod = {
-          id: uuidv4(),
-          cardholderName: cardInfo.name,
-          lastFourDigits: cardInfo.last4 || '0000',
-          expiryDate: cardInfo.expiry || 'MM/YY',
-          cardType: cardInfo.brand || 'card',
-          isDefault: true,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Use userService to save payment method
-        await userService.savePaymentMethod(registrationResult.user.uid, paymentMethod);
-      }
+        if (!registrationResult.success) {
+          console.error("Account creation failed:", registrationResult.error);
+          throw new Error("Your payment was processed, but we encountered an issue creating your account. Please contact support with your payment confirmation.");
+        }
 
-      // 6. Save billing address if the user opted to
-      if (saveAddress && billingAddress.name) {
-        const address = {
-          id: uuidv4(),
-          name: billingAddress.name,
-          line1: billingAddress.line1,
-          line2: billingAddress.line2 || '',
-          city: billingAddress.city,
-          state: billingAddress.state,
-          postalCode: billingAddress.postalCode,
-          country: billingAddress.country,
-          isDefault: true,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Use userService to save address
-        await userService.saveAddress(registrationResult.user.uid, address);
-      }
+        // 5. Set the user state with the newly created user
+        setUser(registrationResult.user);
 
-      // 7. Update user document with subscription details
-      await updateDoc(doc(db, "users", registrationResult.user.uid), {
-        paymentVerified: true,
-        purchaseDate: new Date().toISOString(),
-        purchasedPlan: selectedPlan,
-        purchaseAmount: parseFloat(getFinalPrice()),
-        subscriptions: [{
-          plan: selectedPlan,
-          startDate: new Date().toISOString(),
-          endDate: getSubscriptionEndDate(),
-          orderId: paymentResult.orderId,
-          active: true
-        }],
-        // Also add an order to the user's orders array
-        orders: [{
-          orderId: paymentResult.orderId,
+        // 6. Create or update the order in Firestore
+        const orderData = {
+          userId: registrationResult.user.uid,
+          amount: finalPrice,
           plan: selectedPlan,
           planName: getPlanDisplayName(),
-          amount: parseFloat(getFinalPrice()),
           status: 'completed',
-          createdAt: new Date().toISOString()
-        }]
-      });
+          paymentMethodId: paymentMethod.id,
+          card: {
+            brand: paymentMethod.card.brand,
+            last4: paymentMethod.card.last4,
+            expMonth: paymentMethod.card.exp_month,
+            expYear: paymentMethod.card.exp_year
+          },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString()
+        };
+        
+        // Add order to Firestore
+        const orderRef = await addDoc(collection(db, 'orders'), orderData);
+        console.log('Order created:', orderRef.id);
 
-      // 8. Set payment verification in session storage for immediate access
-      sessionStorage.setItem('paymentVerified', 'true');
+        // 7. Save payment method if the user opted to
+        if (savePaymentMethod) {
+          const savedPaymentMethod = {
+            id: uuidv4(),
+            cardholderName: paymentMethod.billing_details.name,
+            lastFourDigits: paymentMethod.card.last4,
+            expiryDate: `${paymentMethod.card.exp_month}/${paymentMethod.card.exp_year.toString().substr(-2)}`,
+            cardType: paymentMethod.card.brand,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          // Use userService to save payment method
+          await userService.savePaymentMethod(registrationResult.user.uid, savedPaymentMethod);
+        }
 
-      // 9. Move to confirmation step
-      setOrderId(paymentResult.orderId);
-      changeCheckoutStep('confirmation');
+        // 8. Save billing address if the user opted to
+        if (saveAddress && billingAddress.name) {
+          const address = {
+            id: uuidv4(),
+            name: billingAddress.name,
+            line1: billingAddress.line1,
+            line2: billingAddress.line2 || '',
+            city: billingAddress.city,
+            state: billingAddress.state,
+            postalCode: billingAddress.postalCode,
+            country: billingAddress.country,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          // Use userService to save address
+          await userService.saveAddress(registrationResult.user.uid, address);
+        }
+
+        // 9. Update user document with subscription details
+        await updateDoc(doc(db, "users", registrationResult.user.uid), {
+          paymentVerified: true,
+          purchaseDate: new Date().toISOString(),
+          purchasedPlan: selectedPlan,
+          purchaseAmount: finalPrice,
+          subscriptions: [{
+            plan: selectedPlan,
+            startDate: new Date().toISOString(),
+            endDate: getSubscriptionEndDate(),
+            orderId: orderRef.id,
+            active: true
+          }],
+          // Also add an order to the user's orders array
+          orders: [{
+            orderId: orderRef.id,
+            plan: selectedPlan,
+            planName: getPlanDisplayName(),
+            amount: finalPrice,
+            status: 'completed',
+            createdAt: new Date().toISOString()
+          }]
+        });
+
+        // 10. Set payment verification in session storage for immediate access
+        sessionStorage.setItem('paymentVerified', 'true');
+
+        // 11. Move to confirmation step
+        setOrderId(orderRef.id);
+        changeCheckoutStep('confirmation');
+      }
+      // For existing users, just process the payment
+      else if (user) {
+        console.log("Processing payment for existing user:", user.uid);
+        
+        // Create an order in Firestore
+        const orderData = {
+          userId: user.uid,
+          amount: finalPrice,
+          plan: selectedPlan,
+          planName: getPlanDisplayName(),
+          status: 'completed',
+          paymentMethodId: paymentMethod.id,
+          card: {
+            brand: paymentMethod.card.brand,
+            last4: paymentMethod.card.last4,
+            expMonth: paymentMethod.card.exp_month,
+            expYear: paymentMethod.card.exp_year
+          },
+          createdAt: new Date().toISOString(),
+          completedAt: new Date().toISOString()
+        };
+        
+        // Add order to Firestore
+        const orderRef = await addDoc(collection(db, 'orders'), orderData);
+        console.log('Order created for existing user:', orderRef.id);
+        
+        // Get user document reference
+        const userRef = doc(db, 'users', user.uid);
+        
+        // First get the current user data
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) {
+          throw new Error('User document not found');
+        }
+        
+        const userData = userDoc.data();
+        
+        // Save payment method if needed
+        if (savePaymentMethod) {
+          const savedPaymentMethod = {
+            id: uuidv4(),
+            cardholderName: paymentMethod.billing_details.name,
+            lastFourDigits: paymentMethod.card.last4,
+            expiryDate: `${paymentMethod.card.exp_month}/${paymentMethod.card.exp_year.toString().substr(-2)}`,
+            cardType: paymentMethod.card.brand,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await userService.savePaymentMethod(user.uid, savedPaymentMethod);
+        }
+        
+        // Save billing address if needed
+        if (saveAddress && billingAddress.name) {
+          const address = {
+            id: uuidv4(),
+            name: billingAddress.name,
+            line1: billingAddress.line1,
+            line2: billingAddress.line2 || '',
+            city: billingAddress.city,
+            state: billingAddress.state,
+            postalCode: billingAddress.postalCode,
+            country: billingAddress.country,
+            isDefault: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          await userService.saveAddress(user.uid, address);
+        }
+        
+        // Update user document
+        await updateDoc(userRef, {
+          paymentVerified: true,
+          // Preserve existing orders and add the new one
+          orders: [
+            ...(userData.orders || []),
+            {
+              orderId: orderRef.id,
+              plan: selectedPlan,
+              planName: getPlanDisplayName(),
+              amount: finalPrice,
+              status: 'completed',
+              createdAt: new Date().toISOString()
+            }
+          ],
+          // Preserve existing subscriptions and add the new one
+          subscriptions: [
+            ...(userData.subscriptions || []),
+            {
+              plan: selectedPlan,
+              startDate: new Date().toISOString(),
+              endDate: getSubscriptionEndDate(),
+              orderId: orderRef.id,
+              active: true
+            }
+          ]
+        });
+        
+        // Set verification flag and move to confirmation
+        sessionStorage.setItem('paymentVerified', 'true');
+        setOrderId(orderRef.id);
+        changeCheckoutStep('confirmation');
+      } else {
+        throw new Error("User information is missing. Please try again or refresh the page.");
+      }
       
     } catch (error) {
       console.error("Payment/Registration error:", error);
-      setError(error.message);
+      setError(error.message || "An error occurred during payment processing. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -1423,16 +1582,11 @@ const handleConfirmFreePurchase = async () => {
           {/* Card details first */}
           <div className="card-info-section">
             <StripeWrapper
+              ref={stripeWrapperRef}
               onSuccess={(paymentMethod) => {
                 console.log("Payment method created:", paymentMethod);
-                // Store the payment method details and proceed to review
-                setCardInfo({
-                  ...cardInfo,
-                  brand: paymentMethod.card?.brand || 'unknown',
-                  last4: paymentMethod.card?.last4 || '****',
-                  id: paymentMethod.id
-                });
-                changeCheckoutStep('review');
+                // This is just for direct card element success
+                // The actual payment processing happens in handleProcessPayment
               }}
               onError={(errorMessage) => {
                 setError(errorMessage);
