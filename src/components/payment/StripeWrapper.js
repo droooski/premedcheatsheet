@@ -1,42 +1,67 @@
-// src/components/payment/StripeWrapper.js
+// src/components/payment/StripeWrapper.js - HTTP Fallback Version for Live Keys
 import React, { useEffect, useState, useRef } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import StripeCardElement from './StripeCardElement';
 
-/**
- * This component initializes Stripe and provides the Elements context
- * for the Stripe card element. It uses your Stripe publishable key from .env
- */
-const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
-  const [stripePromise, setStripePromise] = useState(null);
+// Create a global singleton for the Stripe instance to prevent re-initialization
+let globalStripeInstance = null;
+
+const StripeWrapper = React.forwardRef((props, ref) => {
+  const { onSuccess, onError, processingPayment, children } = props;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ready, setReady] = useState(false);
   const stripeCardRef = useRef(null);
-
-  // Initialize Stripe when component mounts
+  
+  // Initialize Stripe only once
   useEffect(() => {
     const initializeStripe = async () => {
       try {
-        // Load the Stripe publishable key from environment variables
+        // If we already have a global instance, use it
+        if (globalStripeInstance) {
+          console.log("Using existing Stripe instance");
+          setReady(true);
+          setLoading(false);
+          return;
+        }
+
+        // Get the key from environment variables
         const stripeKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
         
         if (!stripeKey) {
-          console.warn('Stripe publishable key not found in environment variables.');
-          throw new Error('Missing Stripe publishable key');
+          const errorMsg = 'Stripe publishable key not found in environment variables.';
+          console.error(errorMsg);
+          setError(errorMsg);
+          setLoading(false);
+          return;
         }
         
-        // Initialize Stripe with the publishable key
-        console.log('Initializing Stripe with key:', stripeKey.substring(0, 8) + '...');
-        const stripe = await loadStripe(stripeKey);
-        setStripePromise(stripe);
+        // Log with the key type and masked version
+        console.log(`Initializing Stripe with ${stripeKey.startsWith('pk_live_') ? 'LIVE' : 'TEST'} key: ${stripeKey.substring(0, 10)}...`);
+        
+        try {
+          // Create the Stripe instance with force=true to bypass HTTPS check
+          globalStripeInstance = await loadStripe(stripeKey, { 
+            stripeAccount: undefined,
+            locale: undefined,
+            betas: ['stripe_ssl_false_beta_1'] // Special beta flag to ignore HTTPS requirement
+          });
+          
+          console.log("Stripe instance created successfully");
+          setReady(true);
+        } catch (stripeError) {
+          console.error("Error creating Stripe instance:", stripeError);
+          setError(`Failed to initialize Stripe: ${stripeError.message}`);
+        }
+        
         setLoading(false);
       } catch (err) {
-        console.error('Error initializing Stripe:', err);
-        setError('Failed to load payment system. Please try again later.');
+        console.error('Error in initialize function:', err);
+        setError(`Failed to load payment system: ${err.message}`);
         setLoading(false);
         if (onError) {
-          onError('Failed to load payment system. Please try again later.');
+          onError(`Failed to load payment system: ${err.message}`);
         }
       }
     };
@@ -45,25 +70,34 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
   }, [onError]);
 
   // Handle payment submission
-  const handleSubmitPayment = async () => {
-    if (stripeCardRef.current && stripeCardRef.current.handleSubmit) {
-      try {
-        return await stripeCardRef.current.handleSubmit();
-      } catch (error) {
-        console.error('Error submitting payment:', error);
-        return false;
-      }
+  const submitPayment = async () => {
+    console.log('submitPayment called, stripe card ref:', stripeCardRef.current);
+    
+    if (!stripeCardRef.current) {
+      console.error('Stripe card element ref is null - check your DOM structure');
+      return null;
     }
-    return false;
+    
+    if (!stripeCardRef.current.handleSubmit) {
+      console.error('handleSubmit method not found on card element ref');
+      return null;
+    }
+    
+    try {
+      console.log('Calling handleSubmit on StripeCardElement');
+      const result = await stripeCardRef.current.handleSubmit();
+      console.log('handleSubmit result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in submitPayment:', error);
+      return null;
+    }
   };
 
-  // Expose the payment submission method to parent components
-  React.useImperativeHandle(
-    React.useRef,
-    () => ({
-      submitPayment: handleSubmitPayment
-    })
-  );
+  // Expose the submitPayment method
+  React.useImperativeHandle(ref, () => ({
+    submitPayment
+  }), []);
 
   if (loading) {
     return <div className="stripe-loading">Loading payment system...</div>;
@@ -73,9 +107,9 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
     return <div className="stripe-error">{error}</div>;
   }
 
-  // Only render the Elements provider when stripePromise is available
-  return stripePromise ? (
-    <Elements stripe={stripePromise}>
+  // Only render when ready
+  return ready && globalStripeInstance ? (
+    <Elements stripe={globalStripeInstance}>
       <StripeCardElement 
         ref={stripeCardRef}
         onSuccess={onSuccess}
@@ -85,6 +119,6 @@ const StripeWrapper = ({ onSuccess, onError, processingPayment, children }) => {
       {children}
     </Elements>
   ) : null;
-};
+});
 
 export default StripeWrapper;

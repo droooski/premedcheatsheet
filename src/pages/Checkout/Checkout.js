@@ -1,7 +1,7 @@
 // src/pages/Checkout/Checkout.js
 
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
@@ -76,15 +76,18 @@ const Checkout = () => {
     postalCode: '',
     country: 'United States'
   });
-  const stripeWrapperRef = React.useRef(null);
+  const stripeWrapperRef = useRef(null);
   
   const navigate = useNavigate();
 
   const db = getFirestore(app);
 
-  // Make window.stripeWrapperRef available for payment processing
+  // Add this useEffect hook to set up the Stripe wrapper
   useEffect(() => {
+    // Make the ref accessible globally for easier debugging
     window.stripeWrapperRef = stripeWrapperRef;
+    
+    // Cleanup function to remove the ref when component unmounts
     return () => {
       delete window.stripeWrapperRef;
     };
@@ -660,50 +663,38 @@ const Checkout = () => {
     setError('');
 
     try {
-      // 1. Get a reference to the Stripe wrapper and calculate final price
-      const stripeWrapper = window.stripeWrapperRef;
-      if (!stripeWrapper || !stripeWrapper.current) {
+      console.log("Starting payment processing...");
+      console.log("stripeWrapperRef:", stripeWrapperRef);
+      
+      // Check if stripeWrapperRef is available
+      if (!stripeWrapperRef || !stripeWrapperRef.current) {
+        console.error("Stripe wrapper ref is not available");
         throw new Error("Payment system not initialized. Please refresh and try again.");
       }
+      
+      console.log("stripeWrapperRef.current:", stripeWrapperRef.current);
+      console.log("submitPayment method available:", typeof stripeWrapperRef.current.submitPayment === 'function');
 
       const finalPrice = parseFloat(getFinalPrice());
       console.log(`Processing payment of $${finalPrice} for plan: ${selectedPlan}`);
 
-      // 2. Create a payment method using Stripe.js directly on your site
-      // This uses the StripeCardElement component to collect payment info without redirecting
+      // Call the submitPayment method on the StripeWrapper component
       console.log("Creating payment method with Stripe...");
-      let paymentMethod;
+      const paymentResult = await stripeWrapperRef.current.submitPayment();
+      console.log("Payment result:", paymentResult);
       
-      // If using direct DOM access:
-      const stripeCardElement = document.querySelector('.stripe-card-element');
-      if (stripeCardElement && typeof stripeCardElement.submitPayment === 'function') {
-        const result = await stripeCardElement.submitPayment();
-        if (result && result.paymentMethod) {
-          paymentMethod = result.paymentMethod;
-        }
-      } 
-      // If using React ref (preferred method):
-      else if (stripeWrapper && stripeWrapper.current) {
-        const result = await stripeWrapper.current.submitPayment();
-        if (result && result.paymentMethod) {
-          paymentMethod = result.paymentMethod;
-        }
-      }
-      
-      if (!paymentMethod) {
+      if (!paymentResult || !paymentResult.success || !paymentResult.paymentMethod) {
+        console.error("Failed to create payment method", paymentResult);
         throw new Error("Failed to create payment method. Please check your card details and try again.");
       }
       
+      const paymentMethod = paymentResult.paymentMethod;
       console.log("Payment method created:", paymentMethod.id);
 
-      // 3. Process the payment with the Stripe payment method
-      console.log("Processing payment...");
-      const paymentResult = {
-        success: true,
-        orderId: `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-      };
+      // 3. Create a unique order ID
+      const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-      // 4. Now create the user account AFTER payment processing
+      // 4. Now create the user account AFTER payment processing (for new users)
       if (!user && pendingUserData) {
         console.log("Creating user account...");
         const registrationResult = await registerUser(
@@ -713,8 +704,8 @@ const Checkout = () => {
           pendingUserData.lastName
         );
 
-        if (!registrationResult.success) {
-          console.error("Account creation failed:", registrationResult.error);
+        if (!registrationResult.user) { // Change to check for user property instead of success
+          console.error("Account creation failed");
           throw new Error("Your payment was processed, but we encountered an issue creating your account. Please contact support with your payment confirmation.");
         }
 
@@ -1585,8 +1576,6 @@ const handleConfirmFreePurchase = async () => {
               ref={stripeWrapperRef}
               onSuccess={(paymentMethod) => {
                 console.log("Payment method created:", paymentMethod);
-                // This is just for direct card element success
-                // The actual payment processing happens in handleProcessPayment
               }}
               onError={(errorMessage) => {
                 setError(errorMessage);

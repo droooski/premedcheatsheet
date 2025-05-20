@@ -1,5 +1,5 @@
-// src/components/payment/StripeCardElement.js
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+// src/components/payment/StripeCardElement.js - ESLint Fix
+import React, { useState, useCallback } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './StripeCardElement.scss';
 
@@ -22,46 +22,59 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: true,
 };
 
-/**
- * This component renders a Stripe card input and handles payment submissions.
- * It processes payments directly on your site without redirecting to third-party sites.
- */
-const StripeCardElement = forwardRef(({ onSuccess, onError, processingPayment }, ref) => {
+// Using a named function component with forwardRef for better debugging
+const StripeCardElement = React.forwardRef(function StripeCardElement(props, ref) {
+  const { onSuccess, onError } = props;
   const stripe = useStripe();
   const elements = useElements();
   const [cardComplete, setCardComplete] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [cardError, setCardError] = useState(null);
 
-  // The handleSubmit function that processes the payment
-  const handleSubmit = async (event) => {
-    if (event) {
-      event.preventDefault();
-    }
+  // Wrap handleSubmit in useCallback to avoid linting warnings
+  // and ensure stable reference for useImperativeHandle
+  const handleSubmit = useCallback(async () => {
+    console.log('StripeCardElement.handleSubmit called');
+    console.log('- stripe:', !!stripe);
+    console.log('- elements:', !!elements);
+    console.log('- cardComplete:', cardComplete);
+    console.log('- cardholderName:', cardholderName);
 
     if (!stripe || !elements) {
-      setCardError("Payment system is not ready. Please try again.");
-      onError && onError("Payment system is not ready. Please try again.");
-      return false;
+      const errorMsg = "Payment system is not ready. Please try again.";
+      console.error(errorMsg);
+      setCardError(errorMsg);
+      onError && onError(errorMsg);
+      return null;
     }
 
     if (!cardholderName) {
-      setCardError("Please enter the cardholder's name");
-      onError && onError("Please enter the cardholder's name");
-      return false;
+      const errorMsg = "Please enter the cardholder's name";
+      console.error(errorMsg);
+      setCardError(errorMsg);
+      onError && onError(errorMsg);
+      return null;
     }
 
     if (!cardComplete) {
-      setCardError("Please complete your card information");
-      onError && onError("Please complete your card information");
-      return false;
+      const errorMsg = "Please complete your card information";
+      console.error(errorMsg);
+      setCardError(errorMsg);
+      onError && onError(errorMsg);
+      return null;
     }
 
     try {
       // Get a reference to a mounted CardElement
       const cardElement = elements.getElement(CardElement);
+      console.log('- CardElement obtained:', !!cardElement);
+
+      if (!cardElement) {
+        throw new Error("Card element not found");
+      }
 
       // Create a payment method with the card element
+      console.log('Creating payment method...');
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -74,26 +87,27 @@ const StripeCardElement = forwardRef(({ onSuccess, onError, processingPayment },
         console.error('Error creating payment method:', error);
         setCardError(error.message);
         onError && onError(error.message);
-        return false;
+        return null;
       }
 
       console.log('Payment method created successfully:', paymentMethod);
       
       // Pass the payment method to parent component
       onSuccess && onSuccess(paymentMethod);
-      return true;
+      return { success: true, paymentMethod };
     } catch (err) {
       console.error('Stripe payment error:', err);
       setCardError(err.message);
       onError && onError(err.message);
-      return false;
+      return null;
     }
-  };
+  }, [stripe, elements, cardComplete, cardholderName, onSuccess, onError]);
 
   // Expose the handleSubmit method to parent components
-  useImperativeHandle(ref, () => ({
+  // Now we include handleSubmit in the dependencies array
+  React.useImperativeHandle(ref, () => ({
     handleSubmit
-  }));
+  }), [handleSubmit]);
 
   return (
     <div className="stripe-card-element">
@@ -118,8 +132,10 @@ const StripeCardElement = forwardRef(({ onSuccess, onError, processingPayment },
               id="cardElement"
               options={CARD_ELEMENT_OPTIONS} 
               onChange={(e) => {
+                console.log('Card element change:', e.complete ? 'complete' : 'incomplete');
                 setCardComplete(e.complete);
                 if (e.error) {
+                  console.error('Card element error:', e.error.message);
                   setCardError(e.error.message);
                   onError && onError(e.error.message);
                 } else {
