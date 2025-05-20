@@ -1,5 +1,4 @@
-// Fix for the PaymentMethodsPage.js - Remove the redundant button
-
+// src/pages/Account/PaymentMethodsPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -33,6 +32,7 @@ const PaymentMethodsPage = () => {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          console.log("Fetched payment methods from Firestore:", userData.paymentMethods || []);
           setPaymentMethods(userData.paymentMethods || []);
         } else {
           setPaymentMethods([]);
@@ -90,7 +90,8 @@ const PaymentMethodsPage = () => {
           {!showAddForm ? (
             <div className="payment-methods-section">
               <SavedPaymentMethods 
-                showAddNew={false} 
+                showAddNew={false}
+                showInfoSection={false}
                 paymentMethods={paymentMethods}
                 setPaymentMethods={setPaymentMethods}
                 loading={loading}
@@ -117,11 +118,11 @@ const PaymentMethodsPage = () => {
             </div>
           ) : (
             <div className="add-payment-form-section">
+              <h2>Add Payment Method</h2>
               <SavePaymentMethodForm 
                 onSave={handleSaveComplete}
                 onCancel={() => setShowAddForm(false)}
               />
-              {/* Removed the redundant "Add Payment Method" button here */}
             </div>
           )}
         </div>
