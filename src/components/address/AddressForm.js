@@ -21,7 +21,7 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [saveToAccount, setSaveToAccount] = useState(true); // Default to true for better UX
+  // const [saveToAccount, setSaveToAccount] = useState(true); // Default to true for better UX
   
   const { currentUser } = useAuth();
   const db = getFirestore();
@@ -46,7 +46,7 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
       }
 
       // If user is logged in and wants to save the address
-      if (currentUser && saveToAccount) {
+      if (currentUser) {
         // Get reference to user doc
         const userRef = doc(db, "users", currentUser.uid);
         
@@ -239,7 +239,7 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
           />
         </div>
         
-        {currentUser && (
+        {/* {currentUser && (
           <div className="form-checkbox">
             <input
               type="checkbox"
@@ -249,7 +249,7 @@ const AddressForm = ({ initialAddress = {}, onSave, onCancel }) => {
             />
             <label htmlFor="saveToAccount">Save this address to my account</label>
           </div>
-        )}
+        )} */}
         
         <div className="form-checkbox">
           <input

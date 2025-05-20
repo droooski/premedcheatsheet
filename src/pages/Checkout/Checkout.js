@@ -1330,11 +1330,11 @@ const handleConfirmFreePurchase = async () => {
         </div>
         
         {/* Back button */}
-        <div className="navigation-controls">
+        {/* <div className="navigation-controls">
           <button className="back-button" onClick={handleGoBack}>
             ← Back
           </button>
-        </div>
+        </div> */}
         
         <div className="order-summary">
           <h3>Subscription Summary</h3>

@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   background-color: $background-color;
+  font-family: $font-family-mincho;
 }
 
 .account-content {
@@ -52,7 +53,7 @@
   border-bottom: 1px solid $gray-200;
   
   .page-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 500;
     margin: 0;
     display: flex;
@@ -79,7 +80,7 @@
     .back-button, .close-button {
       background: none;
       border: none;
-      font-size: 0.875rem;
+      font-size: 0.7rem;
       font-weight: 500;
       color: $text-color-light;
       cursor: pointer;
@@ -197,8 +198,8 @@
   }
   
   .section-title {
-    font-size: 1.25rem;
-    font-weight: 500;
+    font-size: 1.7rem;
+    font-weight: bolder;
     margin: 0 0 $spacing-4 0;
     color: $text-color;
   }
@@ -212,6 +213,7 @@
     &.empty {
       .section-summary {
         color: $text-color-light;
+        font-family: $font-family-mincho;
       }
     }
     
@@ -221,6 +223,7 @@
       border: none;
       padding: 0;
       font-size: 0.875rem;
+      font-family: $font-family-mincho;
       cursor: pointer;
       text-decoration: underline;
       
@@ -269,6 +272,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: $spacing-2;
+    font-family: $font-family-mincho;
     
     .email-verified-tag {
       display: inline-flex;
@@ -277,6 +281,7 @@
       color: $green-500;
       font-size: 0.75rem;
       font-weight: 500;
+      font-family: $font-family-mincho;
       padding: 0.12rem 0.5rem;
       border-radius: 20px;
       border: 1px solid rgba($green-500, 0.3);
