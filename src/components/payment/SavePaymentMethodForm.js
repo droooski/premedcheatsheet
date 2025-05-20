@@ -199,7 +199,7 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
 
   return (
     <div className="save-payment-method-form">
-      <h2>{existingPaymentMethod ? 'Edit Payment Method' : 'Add New Payment Method'}</h2>
+      <h2>{existingPaymentMethod ? 'Edit Payment Method' : 'Add Payment Method'}</h2>
       
       {errors.general && <div className="error-message">{errors.general}</div>}
       
@@ -211,7 +211,7 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
             id="cardholderName"
             value={cardholderName}
             onChange={(e) => setCardholderName(e.target.value)}
-            placeholder="John Doe"
+            placeholder="Name on card"
             disabled={loading}
           />
           {errors.cardholderName && <span className="error">{errors.cardholderName}</span>}
@@ -229,7 +229,7 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
               maxLength="19"
               disabled={loading || existingPaymentMethod}
             />
-            {cardType && <span className="card-type">{cardType}</span>}
+            {cardType && <span className={`card-type ${cardType}`}>{cardType}</span>}
           </div>
           {errors.cardNumber && <span className="error">{errors.cardNumber}</span>}
         </div>
@@ -249,7 +249,7 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
             {errors.expiryDate && <span className="error">{errors.expiryDate}</span>}
           </div>
           
-          <div className="form-group">
+          <div className="form-group cvv-group">
             <label htmlFor="cvv">CVV</label>
             <input
               type="password"
@@ -260,6 +260,10 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
               maxLength="4"
               disabled={loading}
             />
+            <div className="cvv-icon"></div>
+            <div className="cvv-tooltip">
+              <p>The 3-digit security code on the back of your card. For American Express, it's the 4-digit code on the front.</p>
+            </div>
             {errors.cvv && <span className="error">{errors.cvv}</span>}
           </div>
         </div>
@@ -290,7 +294,7 @@ const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
             className="save-button"
             disabled={loading}
           >
-            {loading ? 'Saving...' : (existingPaymentMethod ? 'Update' : 'Save')}
+            Save Payment Method
           </button>
         </div>
       </form>

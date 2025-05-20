@@ -116,7 +116,7 @@ const PaymentMethodsPage = () => {
             </div>
           ) : (
             <div className="add-payment-form-section">
-              <h2>Add Payment Method</h2>
+              {/* <h2>Add Payment Method</h2> */}
               
               <SavePaymentMethodForm 
                 onSave={handleSaveComplete}

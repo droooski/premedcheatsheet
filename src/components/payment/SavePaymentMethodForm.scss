@@ -3,12 +3,14 @@
 @use '../../styles/mixins' as mix;
 
 .save-payment-method-form {
+  position: relative; /* Add this to contain absolutely positioned elements */
   max-width: 600px;
   margin: 0 auto;
   background-color: $white;
   border-radius: 10px;
   padding: $spacing-6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1; /* Ensure proper stacking */
   
   @media (max-width: $sm) {
     padding: $spacing-4;
@@ -38,6 +40,7 @@
   
   .form-group {
     margin-bottom: $spacing-5;
+    position: relative; /* Important for positioning icons */
     
     label {
       display: block;
@@ -54,12 +57,10 @@
       border: 1px solid $gray-300;
       border-radius: 6px;
       font-size: 1rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
       
       &:focus {
         outline: none;
         border-color: $primary-color;
-        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
       }
       
       &:disabled {
@@ -78,10 +79,10 @@
     &.checkbox {
       display: flex;
       align-items: center;
+      margin-top: $spacing-4;
       
       input[type="checkbox"] {
         margin-right: $spacing-2;
-        width: auto;
       }
       
       label {
@@ -91,50 +92,127 @@
     }
   }
   
+  /* Fix for card type display */
   .card-input-container {
     position: relative;
     
+    input {
+      padding-right: 60px; /* Make space for the card logo */
+    }
+    
     .card-type {
       position: absolute;
-      right: $spacing-4;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 0.9rem;
-      color: $text-color-light;
+      width: 40px;
+      height: 25px;
+      text-indent: -9999px; /* Hide text but keep for accessibility */
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      
+      &.Visa {
+        background-image: url('../../assets/images/card-visa.png');
+      }
+      
+      &.Mastercard {
+        background-image: url('../../assets/images/card-mastercard.png');
+      }
+      
+      &.Amex {
+        background-image: url('../../assets/images/card-amex.png');
+      }
+      
+      &.Unknown {
+        background-image: none;
+        text-indent: 0;
+        font-size: 0.8rem;
+        color: $gray-500;
+      }
     }
   }
   
+  /* Form row for expiry and CVV */
   .form-row {
     display: flex;
     gap: $spacing-4;
     
     @media (max-width: $sm) {
       flex-direction: column;
-      gap: $spacing-5;
+      gap: $spacing-4;
     }
     
     .form-group {
       flex: 1;
       
-      @media (min-width: $md) {
-        margin-bottom: 0;
+      &.cvv-group {
+        position: relative;
+        
+        input {
+          padding-right: 40px; /* Make space for CVV icon */
+        }
+        
+        .cvv-icon {
+          position: absolute;
+          top: 50%;
+          right: 12px;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+          background-image: url('../../assets/images/code.png');
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: contain;
+          cursor: pointer;
+          
+          &:hover + .cvv-tooltip {
+            display: block;
+          }
+        }
+        
+        .cvv-tooltip {
+          display: none;
+          position: absolute;
+          top: calc(100% + 5px);
+          right: 0;
+          width: 220px;
+          background-color: white;
+          border: 1px solid $gray-300;
+          border-radius: 6px;
+          padding: 10px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          font-size: 0.8rem;
+          color: $text-color;
+          z-index: 10;
+        }
       }
     }
   }
   
+  /* Action buttons */
   .form-actions {
     display: flex;
-    justify-content: flex-end;
     gap: $spacing-3;
     margin-top: $spacing-6;
     
-    button {
-      padding: $spacing-2 $spacing-4;
+    .cancel-button, .save-button {
+      flex: 1;
+      padding: $spacing-3;
       border-radius: 6px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+    }
+    
+    .cancel-button {
+      background-color: white;
+      color: $text-color;
+      border: 1px solid $gray-300;
+      
+      &:hover:not(:disabled) {
+        background-color: $gray-100;
+      }
       
       &:disabled {
         opacity: 0.7;
@@ -142,23 +220,18 @@
       }
     }
     
-    .cancel-button {
-      background-color: $white;
-      color: $text-color;
-      border: 1px solid $gray-300;
-      
-      &:hover:not(:disabled) {
-        background-color: $gray-100;
-      }
-    }
-    
     .save-button {
       background-color: $primary-color;
-      color: $white;
+      color: white;
       border: none;
       
       &:hover:not(:disabled) {
         background-color: darken($primary-color, 5%);
+      }
+      
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
       }
     }
   }
