@@ -1,301 +1,305 @@
 // src/components/payment/SavePaymentMethodForm.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
-import { useAuth } from '../../contexts/AuthContext';
-import userService from '../../services/userService';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '../../contexts/AuthContext';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+// Import card logos
+import visaLogo from '../../assets/images/card-visa.png';
+import mastercardLogo from '../../assets/images/card-mastercard.png';
+import amexLogo from '../../assets/images/card-amex.png';
+import cvvIcon from '../../assets/images/code.png';
 import './SavePaymentMethodForm.scss';
 
-const SavePaymentMethodForm = ({ existingPaymentMethod, onSave, onCancel }) => {
-  const [cardholderName, setCardholderName] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [isDefault, setIsDefault] = useState(false);
-  const [cardType, setCardType] = useState('');
-  const [errors, setErrors] = useState({});
+const SavePaymentMethodForm = ({ onSave, onCancel }) => {
+  const [paymentData, setPaymentData] = useState({
+    id: uuidv4(),
+    cardNumber: '',
+    cardholderName: '',
+    expiry: '',
+    cvc: '',
+    isDefault: false
+  });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saveToAccount] = useState(true); // Removed unused setter
+  const [cardType, setCardType] = useState(null);
   
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
   const db = getFirestore();
 
-  // Populate form with existing payment method data if editing
+  // Detect card type as user types card number
   useEffect(() => {
-    if (existingPaymentMethod) {
-      setCardholderName(existingPaymentMethod.cardholderName || '');
-      // Only show last 4 digits of card number for security
-      setCardNumber(existingPaymentMethod.lastFourDigits ? `•••• •••• •••• ${existingPaymentMethod.lastFourDigits}` : '');
-      setExpiryDate(existingPaymentMethod.expiryDate || '');
-      setIsDefault(existingPaymentMethod.isDefault || false);
-      setCardType(existingPaymentMethod.cardType || '');
-      // Don't populate CVV for security reasons
-    }
-  }, [existingPaymentMethod]);
-
-  // Format card number with spaces every 4 digits and detect card type
-  const handleCardNumberChange = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    let formattedValue = '';
-    
-    // Format with spaces every 4 digits
-    for (let i = 0; i < value.length; i += 4) {
-      formattedValue += value.slice(i, i + 4) + ' ';
-    }
-    
-    // Trim extra space at the end
-    formattedValue = formattedValue.trim();
-    
-    // Detect card type
-    const firstDigit = value.charAt(0);
-    const firstTwoDigits = value.substring(0, 2);
-    
-    if (firstDigit === '4') {
-      setCardType('Visa');
-    } else if (firstTwoDigits >= '51' && firstTwoDigits <= '55') {
-      setCardType('Mastercard');
-    } else if (firstTwoDigits === '34' || firstTwoDigits === '37') {
-      setCardType('Amex');
-    } else if (value.length >= 2) {
-      setCardType('Unknown');
+    // Simple card type detection based on first digits
+    const number = paymentData.cardNumber.replace(/\s+/g, '');
+    if (number.startsWith('4')) {
+      setCardType('visa');
+    } else if (/^5[1-5]/.test(number)) {
+      setCardType('mastercard');
+    } else if (/^3[47]/.test(number)) {
+      setCardType('amex');
     } else {
-      setCardType('');
+      setCardType(null);
     }
-    
-    setCardNumber(formattedValue);
+  }, [paymentData.cardNumber]);
+
+  // Format card number as user types (add spaces)
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    // Add parentheses around the && and || operators to clarify order
+    const match = (matches && matches[0]) || '';
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return value;
+    }
   };
 
   // Format expiry date as MM/YY
-  const handleExpiryDateChange = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
+  const formatExpiry = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
-    if (value.length > 0) {
-      // Format month
-      if (value.length <= 2) {
-        setExpiryDate(value);
-      } 
-      // Format month/year
-      else {
-        setExpiryDate(`${value.substring(0, 2)}/${value.substring(2, 4)}`);
-      }
+    if (v.length >= 2) {
+      return v.slice(0, 2) + (v.length > 2 ? '/' + v.slice(2, 4) : '');
+    }
+    
+    return v;
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (name === 'cardNumber') {
+      setPaymentData(prev => ({
+        ...prev,
+        [name]: formatCardNumber(value)
+      }));
+    } else if (name === 'expiry') {
+      setPaymentData(prev => ({
+        ...prev,
+        [name]: formatExpiry(value)
+      }));
     } else {
-      setExpiryDate('');
+      setPaymentData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
     }
   };
 
-  // Validate form fields
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!cardholderName.trim()) {
-      newErrors.cardholderName = 'Cardholder name is required';
+  const getCardTypeDisplay = () => {
+    switch(cardType) {
+      case 'visa':
+        return <img src={visaLogo} alt="Visa" className="card-logo" />;
+      case 'mastercard':
+        return <img src={mastercardLogo} alt="Mastercard" className="card-logo" />;
+      case 'amex':
+        return <img src={amexLogo} alt="American Express" className="card-logo" />;
+      default:
+        return null;
     }
-    
-    if (!cardNumber.trim() || cardNumber.replace(/\D/g, '').length < 15) {
-      newErrors.cardNumber = 'Valid card number is required';
-    }
-    
-    if (!expiryDate || !expiryDate.includes('/')) {
-      newErrors.expiryDate = 'Valid expiry date is required (MM/YY)';
-    } else {
-      const [month, year] = expiryDate.split('/');
-      const currentYear = new Date().getFullYear() % 100;
-      const currentMonth = new Date().getMonth() + 1;
-      
-      if (parseInt(month) < 1 || parseInt(month) > 12) {
-        newErrors.expiryDate = 'Month must be between 1 and 12';
-      } else if (
-        (parseInt(year) < currentYear) || 
-        (parseInt(year) === currentYear && parseInt(month) < currentMonth)
-      ) {
-        newErrors.expiryDate = 'Card has expired';
-      }
-    }
-    
-    if (!cvv || cvv.length < 3 || cvv.length > 4) {
-      newErrors.cvv = 'Valid CVV is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+    setError('');
     setLoading(true);
-    
+
     try {
-      const lastFourDigits = cardNumber.replace(/\D/g, '').slice(-4);
-      
-      // Create payment method object
-      const paymentMethod = {
-        id: existingPaymentMethod?.id || uuidv4(),
-        cardholderName,
-        lastFourDigits,
-        expiryDate,
-        cardType,
-        isDefault,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // If not editing, add createdAt field
-      if (!existingPaymentMethod) {
-        paymentMethod.createdAt = new Date().toISOString();
+      // Validation
+      if (!paymentData.cardNumber || !paymentData.cardholderName || !paymentData.expiry || !paymentData.cvc) {
+        throw new Error("Please fill in all required fields");
       }
-      
-      // Determine if this is an update or a new payment method
-      if (existingPaymentMethod) {
-        // For updating an existing payment method
-        // Get current payment methods
+
+      // Format card data for storage
+      const formattedPaymentMethod = {
+        id: paymentData.id,
+        cardType: cardType || 'card',
+        lastFourDigits: paymentData.cardNumber.replace(/\s+/g, '').slice(-4),
+        cardholderName: paymentData.cardholderName,
+        expiryDate: paymentData.expiry,
+        isDefault: paymentData.isDefault
+      };
+
+      // If user is saving to account
+      if (currentUser && saveToAccount) {
+        // Get reference to user doc
         const userRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userRef);
         
+        // Get current user data first
+        const userDoc = await getDoc(userRef);
         if (!userDoc.exists()) {
-          throw new Error('User document not found');
+          throw new Error("User document not found");
         }
         
         const userData = userDoc.data();
-        const existingMethods = userData.paymentMethods || [];
+        const currentMethods = userData.paymentMethods || [];
         
-        // Replace the existing payment method with the updated one
-        const updatedMethods = existingMethods.map(pm => 
-          pm.id === paymentMethod.id ? paymentMethod : pm
-        );
+        let updatedMethods;
+        if (formattedPaymentMethod.isDefault) {
+          // If this payment method is being set as default, make all other methods non-default
+          updatedMethods = currentMethods.map(method => ({
+            ...method,
+            isDefault: false // Set all existing methods to non-default
+          }));
+          
+          // Check if we're editing an existing method or adding a new one
+          const existingIndex = updatedMethods.findIndex(method => method.id === formattedPaymentMethod.id);
+          if (existingIndex >= 0) {
+            // Replace existing method
+            updatedMethods[existingIndex] = formattedPaymentMethod;
+          } else {
+            // Add new method
+            updatedMethods.push(formattedPaymentMethod);
+          }
+        } else {
+          // If not setting as default
+          const existingIndex = currentMethods.findIndex(method => method.id === formattedPaymentMethod.id);
+          if (existingIndex >= 0) {
+            // Update existing method
+            updatedMethods = [...currentMethods];
+            updatedMethods[existingIndex] = formattedPaymentMethod;
+          } else {
+            // Add new method
+            updatedMethods = [...currentMethods, formattedPaymentMethod];
+          }
+        }
+        
+        // If this is the first payment method, make it default
+        if (updatedMethods.length === 1 && !updatedMethods[0].isDefault) {
+          updatedMethods[0].isDefault = true;
+        }
         
         // Update in Firestore
         await updateDoc(userRef, {
           paymentMethods: updatedMethods
         });
-      } else {
-        // For adding a new payment method
-        const result = await userService.savePaymentMethod(currentUser.uid, paymentMethod);
         
-        if (!result.success) {
-          throw new Error(result.error || "Failed to save payment method");
+        // Call onSave with both the new method and the updated list
+        if (onSave) {
+          onSave(formattedPaymentMethod, updatedMethods);
         }
-      }
-      
-      // Call the onSave callback if provided
-      if (onSave) {
-        onSave(paymentMethod);
       } else {
-        // Navigate back to payment methods page
-        navigate('/account/payment-methods');
+        // Just handle the payment directly
+        if (onSave) {
+          onSave(formattedPaymentMethod);
+        }
       }
     } catch (error) {
       console.error("Error saving payment method:", error);
-      setErrors({ general: "Failed to save payment method. Please try again." });
+      setError(error.message || "Failed to save payment method");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="save-payment-method-form">
-      <h2>{existingPaymentMethod ? 'Edit Payment Method' : 'Add Payment Method'}</h2>
+    <div className="payment-form-container">
+      {error && <div className="error-message">{error}</div>}
       
-      {errors.general && <div className="error-message">{errors.general}</div>}
-      
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="payment-form">
         <div className="form-group">
           <label htmlFor="cardholderName">Cardholder Name</label>
           <input
             type="text"
             id="cardholderName"
-            value={cardholderName}
-            onChange={(e) => setCardholderName(e.target.value)}
+            name="cardholderName"
+            value={paymentData.cardholderName}
+            onChange={handleChange}
             placeholder="Name on card"
-            disabled={loading}
+            required
           />
-          {errors.cardholderName && <span className="error">{errors.cardholderName}</span>}
         </div>
         
-        <div className="form-group">
+        <div className="form-group card-number-group">
           <label htmlFor="cardNumber">Card Number</label>
           <div className="card-input-container">
             <input
               type="text"
               id="cardNumber"
-              value={cardNumber}
-              onChange={handleCardNumberChange}
+              name="cardNumber"
+              value={paymentData.cardNumber}
+              onChange={handleChange}
               placeholder="1234 5678 9012 3456"
               maxLength="19"
-              disabled={loading || existingPaymentMethod}
+              required
             />
-            {cardType && <span className={`card-type ${cardType}`}>{cardType}</span>}
+            <div className="card-type-icon">
+              {getCardTypeDisplay()}
+            </div>
           </div>
-          {errors.cardNumber && <span className="error">{errors.cardNumber}</span>}
         </div>
         
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="expiryDate">Expiry Date</label>
+            <label htmlFor="expiry">Expiry Date</label>
             <input
               type="text"
-              id="expiryDate"
-              value={expiryDate}
-              onChange={handleExpiryDateChange}
+              id="expiry"
+              name="expiry"
+              value={paymentData.expiry}
+              onChange={handleChange}
               placeholder="MM/YY"
               maxLength="5"
-              disabled={loading}
+              required
             />
-            {errors.expiryDate && <span className="error">{errors.expiryDate}</span>}
           </div>
           
           <div className="form-group cvv-group">
-            <label htmlFor="cvv">CVV</label>
-            <input
-              type="password"
-              id="cvv"
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').substring(0, 4))}
-              placeholder="123"
-              maxLength="4"
-              disabled={loading}
-            />
-            <div className="cvv-icon"></div>
-            <div className="cvv-tooltip">
-              <p>The 3-digit security code on the back of your card. For American Express, it's the 4-digit code on the front.</p>
+            <label htmlFor="cvc">CVV</label>
+            <div className="cvv-input-container">
+              <input
+                type="text"
+                id="cvc"
+                name="cvc"
+                value={paymentData.cvc}
+                onChange={handleChange}
+                placeholder="123"
+                maxLength="4"
+                required
+              />
+              <div className="cvv-icon">
+                <img src={cvvIcon} alt="CVV" className="cvv-logo" />
+              </div>
             </div>
-            {errors.cvv && <span className="error">{errors.cvv}</span>}
           </div>
         </div>
         
-        <div className="form-group checkbox">
+        <div className="form-checkbox">
           <input
             type="checkbox"
             id="isDefault"
-            checked={isDefault}
-            onChange={(e) => setIsDefault(e.target.checked)}
-            disabled={loading}
+            name="isDefault"
+            checked={paymentData.isDefault}
+            onChange={handleChange}
           />
           <label htmlFor="isDefault">Set as default payment method</label>
         </div>
         
         <div className="form-actions">
           <button 
-            type="button" 
-            className="cancel-button"
-            onClick={onCancel || (() => navigate('/account/payment-methods'))}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-          
-          <button 
             type="submit" 
             className="save-button"
             disabled={loading}
           >
-            Save Payment Method
+            {loading ? 'Saving...' : 'Save Payment Method'}
           </button>
+          
+          {onCancel && (
+            <button 
+              type="button" 
+              className="cancel-button"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </form>
     </div>

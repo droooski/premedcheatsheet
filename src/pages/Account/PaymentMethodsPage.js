@@ -1,4 +1,5 @@
-// src/pages/Account/PaymentMethodsPage.js
+// Fix for the PaymentMethodsPage.js - Remove the redundant button
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -116,12 +117,11 @@ const PaymentMethodsPage = () => {
             </div>
           ) : (
             <div className="add-payment-form-section">
-              {/* <h2>Add Payment Method</h2> */}
-              
               <SavePaymentMethodForm 
                 onSave={handleSaveComplete}
                 onCancel={() => setShowAddForm(false)}
               />
+              {/* Removed the redundant "Add Payment Method" button here */}
             </div>
           )}
         </div>

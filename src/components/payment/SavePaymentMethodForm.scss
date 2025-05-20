@@ -2,31 +2,16 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
-.save-payment-method-form {
-  position: relative; /* Add this to contain absolutely positioned elements */
+.payment-form-container {
   max-width: 600px;
   margin: 0 auto;
   background-color: $white;
   border-radius: 10px;
   padding: $spacing-6;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  z-index: 1; /* Ensure proper stacking */
   
   @media (max-width: $sm) {
     padding: $spacing-4;
-  }
-  
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: $spacing-6;
-    color: $text-color;
-    text-align: center;
-    
-    @media (max-width: $sm) {
-      font-size: 1.3rem;
-      margin-bottom: $spacing-4;
-    }
   }
   
   .error-message {
@@ -38,154 +23,111 @@
     font-size: 0.9rem;
   }
   
-  .form-group {
-    margin-bottom: $spacing-5;
-    position: relative; /* Important for positioning icons */
-    
-    label {
-      display: block;
-      margin-bottom: $spacing-2;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: $text-color;
-    }
-    
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: $spacing-3 $spacing-4;
-      border: 1px solid $gray-300;
-      border-radius: 6px;
-      font-size: 1rem;
+  .payment-form {
+    .form-group {
+      margin-bottom: $spacing-4;
       
-      &:focus {
-        outline: none;
-        border-color: $primary-color;
+      label {
+        display: block;
+        margin-bottom: $spacing-2;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: $text-color;
       }
       
-      &:disabled {
-        background-color: $gray-100;
-        cursor: not-allowed;
+      input[type="text"] {
+        width: 100%;
+        padding: $spacing-3 $spacing-4;
+        border: 1px solid $gray-300;
+        border-radius: 6px;
+        font-size: 1rem;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
       }
     }
     
-    .error {
-      display: block;
-      color: #dc2626;
-      font-size: 0.85rem;
-      margin-top: $spacing-1;
+    /* Card number group with SVG icon */
+    .card-number-group {
+      .card-input-container {
+        position: relative;
+        
+        input {
+          width: 100%;
+          padding-right: 60px !important; /* Space for card icon */
+        }
+        
+        .card-type-icon {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 5;
+          
+          .card-logo {
+            width: 40px;
+            height: auto; 
+          }
+        }
+      }
     }
     
-    &.checkbox {
+    /* Form row for expiry and CVV */
+    .form-row {
+      display: flex;
+      gap: $spacing-4;
+      
+      @media (max-width: $sm) {
+        flex-direction: column;
+        gap: $spacing-3;
+      }
+      
+      .form-group {
+        flex: 1;
+      }
+    }
+    
+    /* CVV group styling */
+    .cvv-group {
+      .cvv-input-container {
+        position: relative;
+        
+        input {
+          width: 100%;
+          padding-right: 40px !important; /* Space for CVV icon */
+        }
+        
+        .cvv-icon {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 5;
+          
+          .cvv-logo {
+            width: 20px;
+            height: auto;
+          }
+        }
+      }
+    }
+    
+    /* Checkbox styling */
+    .form-checkbox {
       display: flex;
       align-items: center;
-      margin-top: $spacing-4;
+      margin: $spacing-2 0 $spacing-4;
       
       input[type="checkbox"] {
         margin-right: $spacing-2;
       }
       
       label {
-        margin-bottom: 0;
+        font-size: 0.95rem;
+        color: $text-color;
         cursor: pointer;
-      }
-    }
-  }
-  
-  /* Fix for card type display */
-  .card-input-container {
-    position: relative;
-    
-    input {
-      padding-right: 60px; /* Make space for the card logo */
-    }
-    
-    .card-type {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 25px;
-      text-indent: -9999px; /* Hide text but keep for accessibility */
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      
-      &.Visa {
-        background-image: url('../../assets/images/card-visa.png');
-      }
-      
-      &.Mastercard {
-        background-image: url('../../assets/images/card-mastercard.png');
-      }
-      
-      &.Amex {
-        background-image: url('../../assets/images/card-amex.png');
-      }
-      
-      &.Unknown {
-        background-image: none;
-        text-indent: 0;
-        font-size: 0.8rem;
-        color: $gray-500;
-      }
-    }
-  }
-  
-  /* Form row for expiry and CVV */
-  .form-row {
-    display: flex;
-    gap: $spacing-4;
-    
-    @media (max-width: $sm) {
-      flex-direction: column;
-      gap: $spacing-4;
-    }
-    
-    .form-group {
-      flex: 1;
-      
-      &.cvv-group {
-        position: relative;
-        
-        input {
-          padding-right: 40px; /* Make space for CVV icon */
-        }
-        
-        .cvv-icon {
-          position: absolute;
-          top: 50%;
-          right: 12px;
-          transform: translateY(-50%);
-          width: 20px;
-          height: 20px;
-          background-image: url('../../assets/images/code.png');
-          background-repeat: no-repeat;
-          background-position: center;
-          background-size: contain;
-          cursor: pointer;
-          
-          &:hover + .cvv-tooltip {
-            display: block;
-          }
-        }
-        
-        .cvv-tooltip {
-          display: none;
-          position: absolute;
-          top: calc(100% + 5px);
-          right: 0;
-          width: 220px;
-          background-color: white;
-          border: 1px solid $gray-300;
-          border-radius: 6px;
-          padding: 10px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          font-size: 0.8rem;
-          color: $text-color;
-          z-index: 10;
-        }
       }
     }
   }
@@ -194,30 +136,16 @@
   .form-actions {
     display: flex;
     gap: $spacing-3;
-    margin-top: $spacing-6;
     
-    .cancel-button, .save-button {
+    .save-button, 
+    .cancel-button {
       flex: 1;
       padding: $spacing-3;
       border-radius: 6px;
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
-    }
-    
-    .cancel-button {
-      background-color: white;
-      color: $text-color;
-      border: 1px solid $gray-300;
-      
-      &:hover:not(:disabled) {
-        background-color: $gray-100;
-      }
-      
-      &:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
+      transition: all 0.2s ease;
     }
     
     .save-button {
@@ -232,6 +160,16 @@
       &:disabled {
         opacity: 0.7;
         cursor: not-allowed;
+      }
+    }
+    
+    .cancel-button {
+      background-color: white;
+      color: $text-color;
+      border: 1px solid $gray-300;
+      
+      &:hover {
+        background-color: $gray-100;
       }
     }
   }
