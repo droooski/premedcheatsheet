@@ -4,6 +4,7 @@
 
 // Import Google Fonts after @use statements
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abyssinica+SIL:wght@400;600&display=swap');
 
 // Base styles
 * {
@@ -325,32 +326,34 @@ html.scroll-smooth {
   position: absolute !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  z-index: 999 !important; /* Extremely high z-index to ensure it's on top */
-  width: 95vw !important; /* Using viewport width units directly - almost full width on mobile */
+  z-index: 999 !important;
+  
+  // CHANGE THESE WIDTH VALUES TO BE SMALLER:
+  width: 80vw !important; // Change to something like 70vw or 60vw
   min-width: 300px !important;
-  max-width: none !important; /* Remove any max-width constraints initially */
+  max-width: none !important;
   
   @media (min-width: 500px) {
-    width: 90vw !important; /* 90% viewport width for small screens */
+    width: 80vw !important; // Change to 65vw or 55vw
     bottom: -80px !important;
   }
   
   @media (min-width: 768px) {
-    width: 80vw !important; /* 80% viewport width for medium screens */
+    width: 80vw !important; // Change to 55vw or 45vw
     bottom: -120px !important;
-    max-width: 1000px !important; /* Maximum width for medium screens */
+    max-width: 1000px !important;
   }
   
   @media (min-width: 1200px) {
-    width: 70vw !important; /* 70% viewport width for large screens */
+    width: 70vw !important; // Change to 45vw or 35vw
     bottom: -150px !important;
-    max-width: 1200px !important; /* Maximum width for large screens */
+    max-width: 1200px !important;
   }
   
   @media (min-width: 1600px) {
-    width: 60vw !important; /* 60% viewport width for extra large screens */
+    width: 60vw !important; // Change to 40vw or 30vw
     bottom: -180px !important;
-    max-width: 1400px !important; /* Maximum width for extra large screens */
+    max-width: 1400px !important;
   }
 }
 
@@ -408,20 +411,36 @@ html.scroll-smooth {
 html body .hero {
   overflow: visible !important;
   
-  @media (max-width: 767px) {
-    padding-bottom: 400px !important; /* Ensure enough bottom padding on mobile */
+  @media (max-width: 479px) {
+    padding-bottom: 230px !important; // Extra small phones
   }
   
-  @media (min-width: 768px) {
-    padding-bottom: 550px !important; /* More bottom padding on larger screens */
+  @media (min-width: 479px) and (max-width: 630px) {
+    padding-bottom: 300px !important; // Small phones/large phones
   }
   
-  @media (min-width: 1200px) {
-    padding-bottom: 800px !important; /* Even more bottom padding on large screens */
+  @media (min-width: 630px) and (max-width: 731px) {
+    padding-bottom: 400px !important; // Tablets portrait
   }
   
-  @media (min-width: 1600px) {
-    padding-bottom: 800px !important; /* Maximum padding on extra large screens */
+  @media (min-width: 731px) and (max-width: 900px) {
+    padding-bottom: 500px !important; // Tablets landscape/small laptops
+  }
+  
+  @media (min-width: 900px) and (max-width: 1399px) {
+    padding-bottom: 580px !important; // Medium laptops
+  }
+  
+  @media (min-width: 1400px) and (max-width: 1599px) {
+    padding-bottom: 700px !important; // Large laptops
+  }
+  
+  @media (min-width: 1600px) and (max-width: 1919px) {
+    padding-bottom: 750px !important; // Extra large screens
+  }
+  
+  @media (min-width: 1920px) {
+    padding-bottom: 880px !important; // Ultra wide screens
   }
 }
 
