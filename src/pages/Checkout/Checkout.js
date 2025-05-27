@@ -93,6 +93,15 @@ const Checkout = () => {
     };
   }, []);
 
+  // Add this new useEffect to reset loading when modal closes
+  useEffect(() => {
+    // Clear loading state when modal is dismissed
+    if (!showAuthModal) {
+      setLoading(false);
+      setError('');
+    }
+  }, [showAuthModal]);
+
   // Check for authenticated user on component mount
   useEffect(() => {
     const unsubscribe = onAuthChange((currentUser) => {
@@ -188,6 +197,11 @@ const Checkout = () => {
   // Proper back navigation that uses previous step
   const handleGoBack = () => {
     console.log("Back button pressed, current step:", checkoutStep, "previous step:", previousStep);
+    
+    // Reset all modal and loading states when going back
+    setShowAuthModal(false);
+    setLoading(false);
+    setError('');
     
     // If we're on payment, go back to plan selection
     if (checkoutStep === 'payment') {
@@ -308,6 +322,15 @@ const Checkout = () => {
     // Set a flag in session storage to prevent immediate reopening
     sessionStorage.setItem('modalJustClosed', 'true');
     setShowAuthModal(false);
+    setLoading(false); // Stop any loading
+    setError(''); // Clear errors
+    
+    // IMPORTANT: Reset the checkout step back to 'plan'
+    setCheckoutStep('plan');
+    
+    // Clear any pending user data
+    setPendingUserData(null);
+    setRegistrationComplete(false);
   };
 
   // Process a free purchase with 100% discount coupon
@@ -1935,16 +1958,12 @@ const handleConfirmFreePurchase = async () => {
       {/* Auth Modal with preventRedirect prop */}
       <AuthModal 
         isOpen={showAuthModal}
-        onClose={() => {
-          // Set flag that modal was just closed to prevent immediate reopening
-          sessionStorage.setItem('modalJustClosed', 'true');
-          setShowAuthModal(false);
-        }}
+        onClose={handleCloseAuthModal}
         onSuccess={handleAuthSuccess}
         initialMode={isLoginMode ? 'login' : 'signup'}
         preventRedirect={true}
         dataCollectionOnly={checkoutStep === 'payment'}
-      />  
+      />
       <Footer />
     </div>
   );
