@@ -171,7 +171,26 @@ const AuthModal = ({
 
   return (
     <div className="auth-modal-overlay" onClick={handleOverlayClick}>
-      <div className="auth-modal">
+      <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+        <button 
+          className="close-button" 
+          onClick={onClose}
+          type="button"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'none',
+            border: 'none',
+            fontSize: '28px',
+            cursor: 'pointer',
+            zIndex: 1002,
+            color: '#666',
+            lineHeight: '1'
+          }}
+        >
+          ×
+        </button>
         {/* Conditional rendering based on state */}
         {showForgotPassword ? (
           <ForgotPassword 

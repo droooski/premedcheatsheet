@@ -234,7 +234,7 @@ const Checkout = () => {
     
     // CHANGE: Go directly to payment step without requiring login first
     setPreviousStep('plan');
-    setCheckoutStep('payment');
+    // setCheckoutStep('payment');
     
     // Store the plan selection in URL parameters for easy recovery
     const searchParams = new URLSearchParams(location.search);
@@ -243,6 +243,20 @@ const Checkout = () => {
       pathname: location.pathname,
       search: searchParams.toString()
     }, { replace: true });
+  };
+
+  // New function to handle when user wants to proceed to payment
+  const handleProceedToPayment = (plan) => {
+    setSelectedPlan(plan);
+    
+    // If user is not logged in, show auth modal first
+    if (!user && !pendingUserData) {
+      setShowAuthModal(true);
+      setIsLoginMode(false); // Force signup mode
+    } else {
+      // User is already authenticated, go straight to payment
+      setCheckoutStep('payment');
+    }
   };
 
   // Toggle coupon input visibility
@@ -301,29 +315,12 @@ const Checkout = () => {
     return couponApplied && discount === 100;
   };
 
-  useEffect(() => {
-    // Get flag from session storage that tracks if modal was just closed
-    const modalJustClosed = sessionStorage.getItem('modalJustClosed') === 'true';
-    
-    // Show auth modal if we're in payment step and need user data
-    if (checkoutStep === 'payment' && !user && !pendingUserData && !showAuthModal && !modalJustClosed) {
-      console.log("Showing auth modal for data collection");
-      setShowAuthModal(true);
-      setIsLoginMode(false); // Force signup mode
-    }
-    
-    // Clear the flag after checking it
-    if (modalJustClosed) {
-      sessionStorage.removeItem('modalJustClosed');
-    }
-  }, [checkoutStep, user, pendingUserData, showAuthModal]);
-
   const handleCloseAuthModal = () => {
     // Set a flag in session storage to prevent immediate reopening
     sessionStorage.setItem('modalJustClosed', 'true');
     setShowAuthModal(false);
-    setLoading(false); // Stop any loading
-    setError(''); // Clear errors
+    setLoading(false);
+    setError('');
     
     // IMPORTANT: Reset the checkout step back to 'plan'
     setCheckoutStep('plan');
@@ -331,6 +328,11 @@ const Checkout = () => {
     // Clear any pending user data
     setPendingUserData(null);
     setRegistrationComplete(false);
+    
+    // Force a longer delay before allowing modal to show again
+    setTimeout(() => {
+      sessionStorage.removeItem('modalJustClosed');
+    }, 2000);
   };
 
   // Process a free purchase with 100% discount coupon
@@ -1005,7 +1007,7 @@ const Checkout = () => {
           <p>The full profiles of successful medical school applicants will be available once you join the cheatsheet.</p>
         </div>
         
-        <PricingCards onSelectPlan={handleSelectPlan} />
+        <PricingCards onSelectPlan={handleProceedToPayment} />
       </>
     );
   };
