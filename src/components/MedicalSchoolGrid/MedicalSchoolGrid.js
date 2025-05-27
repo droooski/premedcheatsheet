@@ -37,6 +37,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Mount Sinai': 'https://images.shiksha.com/mediadata/images/1540557666php4bzbzD.jpeg',
     'University of Pittsburgh': 'https://upload.wikimedia.org/wikipedia/commons/f/f3/CathedralfromFrick.jpg',
     'CCOM': 'https://www.drnajeeblectures.com/wp-content/uploads/2020/04/page12mwuglendalecampus-e1586548693116.jpg',
+    'chicago college of osteopathic medicine': 'https://www.drnajeeblectures.com/wp-content/uploads/2020/04/page12mwuglendalecampus-e1586548693116.jpg',
     'Case Western': 'https://www.thoughtco.com/thmb/-ViQ27niExYcDtzC0HM9bZzfdl0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/CoverPhoto-57124afc5f9b588cc2d735e2.JPG',
     
     // Additional schools from the applicant profiles
@@ -57,7 +58,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Mayo Clinic Alix School of Medicine': 'https://pxl-mayoedu.terminalfour.net/fit-in/720x480/filters:quality(75)/0x0:720x480/prod01/channel_2/media/mccms/content-assets/academics/residencies-and-fellowships/mayo-clinic-minnesota-MEYR6203-card.jpg',
     'Northwestern Feinberg': 'https://www.feinberg.northwestern.edu/about/campus/facilities/buildings/images/simpson-querey-biomedical-research-center.jpg',
     'Wake Forest': 'https://school.wakehealth.edu/-/media/WakeForest/School/Images/Buildings/Innovation-Quarter-Aerial-View-with-Buildings-Labeled-2022.jpg',
-    'AT Stills': 'https://www.aacom.org/images/default-source/explorer/atsu-soma-entrance-600x400.jpg?sfvrsn=37590e66_1',
+    'AT Stills': 'https://i.ytimg.com/vi/Wk2Zq6gUADo/maxresdefault.jpg',
     'DMUCOM': 'https://www.dmu.edu/wp-content/uploads/2024/08/DMU-default-featured-social.jpg',
     'MCW': 'https://www.mcw.edu/-/media/MCW/Image-Library/Aerial5_Intro-with-Three-Image-CTA-Component.jpg?w=1000&h=412&mode=crop&anchor=middlecenter&scale=both',
     'SLU': 'https://www.slu.edu/_ldp-images/.private_ldp/a337/production/master/6fa3119e-b9a8-4c79-a4c6-6b549bfccc41.jpg',

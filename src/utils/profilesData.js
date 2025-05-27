@@ -8,6 +8,11 @@ const schoolNameMap = {
   'pittsburgh': 'University of Pittsburgh',
   'pitt': 'University of Pittsburgh',
   'upmc': 'University of Pittsburgh',
+
+  'at still': 'A.T. Still University',
+  'at still university': 'A.T. Still University',
+  'at stills': 'A.T. Still University',
+  'at still university of health sciences': 'A.T. Still University',
   
   'columbia': 'Columbia University',
 
@@ -75,6 +80,9 @@ const schoolNameMap = {
 
   'ccom': 'CCOM',
 
+  'chicago college of osteopathic medicine': 'Chicago College of Osteopathic Medicine (CCOM)',
+  'chicago college of osteopathic medicine of midwestern university': 'Chicago College of Osteopathic Medicine (CCOM)',
+
   'case western': 'Case Western Reserve University',
 
   'case': 'Case Western Reserve University',
@@ -82,8 +90,6 @@ const schoolNameMap = {
   'brown': 'Brown University',
 
   'boston u': 'Boston University',
-
-  'at stills': 'A.T. Still University',
 
   'mount sinai': 'Icahn School of Medicine - Mount Sinai',
 
@@ -104,6 +110,9 @@ const schoolNameMap = {
   'washu': 'WASHU',
 
   'wayne state': 'Wayne State University School of Medicine',
+
+
+  
 };
 
 // Normalize school name to ensure consistent naming
