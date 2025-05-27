@@ -8,7 +8,6 @@ const ProfileCard = ({ profile }) => {
   }
 
   const {
-    type,
     gender,
     race,
     stateOfResidency,
@@ -32,18 +31,11 @@ const ProfileCard = ({ profile }) => {
     reflections
   } = profile;
 
-  // Format the title based on the type or major
-  const title = type === "non-trad" 
-    ? "Non-Traditional Applicant with Research Focus"
-    : type === "biomedical" || (major && major.toLowerCase().includes("biomed"))
-      ? "Biomedical Engineering Student"
-      : major ? `${major.split(',')[0].trim()} Student` : "General Biology Student";
+  // REMOVED: title generation code and card-header section
 
   return (
     <div className="profile-card">
-      <div className="card-header">
-        <h3>{title}</h3>
-      </div>
+      {/* REMOVED: card-header div with title */}
       
       <div className="info-section">
         <div className="info-grid">

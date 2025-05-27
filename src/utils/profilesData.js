@@ -54,9 +54,9 @@ const schoolNameMap = {
   'university of michigan': 'University of Michigan',
   'michigan': 'University of Michigan',
   
-  'feinberg': 'Feinberg school of medicine',
-  'northwestern': 'Feinberg school of medicine',
-  'northwestern feinberg': 'Feinberg school of medicine',
+  'feinberg': 'Feinberg School of Medicine',
+  'northwestern': 'Feinberg School of Medicine',
+  'northwestern feinberg': 'Feinberg School of Medicine',
   
   'wake forest': 'Wake Forest University School of Medicine',
   'wake forest university': 'Wake Forest University School of Medicine',
@@ -165,7 +165,7 @@ export const getHardcodedProfiles = () => {
       major: "Biology major, economic policy minor",
       gpa: 3.99,
       mcat: 518,
-      acceptedSchools: ["Feinberg school of medicine"]
+      acceptedSchools: ["Feinberg School of Medicine"]
     },
     {
       id: "applicant-13",
