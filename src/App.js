@@ -58,7 +58,7 @@ function App() {
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/profile" /> : <HomePage />} />
+        <Route path="/" element={<HomePage />} />
         
         {/* Authentication and purchase routes */}
         <Route path="/checkout" element={<Checkout />} />

@@ -137,7 +137,7 @@ const Navbar = () => {
         <div className="navbar-content">
           {/* Left side with logo and brand name */}
           <div className="navbar-left">
-            <Link to={isAuthenticated ? "/profile" : "/"} className="logo" onClick={closeMobileMenu}>
+            <Link to="/" className="logo" onClick={closeMobileMenu}>
               <img src={logo} alt="PremedCheatsheet" />
               <span>PremedCheatsheet</span>
             </Link>
