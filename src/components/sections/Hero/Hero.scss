@@ -4,7 +4,7 @@
 .hero {
   position: relative;
   overflow: visible; /* Allow image to overflow */
-background: linear-gradient(180deg, #F2F6F5 0%, #F2F6F5 60%, #EDF2F1 70%, #E8EEEC 80%, #E3EAE7 85%, #DEE6E2 90%, #D9E2DD 95%, #D4DED8 98%, #CFDAD3 100%);
+  background: linear-gradient(180deg, #F2F6F5 0%, #F2F6F5 60%, #EDF2F1 70%, #E8EEEC 80%, #E3EAE7 85%, #DEE6E2 90%, #D9E2DD 95%, #D4DED8 98%, #CFDAD3 100%);
   padding-top: $spacing-12; /* Increased top padding for more space above the image */
   /* IMPORTANT: Add significant bottom padding to extend the background */
   padding-bottom: 120px; /* Large padding to ensure background extends below the image */
@@ -88,27 +88,28 @@ background: linear-gradient(180deg, #F2F6F5 0%, #F2F6F5 60%, #EDF2F1 70%, #E8EEE
     max-width: clamp(600px, 60vw, 2100px);
     margin: 0 auto clamp(#{$spacing-6}, 3vw, #{$spacing-10});
     color: $text-color;
-    font-size: clamp(0.9rem, 0.2vw + 0.8rem, 1.1rem);
+    font-size: clamp(1rem, 0.2vw + 0.8rem, 1.1rem);
     line-height: 1.6;
     padding: 0 clamp(#{$spacing-4}, 2vw, #{$spacing-8});
     text-align: left;
+    font-weight: 400;
     
     @media (min-width: $xl) {
       max-width: clamp(700px, 65vw, 2100px);
-      font-size: clamp(1rem, 0.2vw + 0.8rem, 1.2rem);
+      font-size: clamp(1.2rem, 0.2vw + 0.8rem, 1.2rem);
       line-height: 1.7;
     }
     
     @media (min-width: $xxl) {
       max-width: clamp(800px, 70vw, 2100px);
-      font-size: clamp(1.1rem, 0.2vw + 0.8rem, 1.3rem);
-      max-width: 95%;
+      font-size: clamp(1.35rem, 0.2vw + 0.8rem, 1.3rem);
+      max-width: 85%;
     }
     
     @media (max-width: $md) {
-      font-size: clamp(0.9rem, 0.2vw + 0.8rem, 1rem);
+      font-size: clamp(1rem, 0.2vw + 0.8rem, 1.1rem);
       padding: 0 clamp(#{$spacing-3}, 1.5vw, #{$spacing-5});
-      max-width: 95%;
+      max-width: 85%;
     }
     
     @media (max-width: $sm) {
@@ -126,23 +127,24 @@ background: linear-gradient(180deg, #F2F6F5 0%, #F2F6F5 60%, #EDF2F1 70%, #E8EEE
     padding: $spacing-3 $spacing-6;
     font-weight: 500;
     font-size: 0.8rem;
+    font-family: 'Roboto Mono', monospace !important;
     
     @media (min-width: $xl) {
-      font-size: 0.8rem;
+      font-size: 1rem;
       padding: $spacing-4 $spacing-10;
       margin-bottom: $spacing-2;
       margin-top: clamp(#{$spacing-8}, 1vw, #{$spacing-16});
     }
 
     @media (min-width: $md) {
-      font-size: 0.8rem;
+      font-size: 1rem;
       padding: $spacing-4 $spacing-10;
       margin-bottom: $spacing-2;
       margin-top: clamp(#{$spacing-2}, 1vw, #{$spacing-8});
     }
     
     @media (min-width: $lg) {
-      font-size: 1rem;
+      font-size: 1.2rem;
       padding: $spacing-3 $spacing-8;
     }
     
@@ -150,7 +152,7 @@ background: linear-gradient(180deg, #F2F6F5 0%, #F2F6F5 60%, #EDF2F1 70%, #E8EEE
       margin-bottom: $spacing-2;
       margin-top: clamp(#{$spacing-4}, 2vw, #{$spacing-8});
       padding: $spacing-3 $spacing-6;
-      font-size: 1.2rem;
+      font-size: 0.8rem;
     }
     
     &:hover {

@@ -267,10 +267,11 @@
     }
 
     .try-free-button {
-      @include mix.button-primary;
+      @include mix.new-button-primary;
       padding: $spacing-2 $spacing-4;
       font-size: 0.9rem;
       border-radius: 6px; /* Added border radius */
+      font-family: font-family-mono;
       
       @media (min-width: $xl) {
         padding: $spacing-2 $spacing-5;
@@ -452,6 +453,7 @@
   cursor: pointer;
   margin-right: $spacing-4;
   padding: 0;
+  font-family: font-family-mono;
   
   &:hover {
     color: $primary-color;

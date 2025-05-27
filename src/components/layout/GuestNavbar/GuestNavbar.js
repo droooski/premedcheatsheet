@@ -65,7 +65,7 @@ const GuestNavbar = ({ onNavigate }) => {
                 className="nav-link-button active" 
                 onClick={() => handleNavigate('/login')}
               >
-                Log in
+                Login
               </button>
             </li>
             <button 
@@ -116,7 +116,7 @@ const GuestNavbar = ({ onNavigate }) => {
               className="nav-link-button active" 
               onClick={() => handleNavigate('/login')}
             >
-              Log in
+              Login
           </button>
           <button 
             className="try-free-button" 

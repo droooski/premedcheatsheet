@@ -5,6 +5,10 @@
 // Import Google Fonts after @use statements
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Abyssinica+SIL:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700&display=swap'); // Gothic A1 alternative
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abyssinica+SIL:wght@400;600&display=swap');
 
 // Base styles
 * {
@@ -416,27 +420,27 @@ html body .hero {
   }
   
   @media (min-width: 479px) and (max-width: 630px) {
-    padding-bottom: 300px !important; // Small phones/large phones
+    padding-bottom: 280px !important; // Small phones/large phones
   }
   
   @media (min-width: 630px) and (max-width: 731px) {
-    padding-bottom: 400px !important; // Tablets portrait
+    padding-bottom: 380px !important; // Tablets portrait
   }
   
   @media (min-width: 731px) and (max-width: 900px) {
-    padding-bottom: 500px !important; // Tablets landscape/small laptops
+    padding-bottom: 480px !important; // Tablets landscape/small laptops
   }
   
   @media (min-width: 900px) and (max-width: 1399px) {
     padding-bottom: 580px !important; // Medium laptops
   }
   
-  @media (min-width: 1400px) and (max-width: 1599px) {
-    padding-bottom: 700px !important; // Large laptops
+  @media (min-width: 1399px) and (max-width: 1599px) {
+    padding-bottom: 650px !important; // Large laptops
   }
   
-  @media (min-width: 1600px) and (max-width: 1919px) {
-    padding-bottom: 750px !important; // Extra large screens
+  @media (min-width: 1599px) and (max-width: 1919px) {
+    padding-bottom: 650px !important; // Extra large screens
   }
   
   @media (min-width: 1920px) {
@@ -452,7 +456,7 @@ html body .hero {
 .roadmap .text-content h2,
 .roadmap h2 {
   font-family: $font-family-mincho !important; /* Apply BIZ UDPMincho font */
-  font-weight: 400 !important; /* Regular weight */
+  font-weight: 500 !important; /* Regular weight */
   
   /* Refined styling for this elegant font */
   letter-spacing: 0.01em !important;
@@ -491,14 +495,14 @@ html body .hero {
 .roadmap .text-content p,
 .roadmap p {
   /* Font properties */
-  font-family: $font-family-sans !important; /* Keep sans-serif for body text */
+  font-family: $font-family-sans2 !important; /* Keep sans-serif for body text */
   font-weight: 400 !important; /* Regular weight for readability */
-  font-size: 0.9rem !important; /* Comfortable reading size */
+  font-size: 1.2rem !important; /* Comfortable reading size */
   line-height: 1.6 !important; /* Improved line height for readability */
   
   /* Spacing and color */
   margin-bottom: $spacing-4 !important; /* Good spacing between paragraphs */
-  color: $text-color-light !important; /* Slightly lighter color for contrast with headers */
+  color: $black !important; /* Slightly lighter color for contrast with headers */
   
   /* Subtle refinements */
   letter-spacing: 0.01em !important; /* Very slight letter spacing improvement */
@@ -510,16 +514,16 @@ html body .hero {
   
   /* Responsive adjustments */
   @media (min-width: 768px) {
-    font-size: 0.9rem !important; /* Slightly larger on medium screens */
+    font-size: 1rem !important; /* Slightly larger on medium screens */
   }
   
   @media (min-width: 1200px) {
-    font-size: 1rem !important; /* Larger on big screens */
+    font-size: 1.2rem !important; /* Larger on big screens */
     line-height: 1.7 !important; /* More generous line height on big screens */
   }
   
   @media (max-width: 576px) {
-    font-size: 0.65rem !important; /* Slightly smaller on mobile */
+    font-size: 0.85rem !important; /* Slightly smaller on mobile */
     line-height: 1.5 !important; /* Tighter line height on mobile */
   }
 }
@@ -546,17 +550,17 @@ html body .hero {
 .med-school-code {
   h2 {
     font-family: $font-family-mincho !important; /* Apply BIZ UDPMincho font */
-    font-weight: 400 !important; /* Regular weight */
+    font-weight: 500 !important; /* Regular weight */
     letter-spacing: 0.01em !important;
     line-height: 1.3 !important;
     margin-bottom: $spacing-6 !important;
   }
   
   p {
-    font-family: $font-family-sans !important;
+    font-family: $font-family-sans2 !important;
     font-weight: 400 !important;
     line-height: 1.6 !important;
-    color: $text-color-light !important;
+    color: $black !important;
     margin-bottom: $spacing-4 !important;
     
     @media (min-width: 768px) {
@@ -579,23 +583,25 @@ html body .hero {
   /* Apply BIZ UDPMincho font to headings */
   h2 {
     font-family: $font-family-mincho !important;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
     letter-spacing: 0.01em !important;
   }
   
   .section-subheading {
-    font-family: $font-family-sans !important;
+    font-family: $font-family-sans2 !important;
     font-weight: 400 !important;
-    color: $text-color-light !important;
-    margin-bottom: $spacing-32 !important; /* Less space on small screens */
+    color: $black !important;
+    margin-bottom: $spacing-8 !important; /* Less space on small screens */
 
-    @media (min-width: $md) {
-      font-size: 0.9rem !important;
+    @media (min-width: $xl) {
+      font-size: 1rem !important;
+      margin-bottom: $spacing-32 !important; /* More space on large screens */
     }
 
     @media (min-width: $lg) {
-      font-size: 1rem !important;
+      font-size: 1.3rem !important;
       line-height: 1.7 !important;
+      margin-bottom: $spacing-32 !important; /* More space on large screens */
     }
 
     @media (max-width: $sm) {
@@ -605,7 +611,7 @@ html body .hero {
 
     @media (max-width: $md) {
       font-size: 0.9rem !important;
-      margin-bottom: $spacing-8 !important; /* Less space on medium screens */
+      margin-bottom: $spacing-2 !important; /* Less space on medium screens */
     }
   }
   
@@ -616,7 +622,7 @@ html body .hero {
     width: 90% !important;
     max-width: 500px !important;
     margin: 0 auto !important;
-    margin-bottom: 100px !important; /* More space below subheading */
+    margin-bottom: 70px !important; /* More space below subheading */
     
     /* FIXED: Proper vertical gap for mobile */
     gap: 0 !important; /* Using explicit pixel value for predictability */
@@ -650,10 +656,11 @@ html body .hero {
     /* Use the exact aspect ratios specified */
     aspect-ratio: 2/3 !important; /* Default aspect ratio */
     overflow: hidden !important;
-    border-radius: 18px !important;
     transform: scale(0.8) !important;
     background-color: transparent !important; /* Removed white background */
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    border: 0.1px solid #000000 !important;
+    border-radius: 12px !important;
     
     /* Subtle hover effect */
     &:hover {
@@ -663,8 +670,10 @@ html body .hero {
     /* Responsive adjustments */
 
     @media (max-width: $sm) {
-      aspect-ratio: 2/3 !important; /* Default aspect ratio for small screens */
+      aspect-ratio: 2/4.5 !important; /* Default aspect ratio for small screens */
       transform: scale(0.75) !important; /* Slightly smaller on small screens */
+      margin-top: -100px !important;
+      margin-bottom: -150px !important;
       
       &:hover {
         transform: scale(0.76) !important; /* Subtle hover */
@@ -672,7 +681,9 @@ html body .hero {
     }
     
     @media (min-width: $md) {
-      aspect-ratio: 5/8 !important; /* Slightly taller on medium screens */
+      aspect-ratio: 3/7 !important; /* Slightly taller on medium screens */
+      margin-top: -50px !important;
+      margin-bottom: -100px !important;
       
       &:hover {
         transform: scale(0.81) !important; /* Subtle hover */
@@ -680,13 +691,17 @@ html body .hero {
     }
     
     @media (min-width: $lg) {
-      aspect-ratio: 15/17.3 !important; /* More vertical on large screens */
-      border-radius: 15px !important; /* Rounded corners */
+      aspect-ratio: 5/11.5 !important; /* More vertical on large screens */
+      border-radius: 20px !important; /* Rounded corners */
+      margin-top: -150px !important;
+      margin-bottom: -100px !important;
     }
     
     @media (min-width: $xl) {
       aspect-ratio: 11/24.8 !important; /* Taller aspect ratio for XL */
       transform: scale(1.08) !important; /* Make slightly larger */
+      margin-top: 0px !important;
+      margin-bottom: 0px !important;
       
       &:hover {
         transform: scale(1.10) !important; /* Moderate hover effect */
@@ -701,7 +716,7 @@ html body .hero {
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important; /* Changed to cover to avoid distortion */
-        border-radius: 18px !important; /* Match container radius */
+        border-radius: 20px !important; /* Match container radius */
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important; /* Apply shadow to image */
         
         &:hover {
@@ -763,21 +778,36 @@ html body .hero {
   
   /* Force BIZ font on headers */
   h2 {
-    font-family: $font-family-mincho !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.01em !important;
-    margin-bottom: $spacing-16 !important; /* More space below heading */
+    text-align: center;
+    font-family: $font-family-mincho !important; // Using BIZ UDPmincho font
+    font-weight: 500 !important; // Regular weight for BIZ font
+    font-size: 2rem;
+    letter-spacing: 0.01em !important; // Slight letter spacing for BIZ font
+    line-height: 1.2;
+    margin-bottom: $spacing-16; // More space below title
+    color: $text-color;
+    margin-left: auto;
+    margin-right: auto;
     
     @media (min-width: $xl) {
-      margin-bottom: $spacing-20 !important;
+      font-size: 2.8rem;
+      margin-bottom: $spacing-20; // Even more space on large screens
+      letter-spacing: 0.015em !important;
+    }
+    
+    @media (min-width: $xxl) {
+      font-size: 3rem;
+      letter-spacing: 0.02em !important;
     }
     
     @media (max-width: $md) {
-      margin-bottom: $spacing-12 !important;
+      font-size: 2.5rem;
+      margin-bottom: $spacing-12; // Reduced space on medium screens
     }
     
     @media (max-width: $sm) {
-      margin-bottom: $spacing-8 !important;
+      font-size: 2rem;
+      margin-bottom: $spacing-8; // Minimal space on small screens
     }
   }
   
@@ -794,7 +824,7 @@ html body .hero {
     }
     
     h3 {
-      font-family: $font-family-mincho !important;
+      font-family: $font-family-sans2 !important;
       font-weight: 400 !important;
       letter-spacing: 0.01em !important;
       text-align: left !important;
@@ -955,4 +985,12 @@ html body .hero {
     margin-left: auto !important;
     margin-right: auto !important;
   }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'BIZ UDPMincho', serif !important;
+}
+
+body, p, div, span {
+  font-family: 'M PLUS 1p', sans-serif !important;
 }

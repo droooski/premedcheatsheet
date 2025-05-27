@@ -221,7 +221,7 @@ const Navbar = () => {
                   onClick={handleLoginClick}
                   className="login-link-button"
                 >
-                  Log in
+                  Login
                 </button>
                 <Link to="/signup" className="try-free-button">
                   Join
@@ -326,7 +326,7 @@ const Navbar = () => {
                             setShowAuthModal(true);
                           }}
                         >
-                          Log in
+                          Login
                         </button>
                       </li>
                       <li>

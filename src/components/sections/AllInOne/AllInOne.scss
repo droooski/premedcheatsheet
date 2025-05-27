@@ -13,27 +13,34 @@
     text-align: center;
     font-family: $font-family-mincho;
     font-weight: 400;
-    @include mix.heading-2;
     margin-bottom: $spacing-2;
     letter-spacing: 0.01em;
     line-height: 1.3;
+    font-size: 2rem;
     
     @media (min-width: $xl) {
       letter-spacing: 0.015em;
+      font-size: 3rem;
     }
     
     @media (min-width: $xxl) {
       letter-spacing: 0.02em;
+      font-size: 3.5rem;
+    }
+
+    @media (min-width: $md) {
+      letter-spacing: 0.02em;
+      font-size: 2.5rem;
     }
     
     @media (max-width: $sm) {
-      font-size: 1.5rem;
+      font-size: 2rem;
     }
   }
   
   .section-subheading {
     text-align: center;
-    color: $text-color-light;
+    color: $black;
     margin-bottom: $spacing-8;
     font-family: $font-family-sans;
     font-weight: 400;
@@ -97,7 +104,7 @@
     
     /* Reduce bottom margin specifically on mobile to reduce gap between cards */
     @media (max-width: $sm) {
-      margin-bottom: -3px !important; /* Negative margin to reduce gap between cards */
+      margin-bottom: -200px !important; /* Negative margin to reduce gap between cards */
       border-radius: 5px; /* Smaller radius on mobile */
     }
     

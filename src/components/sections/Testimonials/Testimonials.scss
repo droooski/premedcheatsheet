@@ -36,18 +36,23 @@
   h2 {
     text-align: center;
     font-family: $font-family-mincho;
-    font-weight: 400;
-    font-size: 3rem;
+    font-weight: 500;
+    font-size: 2.3rem;
     margin-bottom: $spacing-12;
     color: $text-color;
     
     @media (min-width: $xl) {
-      font-size: 3.5rem;
+      font-size: 2.5rem;
+      margin-bottom: $spacing-16;
+    }
+
+    @media (min-width: $xxl) {
+      font-size: 2.8rem;
       margin-bottom: $spacing-16;
     }
     
     @media (max-width: $md) {
-      font-size: 2.5rem;
+      font-size: 2rem;
       margin-bottom: $spacing-8;
     }
     
