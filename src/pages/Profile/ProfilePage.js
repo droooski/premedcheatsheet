@@ -432,7 +432,9 @@ const ProfilePage = () => {
             <>
               <div className="profiles-grid">
                 {filteredProfiles.length > 0 ? (
-                  filteredProfiles.map((profile, index) => (
+                  filteredProfiles
+                    .slice((currentPage - 1) * 10, currentPage * 10)
+                    .map((profile, index) => (
                     <div className="profile-item" key={profile.id || index}>
                       <ProfileCard profile={profile} />
                     </div>
@@ -456,13 +458,13 @@ const ProfilePage = () => {
                   </button>
                   
                   <span className="page-info">
-                    Page {currentPage} of {Math.ceil(filteredProfiles.length / 10)}
+                    Page {currentPage} of {Math.max(1, Math.ceil(filteredProfiles.length / 10))}
                   </span>
                   
                   <button 
                     className="page-button next"
                     onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === Math.ceil(filteredProfiles.length / 10)}
+                    disabled={currentPage >= Math.ceil(filteredProfiles.length / 10)}
                   >
                     Next →
                   </button>

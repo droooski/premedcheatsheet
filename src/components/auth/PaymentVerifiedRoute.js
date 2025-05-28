@@ -72,6 +72,10 @@ const PaymentVerifiedRoute = ({ children, fallbackPath = '/checkout' }) => {
     );
   }
   
+  if (window.location.pathname === '/checkout' || window.location.pathname.includes('/checkout')) {
+    return children;
+  }
+
   return hasAccess ? children : <Navigate to={fallbackPath} />;
 };
 

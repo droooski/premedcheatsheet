@@ -437,43 +437,24 @@ const Checkout = () => {
   const handleAuthSuccess = (userData) => {
     console.log("Auth success in checkout flow:", userData);
     
-    // Check if this is data collection mode (for payment) or actual authentication
-    if (userData?.dataCollectionOnly) {
-      console.log("Data collection mode - storing user data without authentication");
-      
-      // Don't set the user state - just store the registration data
+    // For checkout flow, we ALWAYS want to collect data first, then create account after payment
+    if (userData && (userData.email || userData.user)) {
+      // Store the registration data without creating Firebase account yet
       setPendingUserData({
-        email: userData.email,
-        password: userData.password,
+        email: userData.email || userData.user?.email,
+        password: userData.password || '',
         firstName: userData.firstName || '',
         lastName: userData.lastName || ''
       });
       
-      // Mark registration as complete
-      setRegistrationComplete(true);
-      
       // Close auth modal
       setShowAuthModal(false);
       
-      return; // Critical: exit early without setting user state or changing route
-    }
-    
-    // If it's a real authentication (not data collection), set the user state
-    if (userData?.user) {
-      // Set the authenticated user
-      setUser(userData.user);
+      // Move to payment step
+      changeCheckoutStep('payment');
       
-      // Update email field if available
-      if (userData.user.email) {
-        setCardInfo(prev => ({
-          ...prev,
-          email: userData.user.email
-        }));
-      }
+      return;
     }
-    
-    // Close auth modal
-    setShowAuthModal(false);
     
     if (userData?.isGuest) {
       // Handle guest access
@@ -1958,14 +1939,14 @@ const handleConfirmFreePurchase = async () => {
       </div>
       
       {/* Auth Modal with preventRedirect prop */}
-      <AuthModal 
-        isOpen={showAuthModal}
-        onClose={handleCloseAuthModal}
-        onSuccess={handleAuthSuccess}
-        initialMode={isLoginMode ? 'login' : 'signup'}
-        preventRedirect={true}
-        dataCollectionOnly={checkoutStep === 'payment'}
-      />
+        <AuthModal 
+          isOpen={showAuthModal}
+          onClose={handleCloseAuthModal}
+          onSuccess={handleAuthSuccess}
+          initialMode={isLoginMode ? 'login' : 'signup'}
+          preventRedirect={true}
+          dataCollectionOnly={false}  // Allow guest option
+        />
       <Footer />
     </div>
   );
