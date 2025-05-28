@@ -437,27 +437,29 @@ const Checkout = () => {
   const handleAuthSuccess = (userData) => {
     console.log("Auth success in checkout flow:", userData);
     
-    // For checkout flow, we ALWAYS want to collect data first, then create account after payment
-    if (userData && (userData.email || userData.user)) {
-      // Store the registration data without creating Firebase account yet
+    // If this is actual authentication (user already exists)
+    if (userData?.user) {
+      setUser(userData.user); // Set the user state for navbar
+      setShowAuthModal(false);
+      changeCheckoutStep('payment');
+      return;
+    }
+    
+    // If this is data collection for new user registration
+    if (userData && userData.email) {
       setPendingUserData({
-        email: userData.email || userData.user?.email,
+        email: userData.email,
         password: userData.password || '',
         firstName: userData.firstName || '',
         lastName: userData.lastName || ''
       });
       
-      // Close auth modal
       setShowAuthModal(false);
-      
-      // Move to payment step
       changeCheckoutStep('payment');
-      
       return;
     }
     
     if (userData?.isGuest) {
-      // Handle guest access
       navigate('/guest-preview');
     }
   };
