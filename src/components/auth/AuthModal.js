@@ -1,7 +1,7 @@
 // src/components/auth/AuthModal.js - Redesigned UI while preserving functionality
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser, loginUser, getUserProfile } from '../../firebase/authService';
+import { loginUser, getUserProfile } from '../../firebase/authService';
 import ForgotPassword from './ForgotPassword';
 import './AuthModal.scss';
 
@@ -80,50 +80,54 @@ const AuthModal = ({
         throw new Error('Passwords do not match');
       }
 
-      // If dataCollectionOnly is true, don't actually register the user
-      if (dataCollectionOnly && !isLogin) {
-        // Just pass the data to onSuccess without authentication
+      if (isLogin) {
+        // LOGIN FLOW: Actually authenticate with Firebase
+        console.log("🔑 LOGIN: Authenticating with Firebase");
+        
+        const result = await loginUser(email, password);
+
+        if (result.user) {
+          // Get user profile data
+          let userProfile = null;
+          if (result.user.uid) {
+            const profileResult = await getUserProfile(result.user.uid);
+            if (profileResult.profile) {
+              userProfile = profileResult.profile;
+            }
+          }
+          
+          // Call onSuccess callback with actual user data
+          onSuccess({
+            user: result.user,
+            profile: userProfile,
+            email,
+            firstName,
+            lastName
+          });
+        } else {
+          throw new Error(result.error || 'Login failed');
+        }
+      } else {
+        // SIGNUP FLOW: NEVER create Firebase account - just collect data
+        console.log("📝 SIGNUP: Collecting user data (NOT creating account yet)");
+        
+        // Validate required fields for signup
+        if (!firstName || !lastName || !email || !password) {
+          throw new Error('Please fill in all required fields');
+        }
+        
+        if (password.length < 6) {
+          throw new Error('Password must be at least 6 characters');
+        }
+        
+        // Just pass the data to onSuccess without creating Firebase account
         onSuccess({
           email,
           password,
           firstName,
           lastName,
-          dataCollectionOnly: true
+          dataCollectionOnly: true // Always true for signup in checkout
         });
-        
-        setLoading(false);
-        return;
-      }
-
-      // Normal authentication flow for login or full registration
-      let result;
-      
-      if (isLogin) {
-        result = await loginUser(email, password);
-      } else {
-        result = await registerUser(email, password, firstName, lastName);
-      }
-
-      if (result.user) {
-        // Get user profile data
-        let userProfile = null;
-        if (result.user.uid) {
-          const profileResult = await getUserProfile(result.user.uid);
-          if (profileResult.profile) {
-            userProfile = profileResult.profile;
-          }
-        }
-        
-        // Call onSuccess callback with user data and profile
-        onSuccess({
-          user: result.user,
-          profile: userProfile,
-          email,
-          firstName,
-          lastName
-        });
-      } else {
-        throw new Error(result.error || 'Authentication failed');
       }
       
     } catch (error) {
