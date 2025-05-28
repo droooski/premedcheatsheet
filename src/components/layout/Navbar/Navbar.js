@@ -30,20 +30,21 @@ const Navbar = () => {
   };
 
   // Helper function to determine user plan
-  const getUserPlan = (userProfile) => {
+  const getUserPlans = (userProfile) => {
     if (userProfile?.subscriptions && userProfile.subscriptions.length > 0) {
-      const activeSubscription = userProfile.subscriptions.find(sub => sub.active);
-      return activeSubscription?.plan || 'cheatsheet';
+      return userProfile.subscriptions
+        .filter(sub => sub.active)
+        .map(sub => sub.plan);
     }
-    return 'cheatsheet';
+    return ['cheatsheet']; // default array
   };
 
-  const hasAccessToProfiles = (plan) => {
-    return ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan);
+  const hasAccessToProfiles = (plans) => {
+    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
   };
 
-  const hasAccessToApplication = (plan) => {
-    return ['application', 'application-plus'].includes(plan);
+  const hasAccessToApplication = (plans) => {
+    return plans.some(plan => ['application', 'application-plus'].includes(plan));
   };
 
   useEffect(() => {
@@ -53,24 +54,23 @@ const Navbar = () => {
       
       if (currentUser) {
         try {
-          // Get user profile from Firestore
+          // Always fetch fresh user profile data
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
           
           if (userDoc.exists()) {
             const profileData = userDoc.data();
-            console.log("User profile data:", profileData);
+            console.log("Fresh user profile data:", profileData);
             setUserProfile(profileData);
             setIsAdmin(profileData.isAdmin === true);
             
             // Check payment verification
             const hasVerifiedPayment = profileData.paymentVerified === true ||
               (profileData.subscriptions && 
-               profileData.subscriptions.length > 0 && 
-               profileData.subscriptions.some(sub => sub.active));
-               
+              profileData.subscriptions.length > 0 && 
+              profileData.subscriptions.some(sub => sub.active));
+                
             setPaymentVerified(hasVerifiedPayment);
           } else {
-            console.log("No user profile found");
             setUserProfile(null);
             setIsAdmin(false);
             setPaymentVerified(false);
@@ -86,7 +86,6 @@ const Navbar = () => {
         if (isGuest()) {
           console.log("Guest access active");
         } else {
-          // Clear guest access if expired
           localStorage.removeItem('guestAccess');
           localStorage.removeItem('guestAccessExpiry');
         }
@@ -99,8 +98,27 @@ const Navbar = () => {
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [db]);
+    // Also listen for focus events to refresh profile after purchases
+    const handleFocus = async () => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserProfile(userDoc.data());
+          }
+        } catch (error) {
+          console.error('Error refreshing user profile:', error);
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [db, user]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -185,31 +203,36 @@ const Navbar = () => {
           {isPaidUser && !hasGuestAccess && (
             <div className="navbar-center">
               <ul className="main-menu">
-                {/* Show Profiles section only for plans that have access */}
-                {hasAccessToProfiles(getUserPlan(userProfile)) && (
-                  <li>
-                    <Link 
-                      to="/profile" 
-                      className={isActive('/profile') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Premed Cheatsheet Members
-                    </Link>
-                  </li>
-                )}
-                
-                {/* Show Application section only for plans that have access */}
-                {hasAccessToApplication(getUserPlan(userProfile)) && (
-                  <li>
-                    <Link 
-                      to="/application-cheatsheet" 
-                      className={isActive('/application-cheatsheet') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Application Cheatsheet
-                    </Link>
-                  </li>
-                )}
+                {(() => {
+                  const userPlans = getUserPlans(userProfile);
+                  return (
+                    <>
+                      {hasAccessToProfiles(userPlans) && (
+                        <li>
+                          <Link 
+                            to="/profile" 
+                            className={isActive('/profile') ? 'active' : ''}
+                            onClick={closeMobileMenu}
+                          >
+                            Premed Cheatsheet Members
+                          </Link>
+                        </li>
+                      )}
+                      
+                      {hasAccessToApplication(userPlans) && (
+                        <li>
+                          <Link 
+                            to="/application-cheatsheet" 
+                            className={isActive('/application-cheatsheet') ? 'active' : ''}
+                            onClick={closeMobileMenu}
+                          >
+                            Application Cheatsheet
+                          </Link>
+                        </li>
+                      )}
+                    </>
+                  );
+                })()}
                 
                 {isAdmin && (
                   <li>
@@ -267,59 +290,66 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-                {isPaidUser ? (
-                  // For paid users - show member menu items based on their plan
-                  <>
-                    {hasAccessToProfiles(getUserPlan(userProfile)) && (
-                      <li>
-                        <Link 
-                          to="/profile" 
-                          className={isActive('/profile') ? 'active' : ''}
-                          onClick={closeMobileMenu}
-                        >
-                          Premed Cheatsheet Members
-                        </Link>
-                      </li>
-                    )}
-                    
-                    {hasAccessToApplication(getUserPlan(userProfile)) && (
-                      <li>
-                        <Link 
-                          to="/application-cheatsheet" 
-                          className={isActive('/application-cheatsheet') ? 'active' : ''}
-                          onClick={closeMobileMenu}
-                        >
-                          Application Cheatsheet
-                        </Link>
-                      </li>
-                    )}
-                    
-                    {isAdmin && (
-                      <li>
-                        <Link 
-                          to="/admin" 
-                          className={isActive('/admin') ? 'active' : ''}
-                          onClick={closeMobileMenu}
-                        >
-                          Admin
-                        </Link>
-                      </li>
-                    )}
+              {isPaidUser ? (
+                // For paid users - show member menu items based on their plan
+                <>
+                  {(() => {
+                    const userPlans = getUserPlans(userProfile);
+                    return (
+                      <>
+                        {hasAccessToProfiles(userPlans) && (
+                          <li>
+                            <Link 
+                              to="/profile" 
+                              className={isActive('/profile') ? 'active' : ''}
+                              onClick={closeMobileMenu}
+                            >
+                              Premed Cheatsheet Members
+                            </Link>
+                          </li>
+                        )}
+                        
+                        {hasAccessToApplication(userPlans) && (
+                          <li>
+                            <Link 
+                              to="/application-cheatsheet" 
+                              className={isActive('/application-cheatsheet') ? 'active' : ''}
+                              onClick={closeMobileMenu}
+                            >
+                              Application Cheatsheet
+                            </Link>
+                          </li>
+                        )}
+                      </>
+                    );
+                  })()}
+                  
+                  {isAdmin && (
                     <li>
                       <Link 
-                        to="/account" 
-                        className={isActive('/account') ? 'active' : ''}
+                        to="/admin" 
+                        className={isActive('/admin') ? 'active' : ''}
                         onClick={closeMobileMenu}
                       >
-                        Account
+                        Admin
                       </Link>
                     </li>
-                    <li>
-                      <button onClick={handleLogout} className="logout-button-mobile">
-                        Log out
-                      </button>
-                    </li>
-                  </>
+                  )}
+                  <li>
+                    <Link 
+                      to="/account" 
+                      className={isActive('/account') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Account
+                    </Link>
+                  </li>
+                  <li>
+                    <button onClick={handleLogout} className="logout-button-mobile">
+                      Log out
+                    </button>
+                  </li>
+                </>
                 ) : (
                 // For guest users and non-authenticated users
                 <>

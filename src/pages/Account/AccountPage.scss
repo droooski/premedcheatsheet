@@ -430,3 +430,59 @@
     }
   }
 }
+
+.upgrade-options {
+  margin-top: $spacing-4;
+  padding: $spacing-4;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  
+  h4 {
+    margin-bottom: $spacing-2;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-color;
+  }
+  
+  p {
+    margin-bottom: $spacing-4;
+    color: $text-color-light;
+    font-size: 0.9rem;
+  }
+  
+  .upgrade-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-2;
+    
+    .upgrade-button {
+      padding: $spacing-2 $spacing-4;
+      background-color: $primary-color;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: darken($primary-color, 5%);
+      }
+    }
+  }
+}
+
+.max-plan-notice {
+  margin-top: $spacing-4;
+  padding: $spacing-4;
+  background-color: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  
+  p {
+    color: #166534;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}

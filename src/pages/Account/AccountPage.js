@@ -2,7 +2,7 @@
 
 /* eslint-disable no-unused-vars */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
@@ -74,6 +74,34 @@ const AccountPage = () => {
     }
     return 'cheatsheet'; // Default fallback
   };
+
+  const fetchUserData = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const profileData = userDoc.data();
+        setUserProfile(profileData);
+        
+        // Update orders display
+        if (profileData.orders && profileData.orders.length > 0) {
+          const formattedOrders = profileData.orders.map((order, index) => ({
+            id: order.orderId || `00${650 + index}`,
+            date: order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : "2023-04-15",
+            status: order.status || "completed",
+            total: `$${order.amount ? order.amount.toFixed(2) : "0.00"}`,
+            plan: order.plan || "",
+            planName: order.planName || ""
+          }));
+          
+          setOrders(formattedOrders);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  }, [user, db]);
 
   // Handle email verification from link
   useEffect(() => {
@@ -232,6 +260,19 @@ const AccountPage = () => {
     
     fetchUserData();
   }, [navigate, db]);
+
+  useEffect(() => {
+    // Listen for navigation changes to refresh data after purchase
+    const handleFocus = () => {
+      if (user) {
+        // Refresh user data when page gets focus (user returns from checkout)
+        fetchUserData();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, fetchUserData]);
 
   const handleLogout = async () => {
     try {
@@ -465,38 +506,17 @@ const AccountPage = () => {
                     
                     if (upgradeOptions.length > 0) {
                       return (
-                        <div className="upgrade-options" style={{
-                          marginTop: '20px',
-                          padding: '15px',
-                          backgroundColor: '#f9fafb',
-                          borderRadius: '8px',
-                          border: '1px solid #e5e7eb'
-                        }}>
-                          <h4 style={{marginBottom: '10px', fontSize: '1rem', fontWeight: '600'}}>
-                            Upgrade Your Plan
-                          </h4>
-                          <p style={{marginBottom: '15px', color: '#6b7280', fontSize: '0.9rem'}}>
-                            Get access to more features by upgrading your current plan.
-                          </p>
-                          <div className="upgrade-buttons" style={{display: 'flex', flexWrap: 'wrap', gap: '10px'}}>
+                        <div className="upgrade-options">
+                          <h4>Add More Plans</h4>
+                          <p>Get access to more features by adding additional plans.</p>
+                          <div className="upgrade-buttons">
                             {upgradeOptions.map(plan => (
                               <button
                                 key={plan}
-                                onClick={() => navigate(`/pricing?upgrade=${plan}`)}
-                                style={{
-                                  padding: '8px 16px',
-                                  backgroundColor: '#1A3A34',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  fontSize: '0.9rem',
-                                  cursor: 'pointer',
-                                  transition: 'background-color 0.2s'
-                                }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#0f2419'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = '#1A3A34'}
+                                className="upgrade-button"
+                                onClick={() => navigate(`/checkout?plan=${plan}&upgrade=true`)}
                               >
-                                Upgrade to {getPlanDisplayName(plan)}
+                                Add {getPlanDisplayName(plan)}
                               </button>
                             ))}
                           </div>
@@ -504,16 +524,8 @@ const AccountPage = () => {
                       );
                     } else {
                       return (
-                        <div className="max-plan-notice" style={{
-                          marginTop: '20px',
-                          padding: '15px',
-                          backgroundColor: '#f0fdf4',
-                          borderRadius: '8px',
-                          border: '1px solid #bbf7d0'
-                        }}>
-                          <p style={{color: '#166534', fontSize: '0.9rem', margin: 0}}>
-                            🎉 You have the highest tier plan with access to all features!
-                          </p>
+                        <div className="max-plan-notice">
+                          <p>🎉 You have access to all available plans!</p>
                         </div>
                       );
                     }

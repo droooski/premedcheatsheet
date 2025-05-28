@@ -122,6 +122,15 @@ const Checkout = () => {
 
   // Handle URL parameters for authentication mode
   useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const isUpgrade = urlParams.get('upgrade') === 'true';
+    
+    // Don't show auth modal if user is already logged in and this is an upgrade
+    if (user && isUpgrade) {
+      setCheckoutStep('payment');
+      return;
+    }
+    
     if (mode === 'login') {
       setShowAuthModal(true);
       setIsLoginMode(true);
@@ -129,7 +138,7 @@ const Checkout = () => {
       setShowAuthModal(true);
       setIsLoginMode(false);
     }
-  }, [mode]);
+  }, [mode, user, location.search]);
 
   // Set subscription details based on selected plan
   useEffect(() => {
@@ -166,6 +175,18 @@ const Checkout = () => {
         });
     }
   }, [selectedPlan]);
+
+    useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const preSelectedPlan = urlParams.get('plan');
+    const isUpgrade = urlParams.get('upgrade') === 'true';
+    
+    // If user is authenticated and this is an upgrade, skip straight to payment
+    if (user && isUpgrade && preSelectedPlan && checkoutStep === 'plan') {
+      setSelectedPlan(preSelectedPlan);
+      setCheckoutStep('payment');
+    }
+  }, [user, location.search, checkoutStep]);
 
   // Redirect to profile after confirmation
   useEffect(() => {
@@ -249,12 +270,18 @@ const Checkout = () => {
   const handleProceedToPayment = (plan) => {
     setSelectedPlan(plan);
     
-    // If user is not logged in, show auth modal first
-    if (!user && !pendingUserData) {
+    // Check if this is an upgrade (user already authenticated)
+    const urlParams = new URLSearchParams(location.search);
+    const isUpgrade = urlParams.get('upgrade') === 'true';
+    
+    if (user || isUpgrade) {
+      // User is already authenticated OR this is an upgrade, go straight to payment
+      setCheckoutStep('payment');
+    } else if (!user && !pendingUserData) {
+      // Only show auth modal for new users, not upgrades
       setShowAuthModal(true);
-      setIsLoginMode(false); // Force signup mode
+      setIsLoginMode(false);
     } else {
-      // User is already authenticated, go straight to payment
       setCheckoutStep('payment');
     }
   };
@@ -967,20 +994,29 @@ const Checkout = () => {
 
   // Render plan selection step
   const renderPlanSelection = () => {
-    // Check if query param has plan selection
-    if (location.search.includes('plan=')) {
-      // If plan is pre-selected, move to payment step
-      if (user) {
-        if (checkoutStep === 'plan') {
-          changeCheckoutStep('payment');
-        }
-        return renderPaymentForm();
-      } else {
-        // If no user, show auth modal
-        if (!showAuthModal) {
-          setShowAuthModal(true);
-        }
-      }
+    // Check URL params for upgrade and plan selection
+    const urlParams = new URLSearchParams(location.search);
+    const preSelectedPlan = urlParams.get('plan');
+    const isUpgrade = urlParams.get('upgrade') === 'true';
+    
+    // If this is an upgrade for an authenticated user, skip plan selection
+    if (user && isUpgrade && preSelectedPlan) {
+      setSelectedPlan(preSelectedPlan);
+      setCheckoutStep('payment');
+      return renderPaymentForm();
+    }
+    
+    // If plan is pre-selected and user is authenticated, go to payment
+    if (user && preSelectedPlan) {
+      setSelectedPlan(preSelectedPlan);
+      setCheckoutStep('payment');
+      return renderPaymentForm();
+    }
+    
+    // If plan is pre-selected but no user, show auth modal
+    if (preSelectedPlan && !user && !showAuthModal) {
+      setSelectedPlan(preSelectedPlan);
+      setShowAuthModal(true);
     }
     
     return (
