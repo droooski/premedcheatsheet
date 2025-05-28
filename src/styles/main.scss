@@ -903,26 +903,26 @@ html body .hero {
 /* Global CTA Section Styling */
 .cta {
   // Use existing spacing variables and combine them
-  padding: $spacing-20 0 calc($spacing-32 + $spacing-32) !important; // Huge bottom padding
+  padding: $spacing-20 0 calc($spacing-32) !important; // Huge bottom padding
   background-color: #F2F6F5;
   text-align: center;
   position: relative;
   
   /* Responsive padding that maintains huge bottom space */
   @media (min-width: $xxl) {
-    padding: $spacing-24 0 calc($spacing-32 + $spacing-32 + $spacing-8) !important; // Even more on extra large screens
+    padding: $spacing-24 0 calc($spacing-24) !important; // Even more on extra large screens
   }
   
   @media (max-width: $lg) {
-    padding: $spacing-16 0 $spacing-32 !important; // Still very large on large screens
+    padding: $spacing-16 0 $spacing-16 !important; // Still very large on large screens
   }
   
   @media (max-width: $md) {
-    padding: $spacing-16 0 $spacing-24 !important; // Large on medium screens
+    padding: $spacing-16 0 $spacing-16 !important; // Large on medium screens
   }
   
   @media (max-width: $sm) {
-    padding: $spacing-12 0 $spacing-20 !important; // Smaller but still substantial on mobile
+    padding: $spacing-12 0 $spacing-12 !important; // Smaller but still substantial on mobile
   }
   
   /* Add thin lines at top and bottom */
@@ -931,7 +931,7 @@ html body .hero {
     position: absolute;
     left: 0;
     right: 0;
-    height: 2px !important;
+    height: 1px !important;
     background-color: $black !important;
     width: 100%;
   }

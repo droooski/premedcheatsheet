@@ -13,9 +13,10 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'A.T. Still University': 'https://images.squarespace-cdn.com/content/v1/6797e072b9ef964e6416c4b8/8b5e099d-c9bc-4a99-9224-2facdccbe9db/ATSU-SOMA-entrance-600x400.jpg?format=2500w',
     'Brown University': 'https://media.tacdn.com/media/attractions-splice-spp-674x446/13/2c/54/54.jpg',
     'Chicago College of Osteopathic Medicine': 'https://www.midwestern.edu/media/carousels/il-campus-carousel/main-campus-entrance-evening-2.jpg',
-    'Cleveland Clinic': 'https://my.clevelandclinic.org/-/scassets/images/org/locations/regional-hospitals/ccf-main-campus.jpg',
-    'Columbia': 'https://www.columbia.edu/content/sites/default/files/styles/cu_crop/public/content/Morningside%20Campus%20at%20Dusk%202.jpg?itok=SkwvzD5S',
+    'Cleveland Clinic': 'https://www.prospectivedoctor.com/wp-content/uploads/2020/03/Cleveland-Clinic-Lerner-College-of-Medicine-Cleveland-Ohio.jpg',
     'Cornell': 'https://www.cornell.edu/about/img/main-Tower1.Still001-720x.jpg',
+    'Columbia University': 'https://www.engineering.columbia.edu/sites/default/files/2024-03/7cwUcdpUayQ-HD.jpg',
+    'Cooper/rowan Medical School': 'https://www.cooperhealth.org/sites/default/files/buildings/2017-11/med-school.jpg',
     'Dartmouth': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoReqVBLLHnrpAEaLOkCwTEjM3HBuDjVN9FO4bUt0xCgMhVLsQ0T7aZq1MmAXnUO0cePLIlftV38vg2WFqN6JG7RF__7aSWWDW94ZP5gdiNKlyBXSyVXXOWgVrijLNxFvRd52x6oAPZQsq/s1600/Dartmouth.jpg',
     'Duke University': 'https://medschool.duke.edu/sites/default/files/styles/max_1300x1300_x2/public/2022-01/DAVISON%20BLDG%20%28002%29.jpg',
     'Emory University': 'https://bunny-wp-pullzone-cjamrcljf0.b-cdn.net/wp-content/uploads/2021/02/candler_library_emory_university_001.jpg',
@@ -37,7 +38,7 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Mount Sinai': 'https://images.shiksha.com/mediadata/images/1540557666php4bzbzD.jpeg',
     'University of Pittsburgh': 'https://upload.wikimedia.org/wikipedia/commons/f/f3/CathedralfromFrick.jpg',
     'CCOM': 'https://www.drnajeeblectures.com/wp-content/uploads/2020/04/page12mwuglendalecampus-e1586548693116.jpg',
-    'chicago college of osteopathic medicine': 'https://www.drnajeeblectures.com/wp-content/uploads/2020/04/page12mwuglendalecampus-e1586548693116.jpg',
+    'Chicago College of Osteopathic Medicine (CCOM)': 'https://www.drnajeeblectures.com/wp-content/uploads/2020/04/page12mwuglendalecampus-e1586548693116.jpg',
     'Case Western': 'https://www.thoughtco.com/thmb/-ViQ27niExYcDtzC0HM9bZzfdl0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/CoverPhoto-57124afc5f9b588cc2d735e2.JPG',
     
     // Additional schools from the applicant profiles
@@ -60,7 +61,9 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Wake Forest': 'https://school.wakehealth.edu/-/media/WakeForest/School/Images/Buildings/Innovation-Quarter-Aerial-View-with-Buildings-Labeled-2022.jpg',
     'AT Stills': 'https://i.ytimg.com/vi/Wk2Zq6gUADo/maxresdefault.jpg',
     'DMUCOM': 'https://www.dmu.edu/wp-content/uploads/2024/08/DMU-default-featured-social.jpg',
+    'Des Moines University College Of Osteopathic Medicine': 'https://www.dmu.edu/wp-content/uploads/2024/08/DMU-default-featured-social.jpg',
     'MCW': 'https://www.mcw.edu/-/media/MCW/Image-Library/Aerial5_Intro-with-Three-Image-CTA-Component.jpg?w=1000&h=412&mode=crop&anchor=middlecenter&scale=both',
+    'Medical College Of Wisconsin': 'https://www.mcw.edu/-/media/MCW/Image-Library/Aerial5_Intro-with-Three-Image-CTA-Component.jpg?w=1000&h=412&mode=crop&anchor=middlecenter&scale=both',
     'SLU': 'https://www.slu.edu/_ldp-images/.private_ldp/a337/production/master/6fa3119e-b9a8-4c79-a4c6-6b549bfccc41.jpg',
     'UT Southwestern': 'https://www.utsouthwestern.edu/newsroom/articles/year-2021/assets/cuh-exterior-landscapes.jpg',
     'USUHS': 'https://ohmyfacts.com/wp-content/uploads/2025/01/28-facts-about-uniformed-services-university-of-the-health-sciences-1737627171.jpg',
@@ -86,7 +89,30 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Weill Cornell': 'https://med.weill.cornell.edu/sites/default/files/styles/journal_abstract_image/public/wmc_bt_1.jpg',
     'Penn': 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/9e/f1/7d/may-30-2022-old-main.jpg?w=1400&h=-1&s=1',
     'UNC': 'https://www.med.unc.edu/wp-content/uploads/2019/06/unc-medicine-sign-aerial.jpg',
-    'Michigan': 'https://medicine.umich.edu/sites/default/files/styles/large/public/2021-05/UM%20North_01.jpg'
+    'Michigan': 'https://medicine.umich.edu/sites/default/files/styles/large/public/2021-05/UM%20North_01.jpg',
+
+    //newly added schools
+    'Kaiser Permanente': 'https://images.squarespace-cdn.com/content/v1/5269fbd3e4b0eb2b76ccc1db/bcc4227b-4bb6-4999-b70e-44999c491c01/kaiser-permanente-medical-school_REV.jpg',
+    'Keck School Of Medicine': 'https://keck.usc.edu/medical-education/wp-content/uploads/sites/18/2023/08/KSOM-Quad-IMG_4097-web.jpg',
+    'Lake Erie College Of Osteopathic Medicine': 'https://lecom.edu/content/uploads/2022/05/lecom-hero-image-header-erie-pa.jpg',
+    'Medical University Of South Carolina': 'https://web.musc.edu/-/media/images/social/icons/enterprise.jpg',
+    'New York Institute Of Technology College Of Osteopathic Medicine': 'https://www.prospectivedoctor.com/wp-content/uploads/2017/07/NYITCOM.jpg',
+    'Nova Southeastern University Md': 'https://www.nova.edu/patelgift/images/tbrc-rendering.jpg',
+    'Oakland University William Beaumont School Of Medicine': 'https://oaklandpostonline.com/wp-content/uploads/2021/09/DSC_8615.jpg',
+    'Renaissance School Of Medicine At Stony Brook University': 'https://renaissance.stonybrookmedicine.edu/sites/default/files/Stony%20HDR%20%281%29mobile_1240.jpg',
+    'Rutgers New Jersey Medical School': 'https://njms.rutgers.edu/departments/medicine/images/hhospitalfromdoc.jpg',
+    'Rutgers Robert Wood Johnson Medical School': 'https://www.mgedpc.net/wp-content/uploads/2022/01/RWJ-School-Public-Health-15-1030x584.jpg',
+    'Saint Louis University': 'https://www.slu.edu/_ldp-images/.private_ldp/a337/production/master/242d174a-9ca9-4b75-b415-27ec75aa33ad.jpeg',
+    'Sidney Kimmel Medical College At Thomas Jefferson University': 'https://www.healthcareitnews.com/sites/hitn/files/092622%20HIMSS%20Davies%20Jefferson%20Health%201200.jpg',
+    'Uc Davis': 'https://health.ucdavis.edu/media-resources/welcome/images/Cards/health-home-cards-awards.jpg',
+    'Ucsf': 'https://www.ucsf.edu/sites/default/files/fields/field_insert_file/news/ucsf-fresno_0.jpg',
+    'Uniformed Services University': 'https://ohmyfacts.com/wp-content/uploads/2025/01/28-facts-about-uniformed-services-university-of-the-health-sciences-1737627171.jpg',
+    'University Of Massachusetts': 'https://assets.collegedunia.com/public/college_data/images/studyabroad/appImage/72148%20cover.jpg',
+    'University Of Miami Miller School Of Medicine': 'https://southfloridahospitalnews.com/wp-content/uploads/2023/03/Aerial-view-of-Leon-J-Simkins-Research-Tower_Email.png',
+    'University Of Southern California': 'https://images.shiksha.com/mediadata/images/1533291664phpRX4fuL.jpeg',
+    'University Of Wisconsin School Of Medicine And Public Health': 'https://www.drnajeeblectures.com/wp-content/uploads/2019/12/sssssss-e1577455387941.jpg',
+    'Washington University School Of Medicine': 'https://www.mccarthy.com/sites/default/files/styles/open_graph/public/2024-09/WUSM-23330-FINAL-DESKTOP.jpg?h=9782657d&itok=lFg-hQDX',
+    'Yale School Of Medicine': 'https://res.cloudinary.com/ysm/image/upload/yms/prod/e9f06bd3-4395-4aa9-ab62-f3e72eab722f',
   };
 
   // Get image URL for a school or use a placeholder

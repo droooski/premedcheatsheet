@@ -1,6 +1,8 @@
 // src/components/sections/ProfileCard/ProfileCard.js
-import React from 'react';
 import './ProfileCard.scss';
+import acceptedSchoolsIcon from '../../../assets/images/acceptedSchools.png';
+import applicationBackgroundIcon from '../../../assets/images/applicationBackground.png';
+import reflectionsIcon from '../../../assets/images/reflections.png';
 
 const ProfileCard = ({ profile }) => {
   if (!profile) {
@@ -74,16 +76,33 @@ const ProfileCard = ({ profile }) => {
       </div>
       
       <div className="section-header">
-        <div className="icon accepted"></div>
+        <img src={acceptedSchoolsIcon} alt="Accepted Schools" className="section-icon" />
         <h4>Accepted Schools</h4>
       </div>
       
       <div className="accepted-schools">
         <div className="schools-list">
           {acceptedSchools && acceptedSchools.length > 0 ? (
-            acceptedSchools.map((school, index) => (
-              <div key={index} className="school-badge">{school}</div>
-            ))
+            acceptedSchools.map((school, index) => {
+              const handleSchoolClick = () => {
+                // Create a Google search URL for the school
+                const searchQuery = encodeURIComponent(`${school} medical school official website`);
+                const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+                window.open(googleSearchUrl, '_blank');
+              };
+
+              return (
+                <div 
+                  key={index} 
+                  className="school-badge clickable"
+                  onClick={handleSchoolClick}
+                  style={{ cursor: 'pointer' }}
+                  title={`Visit ${school} official website`}
+                >
+                  {school}
+                </div>
+              );
+            })
           ) : (
             <div className="empty-data">No schools specified</div>
           )}
@@ -91,7 +110,7 @@ const ProfileCard = ({ profile }) => {
       </div>
       
       <div className="section-header">
-        <div className="icon background"></div>
+        <img src={applicationBackgroundIcon} alt="Applicant Background" className="section-icon" />
         <h4>Applicant Background</h4>
       </div>
       
@@ -184,7 +203,7 @@ const ProfileCard = ({ profile }) => {
       {reflections && (
         <>
           <div className="section-header">
-            <div className="icon background"></div>
+            <img src={reflectionsIcon} alt="Reflections" className="section-icon" />
             <h4>Reflections</h4>
           </div>
           <div className="reflections-section">

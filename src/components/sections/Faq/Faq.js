@@ -32,11 +32,15 @@ const Faq = () => {
   const faqItems = [
     {
       question: "Why do I need the Premed Cheatsheet?",
-      answer: "Our database provides valuable insights from successful applicants who made it to medical school, helping you understand acceptance patterns and strategies that actually work."
+      answer: "The Premed Cheatsheet can give you inspiration on what extracurriculars to do to get into medical school. It will also help you evaluate which medical school you fit in with the best."
     },
     {
       question: "What makes this different from Reddit or SDN forums?",
-      answer: "Unlike forums with scattered advice, we provide structured, verified data from accepted students with complete profiles including GPA, MCAT scores, and experiences."
+      answer: "These forums only have 10-20 responses a year, whereas our database already gives you access to over 50 applications with 25 added each month. Forums are also biased because only a certain type of student likes to write about their stats online."
+    },
+    {
+      question: "Isn't this toxic?",
+      answer: "No! We hope these applicant profiles give you inspiration on how to craft your own applications. This is solely a database to help applicants, not to say which applicant is better than another."
     },
     {
       question: "Got any trials?",

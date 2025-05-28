@@ -287,7 +287,7 @@ const SneakPeek = ({ onTimeExpired }) => {
       <div className="cta-section">
         <h3>Want to read more success stories?</h3>
         <p>
-          Join for full access to dozens of student profiles that got into T14 med schools.
+          Join for full access to dozens of student profiles.
         </p>
         <button 
           className="cta-button" 

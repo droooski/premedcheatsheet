@@ -1,4 +1,4 @@
-// src/components/sections/ProfileCard/ProfileCard.scss - Updated with no outlines
+// src/components/sections/ProfileCard/ProfileCard.scss - Updated with image icons
 @use '../../../styles/variables' as *;
 
 .profile-card {
@@ -90,36 +90,11 @@
     padding: $spacing-3 $spacing-4;
     padding-bottom: 0;
     
-    .icon {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
+    .section-icon {
+      width: 19.5px;
+      height: 22px;
       margin-right: $spacing-2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       flex-shrink: 0;
-      
-      &.accepted {
-        background-color: #3B82F6; /* Blue */
-        
-        &::before {
-          content: "✓";
-          color: white;
-          font-size: 10px;
-          font-weight: bold;
-        }
-      }
-      
-      &.background {
-        background-color: #10B981; /* Green */
-        
-        &::before {
-          content: "●";
-          color: white;
-          font-size: 10px;
-        }
-      }
     }
     
     h4 {
@@ -144,9 +119,19 @@
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
         /* No outlines on badges */
         outline: none !important;
         border: none !important;
+        
+        &:hover {
+          background-color: #BBF7D0; /* Slightly darker green on hover */
+        }
+        
+        &.clickable {
+          cursor: pointer;
+        }
       }
     }
   }
