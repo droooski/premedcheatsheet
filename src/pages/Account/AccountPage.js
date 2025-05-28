@@ -36,15 +36,20 @@ const AccountPage = () => {
   const db = getFirestore();
 
   // Helper function to determine upgrade options
-  const getUpgradeOptions = (currentPlan) => {
-    const planHierarchy = {
-      'cheatsheet': ['cheatsheet-plus', 'application', 'application-plus'],
-      'cheatsheet-plus': ['application-plus'],
-      'application': ['application-plus'],
-      'application-plus': [] // No upgrades available
-    };
+  const getUpgradeOptions = (userProfile) => {
+    // Get all plans the user currently has
+    const currentPlans = [];
+    if (userProfile?.subscriptions && userProfile.subscriptions.length > 0) {
+      userProfile.subscriptions
+        .filter(sub => sub.active)
+        .forEach(sub => currentPlans.push(sub.plan));
+    }
     
-    return planHierarchy[currentPlan] || [];
+    // All available plans
+    const allPlans = ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'];
+    
+    // Return plans the user doesn't have yet
+    return allPlans.filter(plan => !currentPlans.includes(plan));
   };
 
   // Helper function to get plan display names
@@ -59,20 +64,13 @@ const AccountPage = () => {
   };
 
   // Get user's current plan
-  const getCurrentUserPlan = () => {
-    if (digitalProducts.length > 0) {
-      // Extract plan from the product name or use subscriptionDetails
-      if (subscriptionDetails?.plan) {
-        return subscriptionDetails.plan;
-      }
-      // Fallback: determine from product name
-      const productName = digitalProducts[0].name.toLowerCase();
-      if (productName.includes('application cheatsheet+')) return 'application-plus';
-      if (productName.includes('application cheatsheet')) return 'application';
-      if (productName.includes('cheatsheet+')) return 'cheatsheet-plus';
-      if (productName.includes('cheatsheet')) return 'cheatsheet';
+  const getCurrentUserPlans = () => {
+    if (userProfile?.subscriptions && userProfile.subscriptions.length > 0) {
+      return userProfile.subscriptions
+        .filter(sub => sub.active)
+        .map(sub => sub.plan);
     }
-    return 'cheatsheet'; // Default fallback
+    return ['cheatsheet']; // Default fallback
   };
 
   const fetchUserData = useCallback(async () => {
@@ -82,19 +80,82 @@ const AccountPage = () => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const profileData = userDoc.data();
+        console.log("Fetched profile data:", profileData); // Debug log
         setUserProfile(profileData);
         
-        // Update orders display
+        // Update subscription status and digital products
+        if (profileData.subscriptions && profileData.subscriptions.length > 0) {
+          const activeSubscriptions = profileData.subscriptions.filter(sub => sub.active);
+          if (activeSubscriptions.length > 0) {
+            setSubscriptionStatus('active');
+            
+            // Create digital products based on actual plans purchased
+            const digitalProductList = [];
+            const uniquePlans = [...new Set(activeSubscriptions.map(sub => sub.plan))];
+            
+            uniquePlans.forEach(plan => {
+              switch(plan) {
+                case 'cheatsheet':
+                  digitalProductList.push({ 
+                    id: 1, 
+                    name: "Premed Cheatsheet Members Access", 
+                    status: "Active",
+                    description: "Access to applicant profiles"
+                  });
+                  break;
+                case 'cheatsheet-plus':
+                  digitalProductList.push({ 
+                    id: 2, 
+                    name: "Premed Cheatsheet+ Members Access", 
+                    status: "Active",
+                    description: "Access to profiles + extra resources"
+                  });
+                  break;
+                case 'application':
+                  digitalProductList.push({ 
+                    id: 3, 
+                    name: "Application Cheatsheet Access", 
+                    status: "Active",
+                    description: "Application writing guides and templates"
+                  });
+                  break;
+                case 'application-plus':
+                  digitalProductList.push({ 
+                    id: 4, 
+                    name: "Application Cheatsheet+ Access", 
+                    status: "Active",
+                    description: "Complete access to all features"
+                  });
+                  break;
+                default:
+                  // Handle unknown plan types
+                  digitalProductList.push({ 
+                    id: digitalProductList.length + 1, 
+                    name: "PremedCheatsheet Access", 
+                    status: "Active",
+                    description: "Basic access"
+                  });
+                  break;
+              }
+            });
+            
+            setDigitalProducts(digitalProductList);
+          }
+        }
+        
+        // Update orders display - Show ALL orders, not just the first one
         if (profileData.orders && profileData.orders.length > 0) {
           const formattedOrders = profileData.orders.map((order, index) => ({
             id: order.orderId || `00${650 + index}`,
-            date: order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : "2023-04-15",
+            date: order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             status: order.status || "completed",
             total: `$${order.amount ? order.amount.toFixed(2) : "0.00"}`,
             plan: order.plan || "",
-            planName: order.planName || ""
+            planName: order.planName || getPlanDisplayName(order.plan)
           }));
           
+          // Sort orders by date (newest first)
+          formattedOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
           setOrders(formattedOrders);
         }
       }
@@ -166,50 +227,56 @@ const AccountPage = () => {
               
               // Check subscription status
               if (profileData.subscriptions && profileData.subscriptions.length > 0) {
-                const activeSubscription = profileData.subscriptions.find(sub => {
+                // Get ALL active subscriptions (not just the first one)
+                const activeSubscriptions = profileData.subscriptions.filter(sub => {
                   return sub.active && new Date(sub.endDate) > new Date();
                 });
                 
-                if (activeSubscription) {
+                if (activeSubscriptions.length > 0) {
                   setSubscriptionStatus('active');
-                  setSubscriptionDetails(activeSubscription);
-                  setRenewalDate(new Date(activeSubscription.endDate));
                   
-                  // Use actual purchased plan instead of hardcoded values
+                  // Use the most recent subscription for renewal date
+                  const mostRecentSub = activeSubscriptions.sort((a, b) => 
+                    new Date(b.startDate) - new Date(a.startDate)
+                  )[0];
+                  setSubscriptionDetails(mostRecentSub);
+                  setRenewalDate(new Date(mostRecentSub.endDate));
+                  
+                  // Create digital products based on ALL active plans
                   const digitalProductList = [];
-                  if (activeSubscription.plan) {
-                    let productName;
-                    switch(activeSubscription.plan) {
+                  const uniquePlans = [...new Set(activeSubscriptions.map(sub => sub.plan))];
+                  
+                  uniquePlans.forEach((plan, index) => {
+                    let productName, description;
+                    switch(plan) {
                       case 'cheatsheet':
-                        productName = "PremedCheatsheet Members Access";
+                        productName = "Premed Cheatsheet Members Access";
+                        description = "Access to applicant profiles";
                         break;
                       case 'cheatsheet-plus':
-                        productName = "PremedCheatsheet+ Members Access";
+                        productName = "Premed Cheatsheet+ Members Access";
+                        description = "Access to profiles + extra resources";
                         break;
                       case 'application':
-                        productName = "Application Cheatsheet";
+                        productName = "Application Cheatsheet Access";
+                        description = "Application writing guides and templates";
                         break;
                       case 'application-plus':
-                        productName = "Application Cheatsheet+";
+                        productName = "Application Cheatsheet+ Access";
+                        description = "Complete access to all features";
                         break;
                       default:
                         productName = "PremedCheatsheet Access";
+                        description = "Basic access";
                     }
+                    
                     digitalProductList.push({ 
-                      id: 1, 
-                      name: productName, 
+                      id: index + 1, 
+                      name: productName,
+                      description: description,
                       status: "Active" 
                     });
-
-                    // If they have the application-plus plan, they have access to both products
-                    if (activeSubscription.plan === 'application-plus') {
-                      digitalProductList.push({
-                        id: 2,
-                        name: "Application Cheatsheet",
-                        status: "Active"
-                      });
-                    }
-                  }
+                  });
                   
                   // Set digital products from actual subscription data
                   setDigitalProducts(digitalProductList);
@@ -458,7 +525,12 @@ const AccountPage = () => {
                   <div className="products-list">
                     {digitalProducts.map(product => (
                       <div key={product.id} className="product-item">
-                        <span className="product-name">{product.name}</span>
+                        <div className="product-info">
+                          <span className="product-name">{product.name}</span>
+                          {product.description && (
+                            <p className="product-description">{product.description}</p>
+                          )}
+                        </div>
                         <span className={`product-status ${product.status.toLowerCase()}`}>
                           {product.status}
                         </span>
@@ -481,36 +553,35 @@ const AccountPage = () => {
                   <p className="section-summary">
                     Last order #{orders[0].id} is {orders[0].status}
                   </p>
-                  <div className="orders-summary">
-                    {orders.slice(0, 1).map(order => (
-                      <div key={order.id} className="order-item">
-                        <div className="order-header">
-                          <span className="order-id">Order #{order.id}</span>
-                          <span className="order-date">{order.date}</span>
-                        </div>
-                        <div className="order-details">
-                          {order.planName && (
-                            <p className="order-plan">{order.planName}</p>
-                          )}
-                          <span className="order-total">{order.total}</span>
-                          <span className={`order-status ${order.status}`}>{order.status}</span>
-                        </div>
-                      </div>
-                    ))}
+            <div className="orders-summary">
+              {orders.slice(0, 3).map(order => (  // Show up to 3 recent orders
+                <div key={order.id} className="order-item">
+                  <div className="order-header">
+                    <span className="order-id">Order #{order.id}</span>
+                    <span className="order-date">{order.date}</span>
                   </div>
+                  <div className="order-details">
+                    {order.planName && (
+                      <p className="order-plan">{order.planName}</p>
+                    )}
+                    <span className="order-total">{order.total}</span>
+                    <span className={`order-status ${order.status}`}>{order.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
                   
                   {/* Upgrade Options */}
                   {(() => {
-                    const currentPlan = getCurrentUserPlan();
-                    const upgradeOptions = getUpgradeOptions(currentPlan);
+                    const availableUpgrades = getUpgradeOptions(userProfile);
                     
-                    if (upgradeOptions.length > 0) {
+                    if (availableUpgrades.length > 0) {
                       return (
                         <div className="upgrade-options">
                           <h4>Add More Plans</h4>
-                          <p>Get access to more features by adding additional plans.</p>
+                          <p>Get access to additional features by adding more plans.</p>
                           <div className="upgrade-buttons">
-                            {upgradeOptions.map(plan => (
+                            {availableUpgrades.map(plan => (
                               <button
                                 key={plan}
                                 className="upgrade-button"

@@ -125,18 +125,23 @@ const Checkout = () => {
     const urlParams = new URLSearchParams(location.search);
     const isUpgrade = urlParams.get('upgrade') === 'true';
     
-    // Don't show auth modal if user is already logged in and this is an upgrade
-    if (user && isUpgrade) {
+    // If this is an upgrade and user is logged in, NEVER show auth modal
+    if (isUpgrade && user) {
+      console.log("Upgrade detected for logged in user - skipping auth modal");
+      setShowAuthModal(false); // Force close any modal
       setCheckoutStep('payment');
       return;
     }
     
-    if (mode === 'login') {
-      setShowAuthModal(true);
-      setIsLoginMode(true);
-    } else if (mode === 'signup') {
-      setShowAuthModal(true);
-      setIsLoginMode(false);
+    // Only show auth modal for non-upgrade flows
+    if (!isUpgrade) {
+      if (mode === 'login') {
+        setShowAuthModal(true);
+        setIsLoginMode(true);
+      } else if (mode === 'signup') {
+        setShowAuthModal(true);
+        setIsLoginMode(false);
+      }
     }
   }, [mode, user, location.search]);
 
@@ -270,15 +275,19 @@ const Checkout = () => {
   const handleProceedToPayment = (plan) => {
     setSelectedPlan(plan);
     
-    // Check if this is an upgrade (user already authenticated)
     const urlParams = new URLSearchParams(location.search);
     const isUpgrade = urlParams.get('upgrade') === 'true';
     
-    if (user || isUpgrade) {
-      // User is already authenticated OR this is an upgrade, go straight to payment
+    // Force skip auth modal for upgrades
+    if (isUpgrade || user) {
+      console.log("Skipping auth modal - upgrade or authenticated user");
+      setShowAuthModal(false);
       setCheckoutStep('payment');
-    } else if (!user && !pendingUserData) {
-      // Only show auth modal for new users, not upgrades
+      return;
+    }
+    
+    // Only show auth modal for completely new users
+    if (!user && !pendingUserData && !isUpgrade) {
       setShowAuthModal(true);
       setIsLoginMode(false);
     } else {

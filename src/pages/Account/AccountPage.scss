@@ -486,3 +486,42 @@
     margin: 0;
   }
 }
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-3 0;
+  border-bottom: 1px solid $gray-100;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .product-info {
+    flex: 1;
+    
+    .product-name {
+      font-weight: 500;
+      display: block;
+      margin-bottom: $spacing-1;
+    }
+    
+    .product-description {
+      font-size: 0.85rem;
+      color: $text-color-light;
+      margin: 0;
+    }
+  }
+  
+  .product-status {
+    &.active {
+      color: #10B981;
+      font-weight: 500;
+    }
+    
+    &.inactive {
+      color: #DC2626;
+    }
+  }
+}
