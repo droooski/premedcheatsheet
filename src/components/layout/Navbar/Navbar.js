@@ -29,6 +29,23 @@ const Navbar = () => {
     return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
   };
 
+  // Helper function to determine user plan
+  const getUserPlan = (userProfile) => {
+    if (userProfile?.subscriptions && userProfile.subscriptions.length > 0) {
+      const activeSubscription = userProfile.subscriptions.find(sub => sub.active);
+      return activeSubscription?.plan || 'cheatsheet';
+    }
+    return 'cheatsheet';
+  };
+
+  const hasAccessToProfiles = (plan) => {
+    return ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan);
+  };
+
+  const hasAccessToApplication = (plan) => {
+    return ['application', 'application-plus'].includes(plan);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthChange(async (currentUser) => {
       console.log("Navbar - Auth state changed:", currentUser);
@@ -168,24 +185,32 @@ const Navbar = () => {
           {isPaidUser && !hasGuestAccess && (
             <div className="navbar-center">
               <ul className="main-menu">
-                <li>
-                  <Link 
-                    to="/profile" 
-                    className={isActive('/profile') ? 'active' : ''}
-                    onClick={closeMobileMenu}
-                  >
-                    Premed Cheatsheet Members
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/application-cheatsheet" 
-                    className={isActive('/application-cheatsheet') ? 'active' : ''}
-                    onClick={closeMobileMenu}
-                  >
-                    Application Cheatsheet
-                  </Link>
-                </li>
+                {/* Show Profiles section only for plans that have access */}
+                {hasAccessToProfiles(getUserPlan(userProfile)) && (
+                  <li>
+                    <Link 
+                      to="/profile" 
+                      className={isActive('/profile') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Premed Cheatsheet Members
+                    </Link>
+                  </li>
+                )}
+                
+                {/* Show Application section only for plans that have access */}
+                {hasAccessToApplication(getUserPlan(userProfile)) && (
+                  <li>
+                    <Link 
+                      to="/application-cheatsheet" 
+                      className={isActive('/application-cheatsheet') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Application Cheatsheet
+                    </Link>
+                  </li>
+                )}
+                
                 {isAdmin && (
                   <li>
                     <Link 
@@ -242,54 +267,60 @@ const Navbar = () => {
           {/* Mobile menu */}
           <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
             <ul className="mobile-menu-items">
-              {isPaidUser ? (
-                // For paid users - show member menu items
-                <>
-                  <li>
-                    <Link 
-                      to="/profile" 
-                      className={isActive('/profile') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Premed Cheatsheet Members
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      to="/application-cheatsheet" 
-                      className={isActive('/application-cheatsheet') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Application Cheatsheet
-                    </Link>
-                  </li>
-                  {isAdmin && (
+                {isPaidUser ? (
+                  // For paid users - show member menu items based on their plan
+                  <>
+                    {hasAccessToProfiles(getUserPlan(userProfile)) && (
+                      <li>
+                        <Link 
+                          to="/profile" 
+                          className={isActive('/profile') ? 'active' : ''}
+                          onClick={closeMobileMenu}
+                        >
+                          Premed Cheatsheet Members
+                        </Link>
+                      </li>
+                    )}
+                    
+                    {hasAccessToApplication(getUserPlan(userProfile)) && (
+                      <li>
+                        <Link 
+                          to="/application-cheatsheet" 
+                          className={isActive('/application-cheatsheet') ? 'active' : ''}
+                          onClick={closeMobileMenu}
+                        >
+                          Application Cheatsheet
+                        </Link>
+                      </li>
+                    )}
+                    
+                    {isAdmin && (
+                      <li>
+                        <Link 
+                          to="/admin" 
+                          className={isActive('/admin') ? 'active' : ''}
+                          onClick={closeMobileMenu}
+                        >
+                          Admin
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <Link 
-                        to="/admin" 
-                        className={isActive('/admin') ? 'active' : ''}
+                        to="/account" 
+                        className={isActive('/account') ? 'active' : ''}
                         onClick={closeMobileMenu}
                       >
-                        Admin
+                        Account
                       </Link>
                     </li>
-                  )}
-                  <li>
-                    <Link 
-                      to="/account" 
-                      className={isActive('/account') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Account
-                    </Link>
-                  </li>
-                  <li>
-                    <button onClick={handleLogout} className="logout-button-mobile">
-                      Log out
-                    </button>
-                  </li>
-                </>
-              ) : (
+                    <li>
+                      <button onClick={handleLogout} className="logout-button-mobile">
+                        Log out
+                      </button>
+                    </li>
+                  </>
+                ) : (
                 // For guest users and non-authenticated users
                 <>
                   <li>

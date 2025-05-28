@@ -18,6 +18,7 @@ import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import EmailVerificationPage from './components/auth/EmailVerificationPage'; // New component for handling verifications
 import { onAuthChange } from './firebase/authService';
 import { AuthProvider } from './contexts/AuthContext';
+import PlanBasedRoute from './components/auth/PlanBasedRoute';
 import './styles/main.scss';
 
 // Function to check if user has guest access
@@ -82,7 +83,9 @@ function App() {
         <Route path="/profile" element={
           isAuthenticated ? (
             <PaymentVerifiedRoute fallbackPath="/checkout">
-              <ProfilePage />
+              <PlanBasedRoute requiredAccess="profiles" fallbackPath="/account">
+                <ProfilePage />
+              </PlanBasedRoute>
             </PaymentVerifiedRoute>
           ) : isGuest ? (
             <GuestPage />
@@ -94,7 +97,9 @@ function App() {
         <Route path="/application-cheatsheet" element={
           isAuthenticated ? (
             <PaymentVerifiedRoute fallbackPath="/checkout">
-              <ApplicationCheatsheetPage />
+              <PlanBasedRoute requiredAccess="application" fallbackPath="/account">
+                <ApplicationCheatsheetPage />
+              </PlanBasedRoute>
             </PaymentVerifiedRoute>
           ) : isGuest ? (
             <GuestPage />

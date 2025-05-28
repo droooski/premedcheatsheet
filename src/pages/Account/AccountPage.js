@@ -35,6 +35,46 @@ const AccountPage = () => {
   const location = useLocation();
   const db = getFirestore();
 
+  // Helper function to determine upgrade options
+  const getUpgradeOptions = (currentPlan) => {
+    const planHierarchy = {
+      'cheatsheet': ['cheatsheet-plus', 'application', 'application-plus'],
+      'cheatsheet-plus': ['application-plus'],
+      'application': ['application-plus'],
+      'application-plus': [] // No upgrades available
+    };
+    
+    return planHierarchy[currentPlan] || [];
+  };
+
+  // Helper function to get plan display names
+  const getPlanDisplayName = (plan) => {
+    const planNames = {
+      'cheatsheet': 'The Cheatsheet',
+      'cheatsheet-plus': 'The Cheatsheet+',
+      'application': 'Application Cheatsheet', 
+      'application-plus': 'Application Cheatsheet+'
+    };
+    return planNames[plan] || plan;
+  };
+
+  // Get user's current plan
+  const getCurrentUserPlan = () => {
+    if (digitalProducts.length > 0) {
+      // Extract plan from the product name or use subscriptionDetails
+      if (subscriptionDetails?.plan) {
+        return subscriptionDetails.plan;
+      }
+      // Fallback: determine from product name
+      const productName = digitalProducts[0].name.toLowerCase();
+      if (productName.includes('application cheatsheet+')) return 'application-plus';
+      if (productName.includes('application cheatsheet')) return 'application';
+      if (productName.includes('cheatsheet+')) return 'cheatsheet-plus';
+      if (productName.includes('cheatsheet')) return 'cheatsheet';
+    }
+    return 'cheatsheet'; // Default fallback
+  };
+
   // Handle email verification from link
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -417,6 +457,67 @@ const AccountPage = () => {
                       </div>
                     ))}
                   </div>
+                  
+                  {/* Upgrade Options */}
+                  {(() => {
+                    const currentPlan = getCurrentUserPlan();
+                    const upgradeOptions = getUpgradeOptions(currentPlan);
+                    
+                    if (upgradeOptions.length > 0) {
+                      return (
+                        <div className="upgrade-options" style={{
+                          marginTop: '20px',
+                          padding: '15px',
+                          backgroundColor: '#f9fafb',
+                          borderRadius: '8px',
+                          border: '1px solid #e5e7eb'
+                        }}>
+                          <h4 style={{marginBottom: '10px', fontSize: '1rem', fontWeight: '600'}}>
+                            Upgrade Your Plan
+                          </h4>
+                          <p style={{marginBottom: '15px', color: '#6b7280', fontSize: '0.9rem'}}>
+                            Get access to more features by upgrading your current plan.
+                          </p>
+                          <div className="upgrade-buttons" style={{display: 'flex', flexWrap: 'wrap', gap: '10px'}}>
+                            {upgradeOptions.map(plan => (
+                              <button
+                                key={plan}
+                                onClick={() => navigate(`/pricing?upgrade=${plan}`)}
+                                style={{
+                                  padding: '8px 16px',
+                                  backgroundColor: '#1A3A34',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                  transition: 'background-color 0.2s'
+                                }}
+                                onMouseOver={(e) => e.target.style.backgroundColor = '#0f2419'}
+                                onMouseOut={(e) => e.target.style.backgroundColor = '#1A3A34'}
+                              >
+                                Upgrade to {getPlanDisplayName(plan)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="max-plan-notice" style={{
+                          marginTop: '20px',
+                          padding: '15px',
+                          backgroundColor: '#f0fdf4',
+                          borderRadius: '8px',
+                          border: '1px solid #bbf7d0'
+                        }}>
+                          <p style={{color: '#166534', fontSize: '0.9rem', margin: 0}}>
+                            🎉 You have the highest tier plan with access to all features!
+                          </p>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               ) : (
                 <div className="section-content empty">
