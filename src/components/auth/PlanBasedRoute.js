@@ -1,4 +1,4 @@
-// src/components/auth/PlanBasedRoute.js - FIXED VERSION
+// src/components/auth/PlanBasedRoute.js - FIXED VERSION WITH CHEATSHEET+ LOGIC
 
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
@@ -49,16 +49,24 @@ const PlanBasedRoute = ({ children, requiredAccess, fallbackPath = '/account' })
           let hasRequiredAccess = false;
           
           if (requiredAccess === 'profiles') {
-            // Plans that include profile access
-            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application-plus'];
+            // Plans that include profile access (ALL plans include profile access)
+            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'];
             hasRequiredAccess = userPlans.some(plan => profilePlans.includes(plan));
             console.log("🔒 Profile access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", profilePlans);
-          } else if (requiredAccess === 'application') {
+          } 
+          else if (requiredAccess === 'cheatsheet-plus') {
+            // ONLY Cheatsheet+ plan includes access to Cheatsheet+ features
+            const cheatsheetPlusPlans = ['cheatsheet-plus'];
+            hasRequiredAccess = userPlans.some(plan => cheatsheetPlusPlans.includes(plan));
+            console.log("🔒 Cheatsheet+ access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", cheatsheetPlusPlans);
+          }
+          else if (requiredAccess === 'application') {
             // Plans that include application guides access
             const applicationPlans = ['application', 'application-plus'];
             hasRequiredAccess = userPlans.some(plan => applicationPlans.includes(plan));
             console.log("🔒 Application access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", applicationPlans);
-          } else {
+          } 
+          else {
             // Default: if no specific requirement, just check if user has any active subscription
             hasRequiredAccess = userPlans.length > 0 || userData.paymentVerified;
             console.log("🔒 Default access check:", hasRequiredAccess);

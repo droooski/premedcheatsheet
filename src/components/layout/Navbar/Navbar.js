@@ -1,4 +1,4 @@
-// src/components/layout/Navbar/Navbar.js - Updated for proper nav items
+// src/components/layout/Navbar/Navbar.js - Updated with Cheatsheet+ functionality
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
@@ -40,7 +40,11 @@ const Navbar = () => {
   };
 
   const hasAccessToProfiles = (plans) => {
-    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
+    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'].includes(plan));
+  };
+
+  const hasAccessToCheatsheetPlus = (plans) => {
+    return plans.some(plan => ['cheatsheet-plus'].includes(plan));
   };
 
   const hasAccessToApplication = (plans) => {
@@ -219,6 +223,19 @@ const Navbar = () => {
                         </li>
                       )}
                       
+                      {/* NEW: Cheatsheet+ Tab - Only show for cheatsheet-plus or application-plus plans */}
+                      {hasAccessToCheatsheetPlus(userPlans) && (
+                        <li>
+                          <Link 
+                            to="/premed-cheatsheet-plus" 
+                            className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                            onClick={closeMobileMenu}
+                          >
+                            Cheatsheet+
+                          </Link>
+                        </li>
+                      )}
+                      
                       {hasAccessToApplication(userPlans) && (
                         <li>
                           <Link 
@@ -305,6 +322,19 @@ const Navbar = () => {
                               onClick={closeMobileMenu}
                             >
                               Premed Cheatsheet Members
+                            </Link>
+                          </li>
+                        )}
+                        
+                        {/* NEW: Cheatsheet+ Mobile Menu Item */}
+                        {hasAccessToCheatsheetPlus(userPlans) && (
+                          <li>
+                            <Link 
+                              to="/premed-cheatsheet-plus" 
+                              className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                              onClick={closeMobileMenu}
+                            >
+                              Cheatsheet+
                             </Link>
                           </li>
                         )}
