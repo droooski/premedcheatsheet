@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../../assets/icons/Icon.png'; 
 import './Footer.scss';
 
 const Footer = () => {
@@ -8,7 +9,7 @@ const Footer = () => {
         {/* Logo and copyright on the left */}
         <div className="footer-left">
           <div className="footer-logo">
-            <span className="logo-icon">✳</span>
+            <img src={logo} alt="PremedCheatsheet" className="logo-icon" />
             <span className="logo-text">Premed Cheatsheet</span>
           </div>
           <div className="footer-copyright">

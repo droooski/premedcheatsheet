@@ -48,7 +48,8 @@
 }
 
 .logo-icon {
-  font-size: 2rem;
+  width: 32px;        // Change from font-size to width/height
+  height: 32px;
   margin-right: 0.5rem;
 }
 
