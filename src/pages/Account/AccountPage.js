@@ -47,70 +47,62 @@ const AccountPage = () => {
     
     console.log("Current user plans:", currentPlans);
     
-    // Define plan hierarchies
-    const availableUpgrades = [];
-    
-    // Check what the user can still upgrade to based on what they have
+    // Check what the user has
     const hasCheatsheet = currentPlans.includes('cheatsheet');
     const hasCheatsheetPlus = currentPlans.includes('cheatsheet-plus');
     const hasApplication = currentPlans.includes('application');
     const hasApplicationPlus = currentPlans.includes('application-plus');
     
-    // Special case: If user has both top-tier plans, they have everything
-    if (hasCheatsheetPlus && hasApplicationPlus) {
-      console.log("User has both top-tier plans - no upgrades available");
+    // FIXED LOGIC: If user has BOTH top-tier plans OR equivalent combinations, no upgrades
+    if ((hasCheatsheetPlus && hasApplicationPlus) || 
+        (hasCheatsheetPlus && hasApplication) || 
+        (hasApplicationPlus && hasCheatsheet) ||
+        (hasApplicationPlus && hasCheatsheetPlus)) {
+      console.log("User has maximum plan combination - no upgrades available");
       return []; // No upgrades available
     }
     
-    // Special case: If user has Cheatsheet+ and Application (any level), only show Application+
-    if (hasCheatsheetPlus && hasApplication && !hasApplicationPlus) {
-      availableUpgrades.push('application-plus');
-      console.log("Available upgrades:", availableUpgrades);
-      return availableUpgrades;
-    }
-    
-    // Special case: If user has ApplicationPlus and Cheatsheet (any level), only show Cheatsheet+
-    if (hasApplicationPlus && hasCheatsheet && !hasCheatsheetPlus) {
-      availableUpgrades.push('cheatsheet-plus');
-      console.log("Available upgrades:", availableUpgrades);
-      return availableUpgrades;
-    }
+    const availableUpgrades = [];
     
     // Logic for Cheatsheet plans
     if (!hasCheatsheet && !hasCheatsheetPlus) {
-      // If user has ANY plus plan OR any application plan, skip basic cheatsheet
+      // User has no cheatsheet plan
       if (hasApplicationPlus || hasApplication) {
+        // If they have any application plan, only offer cheatsheet-plus
         availableUpgrades.push('cheatsheet-plus');
       } else {
-        // User has no conflicting plans - show both options
+        // If they have nothing, offer both
         availableUpgrades.push('cheatsheet', 'cheatsheet-plus');
       }
     } else if (hasCheatsheet && !hasCheatsheetPlus) {
-      // User has basic cheatsheet - only show plus upgrade
-      availableUpgrades.push('cheatsheet-plus');
+      // User has basic cheatsheet - only offer plus upgrade if they don't have application-plus
+      if (!hasApplicationPlus) {
+        availableUpgrades.push('cheatsheet-plus');
+      }
     }
-    // If user has cheatsheet-plus, don't show any cheatsheet upgrades
+    // If user has cheatsheet-plus, don't offer any cheatsheet upgrades
     
     // Logic for Application plans
     if (!hasApplication && !hasApplicationPlus) {
-      // If user has ANY plus plan OR any cheatsheet plan, skip basic application
+      // User has no application plan
       if (hasCheatsheetPlus || hasCheatsheet) {
+        // If they have any cheatsheet plan, only offer application-plus
         availableUpgrades.push('application-plus');
       } else {
-        // User has no conflicting plans - show both options
+        // If they have nothing, offer both
         availableUpgrades.push('application', 'application-plus');
       }
     } else if (hasApplication && !hasApplicationPlus) {
-      // User has basic application - only show plus upgrade
-      availableUpgrades.push('application-plus');
+      // User has basic application - only offer plus upgrade if they don't have cheatsheet-plus
+      if (!hasCheatsheetPlus) {
+        availableUpgrades.push('application-plus');
+      }
     }
-    // If user has application-plus, don't show any application upgrades
+    // If user has application-plus, don't offer any application upgrades
     
     console.log("Available upgrades:", availableUpgrades);
     return availableUpgrades;
   };
-
-  
 
   // Helper function to get plan display names
   const getPlanDisplayName = (plan) => {
