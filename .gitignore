@@ -34,3 +34,4 @@ yarn-error.log*
 # Case sensitivity conflict marker
 case-sensitivity-conflict.txt
 .vercel
+.env
