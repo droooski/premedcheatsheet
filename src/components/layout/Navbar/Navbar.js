@@ -1,4 +1,4 @@
-// src/components/layout/Navbar/Navbar.js - Updated with Cheatsheet+ functionality
+// src/components/layout/Navbar/Navbar.js - With Stable State Management
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
@@ -10,13 +10,20 @@ import './Navbar.scss';
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [userProfile, setUserProfile] = useState(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
-  // eslint-disable-next-line no-unused-vars
-  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  // ADD STABLE STATE MANAGEMENT
+  const [stableUserData, setStableUserData] = useState({
+    isAuthenticated: false,
+    isPaidUser: false,
+    hasGuestAccess: false,
+    userPlans: [],
+    isAdmin: false
+  });
+  
   const navigate = useNavigate();
   const location = useLocation();
   const db = getFirestore();
@@ -50,6 +57,34 @@ const Navbar = () => {
   const hasAccessToApplication = (plans) => {
     return plans.some(plan => ['application', 'application-plus'].includes(plan));
   };
+
+  // UPDATE STABLE STATE WHENEVER AUTH CHANGES
+  useEffect(() => {
+    const updateStableState = () => {
+      const currentIsGuest = isGuest();
+      const currentIsAuthenticated = !!user;
+      const currentIsPaidUser = currentIsAuthenticated && paymentVerified;
+      const currentUserPlans = getUserPlans(userProfile);
+      
+      // Only update if there's an actual change to prevent unnecessary re-renders
+      setStableUserData(prevState => {
+        const newState = {
+          isAuthenticated: currentIsAuthenticated,
+          isPaidUser: currentIsPaidUser,
+          hasGuestAccess: currentIsGuest,
+          userPlans: currentUserPlans,
+          isAdmin: isAdmin
+        };
+        
+        // Deep comparison to avoid unnecessary updates
+        const hasChanged = JSON.stringify(prevState) !== JSON.stringify(newState);
+        return hasChanged ? newState : prevState;
+      });
+    };
+    
+    // Update stable state whenever any dependency changes
+    updateStableState();
+  }, [user, paymentVerified, userProfile, isAdmin]);
 
   useEffect(() => {
     const unsubscribe = onAuthChange(async (currentUser) => {
@@ -99,7 +134,6 @@ const Navbar = () => {
         setPaymentVerified(false);
       }
       
-      setLoading(false);
     });
 
     // Also listen for focus events to refresh profile after purchases
@@ -164,11 +198,9 @@ const Navbar = () => {
   const isActive = (path) => {
     return location.pathname === path;
   };
-  
-  // Separate guest status from auth status
-  const isAuthenticated = !!user;
-  const hasGuestAccess = isGuest();
-  const isPaidUser = isAuthenticated && paymentVerified;
+
+  // USE STABLE STATE FOR RENDERING
+  const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
 
   return (
     <nav className="navbar">
@@ -207,51 +239,44 @@ const Navbar = () => {
           {isPaidUser && !hasGuestAccess && (
             <div className="navbar-center">
               <ul className="main-menu">
-                {(() => {
-                  const userPlans = getUserPlans(userProfile);
-                  return (
-                    <>
-                      {hasAccessToProfiles(userPlans) && (
-                        <li>
-                          <Link 
-                            to="/profile" 
-                            className={isActive('/profile') ? 'active' : ''}
-                            onClick={closeMobileMenu}
-                          >
-                            Premed Cheatsheet Members
-                          </Link>
-                        </li>
-                      )}
-                      
-                      {/* NEW: Cheatsheet+ Tab - Only show for cheatsheet-plus or application-plus plans */}
-                      {hasAccessToCheatsheetPlus(userPlans) && (
-                        <li>
-                          <Link 
-                            to="/premed-cheatsheet-plus" 
-                            className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
-                            onClick={closeMobileMenu}
-                          >
-                            Cheatsheet+
-                          </Link>
-                        </li>
-                      )}
-                      
-                      {hasAccessToApplication(userPlans) && (
-                        <li>
-                          <Link 
-                            to="/application-cheatsheet" 
-                            className={isActive('/application-cheatsheet') ? 'active' : ''}
-                            onClick={closeMobileMenu}
-                          >
-                            Application Cheatsheet
-                          </Link>
-                        </li>
-                      )}
-                    </>
-                  );
-                })()}
+                {hasAccessToProfiles(userPlans) && (
+                  <li>
+                    <Link 
+                      to="/profile" 
+                      className={isActive('/profile') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Premed Cheatsheet Members
+                    </Link>
+                  </li>
+                )}
                 
-                {isAdmin && (
+                {/* Cheatsheet+ Tab - Only show for cheatsheet-plus plans */}
+                {hasAccessToCheatsheetPlus(userPlans) && (
+                  <li>
+                    <Link 
+                      to="/premed-cheatsheet-plus" 
+                      className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Cheatsheet+
+                    </Link>
+                  </li>
+                )}
+                
+                {hasAccessToApplication(userPlans) && (
+                  <li>
+                    <Link 
+                      to="/application-cheatsheet" 
+                      className={isActive('/application-cheatsheet') ? 'active' : ''}
+                      onClick={closeMobileMenu}
+                    >
+                      Application Cheatsheet
+                    </Link>
+                  </li>
+                )}
+                
+                {stableIsAdmin && (
                   <li>
                     <Link 
                       to="/admin" 
@@ -310,51 +335,44 @@ const Navbar = () => {
               {isPaidUser ? (
                 // For paid users - show member menu items based on their plan
                 <>
-                  {(() => {
-                    const userPlans = getUserPlans(userProfile);
-                    return (
-                      <>
-                        {hasAccessToProfiles(userPlans) && (
-                          <li>
-                            <Link 
-                              to="/profile" 
-                              className={isActive('/profile') ? 'active' : ''}
-                              onClick={closeMobileMenu}
-                            >
-                              Premed Cheatsheet Members
-                            </Link>
-                          </li>
-                        )}
-                        
-                        {/* NEW: Cheatsheet+ Mobile Menu Item */}
-                        {hasAccessToCheatsheetPlus(userPlans) && (
-                          <li>
-                            <Link 
-                              to="/premed-cheatsheet-plus" 
-                              className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
-                              onClick={closeMobileMenu}
-                            >
-                              Cheatsheet+
-                            </Link>
-                          </li>
-                        )}
-                        
-                        {hasAccessToApplication(userPlans) && (
-                          <li>
-                            <Link 
-                              to="/application-cheatsheet" 
-                              className={isActive('/application-cheatsheet') ? 'active' : ''}
-                              onClick={closeMobileMenu}
-                            >
-                              Application Cheatsheet
-                            </Link>
-                          </li>
-                        )}
-                      </>
-                    );
-                  })()}
+                  {hasAccessToProfiles(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/profile" 
+                        className={isActive('/profile') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Premed Cheatsheet Members
+                      </Link>
+                    </li>
+                  )}
                   
-                  {isAdmin && (
+                  {/* Cheatsheet+ Mobile Menu Item */}
+                  {hasAccessToCheatsheetPlus(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/premed-cheatsheet-plus" 
+                        className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Cheatsheet+
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {hasAccessToApplication(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/application-cheatsheet" 
+                        className={isActive('/application-cheatsheet') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Application Cheatsheet
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {stableIsAdmin && (
                     <li>
                       <Link 
                         to="/admin" 

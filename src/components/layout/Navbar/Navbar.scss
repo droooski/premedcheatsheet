@@ -30,16 +30,29 @@
   
   .navbar-content {
     display: flex;
-    justify-content: space-between; // This creates the expanding middle gap
     align-items: center;
     padding: $spacing-3 0;
     position: relative;
+    min-height: 60px; // Prevent height jumping
+    gap: $spacing-2; // Small gap between sections
   }
-  
-  // Left side of navbar (logo + primary nav)
+
   .navbar-left {
     display: flex;
     align-items: center;
+    flex-shrink: 0; // Never shrink the logo section
+    min-width: fit-content;
+  }
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; // Never shrink the account section
+    min-width: fit-content;
+    
+    @media (max-width: $md) {
+      display: none;
+    }
   }
   
   .logo {
@@ -133,49 +146,50 @@
   }
   
   // Center navigation menu
-  .navbar-center {
-    flex: 1;
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0; // Allow shrinking
+  // REMOVE this line: max-width: calc(100% - 600px); // This is causing overflow!
+  margin: 0 $spacing-4; // Add margins to create breathing room
+  
+  @media (max-width: $md) {
+    display: none;
+  }
+  
+  .main-menu {
     display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: nowrap;
     justify-content: center;
+    gap: clamp(12px, 3vw, 24px); // Increase minimum gap
     
-    @media (max-width: $md) {
-      display: none; // Hide on mobile and small screens
-    }
-    
-    .main-menu {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
+    li {
+      flex-shrink: 0; // CHANGE THIS - don't allow shrinking of items
+      min-width: fit-content;
       
-      li {
-        margin: 0 $spacing-4;
-        
-        @media (min-width: $lg) {
-          margin: 0 $spacing-5;
-        }
-        
-        @media (min-width: $xl) {
-          margin: 0 $spacing-6;
-        }
-        
-        a {
-          color: $text-color;
-          font-weight: 300;
-          @include mix.transition(color);
-          font-size: 0.95rem;
-          padding: $spacing-2 0;
-          position: relative;
+      a {
+        color: $text-color;
+        font-weight: 300;
+        @include mix.transition(color);
+        font-size: clamp(0.85rem, 1.2vw, 0.95rem); // Slightly larger minimum
+        padding: $spacing-2 clamp(6px, 1.5vw, 12px);
+        position: relative;
+        white-space: nowrap;
+        text-align: center;
+        display: block; // ADD THIS
           
           @media (min-width: $xl) {
-            font-size: 1.05rem;
+            font-size: clamp(0.9rem, 1.5vw, 1.05rem);
           }
           
           &:hover {
             color: $primary-color;
           }
           
-          // Active state with underline
           &.active {
             font-weight: 500;
             
