@@ -45,11 +45,49 @@ const AccountPage = () => {
         .forEach(sub => currentPlans.push(sub.plan));
     }
     
-    // All available plans
-    const allPlans = ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'];
+    console.log("Current user plans:", currentPlans);
     
-    // Return plans the user doesn't have yet
-    return allPlans.filter(plan => !currentPlans.includes(plan));
+    // Define plan hierarchies
+    const availableUpgrades = [];
+    
+    // Check what the user can still upgrade to based on what they have
+    const hasCheatsheet = currentPlans.includes('cheatsheet');
+    const hasCheatsheetPlus = currentPlans.includes('cheatsheet-plus');
+    const hasApplication = currentPlans.includes('application');
+    const hasApplicationPlus = currentPlans.includes('application-plus');
+    
+    // Logic for Cheatsheet plans
+    if (!hasCheatsheet && !hasCheatsheetPlus) {
+      // If user has ANY plus plan, skip basic cheatsheet and only show cheatsheet-plus
+      if (hasApplicationPlus) {
+        availableUpgrades.push('cheatsheet-plus');
+      } else {
+        // User has no plus plans - show both options
+        availableUpgrades.push('cheatsheet', 'cheatsheet-plus');
+      }
+    } else if (hasCheatsheet && !hasCheatsheetPlus) {
+      // User has basic cheatsheet - only show plus upgrade
+      availableUpgrades.push('cheatsheet-plus');
+    }
+    // If user has cheatsheet-plus, don't show any cheatsheet upgrades
+    
+    // Logic for Application plans
+    if (!hasApplication && !hasApplicationPlus) {
+      // If user has ANY plus plan, skip basic application and only show application-plus
+      if (hasCheatsheetPlus) {
+        availableUpgrades.push('application-plus');
+      } else {
+        // User has no plus plans - show both options
+        availableUpgrades.push('application', 'application-plus');
+      }
+    } else if (hasApplication && !hasApplicationPlus) {
+      // User has basic application - only show plus upgrade
+      availableUpgrades.push('application-plus');
+    }
+    // If user has application-plus, don't show any application upgrades
+    
+    console.log("Available upgrades:", availableUpgrades);
+    return availableUpgrades;
   };
 
   // Helper function to get plan display names
