@@ -30,29 +30,16 @@
   
   .navbar-content {
     display: flex;
+    justify-content: space-between; // This creates the expanding middle gap
     align-items: center;
     padding: $spacing-3 0;
     position: relative;
-    min-height: 60px; // Prevent height jumping
-    gap: $spacing-2; // Small gap between sections
   }
-
+  
+  // Left side of navbar (logo + primary nav)
   .navbar-left {
     display: flex;
     align-items: center;
-    flex-shrink: 0; // Never shrink the logo section
-    min-width: fit-content;
-  }
-
-  .navbar-right {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0; // Never shrink the account section
-    min-width: fit-content;
-    
-    @media (max-width: $md) {
-      display: none;
-    }
   }
   
   .logo {
@@ -146,41 +133,39 @@
   }
   
   // Center navigation menu
-.navbar-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  min-width: 0; // Allow shrinking
-  // REMOVE this line: max-width: calc(100% - 600px); // This is causing overflow!
-  margin: 0 $spacing-4; // Add margins to create breathing room
-  
-  @media (max-width: $md) {
-    display: none;
-  }
-  
-  .main-menu {
+  .navbar-center {
+    flex: 1;
     display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex-wrap: nowrap;
     justify-content: center;
-    gap: clamp(12px, 3vw, 24px); // Increase minimum gap
+    min-width: 0; // Allow shrinking
+    max-width: calc(100% - 600px); // Reserve space for left and right sections
     
-    li {
-      flex-shrink: 0; // CHANGE THIS - don't allow shrinking of items
-      min-width: fit-content;
+    @media (max-width: $md) {
+      display: none;
+    }
+    
+    .main-menu {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      flex-wrap: nowrap; // Never wrap
+      justify-content: center;
+      gap: clamp(8px, 2vw, 24px); // Responsive gap that shrinks on smaller screens
       
-      a {
-        color: $text-color;
-        font-weight: 300;
-        @include mix.transition(color);
-        font-size: clamp(0.85rem, 1.2vw, 0.95rem); // Slightly larger minimum
-        padding: $spacing-2 clamp(6px, 1.5vw, 12px);
-        position: relative;
-        white-space: nowrap;
-        text-align: center;
-        display: block; // ADD THIS
+      li {
+        flex-shrink: 1; // Allow shrinking if needed
+        min-width: fit-content; // But maintain minimum content width
+        
+        a {
+          color: $text-color;
+          font-weight: 300;
+          @include mix.transition(color);
+          font-size: clamp(0.8rem, 1.5vw, 0.95rem); // Responsive font size
+          padding: $spacing-2 clamp(4px, 1vw, 12px); // Responsive padding
+          position: relative;
+          white-space: nowrap; // Never wrap text
+          text-align: center;
           
           @media (min-width: $xl) {
             font-size: clamp(0.9rem, 1.5vw, 1.05rem);

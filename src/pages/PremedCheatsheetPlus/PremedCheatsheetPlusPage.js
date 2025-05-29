@@ -1,4 +1,3 @@
-// src/pages/PremedCheatsheetPlus/PremedCheatsheetPlusPage.js
 import React, { useState } from 'react';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
@@ -32,85 +31,116 @@ const PremedCheatsheetPlusPage = () => {
     window.open('https://docs.google.com/spreadsheets/d/15WblooRULO-pl0pEVThNzD_3tBN0YMb6o7wksIgd_7M/edit?usp=drive_link', '_blank');
   };
 
+  const resources = [
+    {
+      title: "Cold Emailing Templates",
+      description: "Proven templates for reaching out to research labs, doctors for shadowing, and networking opportunities.",
+      items: [
+        "Cold Emailing Template for Research #1",
+        "Cold Emailing Template for Research #2", 
+        "Cold Emailing Template for Shadowing #1",
+        "Cold Emailing Template for Shadowing #2"
+      ],
+      icon: "📧"
+    },
+    {
+      title: "Professional CV Template",
+      description: "Polished, ATS-friendly CV template optimized specifically for medical school applications.",
+      downloadable: true,
+      fileName: "CV_Template_PremedCheatsheet.docx",
+      icon: "📄"
+    },
+    {
+      title: "Pre-med Summer Program Database",
+      description: "Comprehensive database of summer programs, research opportunities, and their requirements.",
+      external: true,
+      action: openSummerPrograms,
+      icon: "🏫"
+    },
+    {
+      title: "MCAT-Optimized Course Schedules & Study Plan",
+      description: "Strategic course planning and study schedules designed to maximize your MCAT preparation.",
+      comingSoon: true,
+      icon: "📚"
+    }
+  ];
+
   return (
     <div className="premed-cheatsheet-plus-page">
       <Navbar />
-      
-      <div className="page-content">
-        <div className="container">
-          <div className="header-section">
-            <h1 className="page-title">Premed Cheatsheet+</h1>
-            <p className="page-subtitle">
-              Feel free to copy and paste any templates!
-            </p>
-          </div>
+      <div className="container">
+        <div className="header-section">
+          <h1 className="page-title">Premed Cheatsheet+</h1>
+          <p className="page-subtitle">
+            Feel free to copy and paste any templates!
+          </p>
+        </div>
 
-          <div className="resources-overview">
-            <div className="resource-card">
+        <div className="resources-grid">
+          {resources.map((resource, index) => (
+            <div key={index} className="resource-card">
               <div className="resource-header">
-                <span className="resource-icon">📧</span>
-                <h2>Cold Emailing Templates</h2>
+                <span className="resource-icon">{resource.icon}</span>
+                <h2>{resource.title}</h2>
               </div>
-              <p className="resource-description">
-                Proven templates for reaching out to research labs, doctors for shadowing, and networking opportunities.
-              </p>
-            </div>
-
-            <div className="resource-card">
-              <div className="resource-header">
-                <span className="resource-icon">📄</span>
-                <h2>Professional CV Template</h2>
-              </div>
-              <p className="resource-description">
-                Polished, ATS-friendly CV template optimized specifically for medical school applications.
-              </p>
-              <div className="resource-actions">
-                <button 
-                  className={`download-button ${downloadStatus['CV_Template_PremedCheatsheet.docx'] || 'ready'}`}
-                  onClick={() => handleDownload('CV_Template_PremedCheatsheet.docx', 'CV Template')}
-                  disabled={downloadStatus['CV_Template_PremedCheatsheet.docx'] === 'downloaded'}
-                >
-                  {downloadStatus['CV_Template_PremedCheatsheet.docx'] === 'downloaded' 
-                    ? '✓ Downloaded' 
-                    : '⬇ Download CV Template'}
-                </button>
-              </div>
-            </div>
-
-            <div className="resource-card">
-              <div className="resource-header">
-                <span className="resource-icon">🏫</span>
-                <h2>Pre-med Summer Program Database</h2>
-              </div>
-              <p className="resource-description">
-                Comprehensive database of summer programs, research opportunities, and their requirements.
-              </p>
-              <div className="resource-actions">
-                <button 
-                  className="external-button"
-                  onClick={openSummerPrograms}
-                >
-                  🔗 Open Database
-                </button>
-              </div>
-            </div>
-
-            <div className="resource-card">
-              <div className="resource-header">
-                <span className="resource-icon">📚</span>
-                <h2>MCAT-Optimized Course Schedules & Study Plan</h2>
-              </div>
-              <p className="resource-description">
-                Strategic course planning and study schedules designed to maximize your MCAT preparation.
-              </p>
-              <div className="resource-actions">
-                <div className="coming-soon-badge">
-                  🚀 Coming Soon
+              
+              <p className="resource-description">{resource.description}</p>
+              
+              {resource.items && (
+                <div className="resource-content">
+                  <div className="templates-grid">
+                    {resource.items.map((item, itemIndex) => (
+                      <div key={itemIndex} className="template-item">
+                        <h3>{item}</h3>
+                        <div className="template-content">
+                          {/* Template content would be displayed here */}
+                          <div className="template-preview">
+                            <p>Template content preview...</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+              
+              {resource.downloadable && (
+                <div className="resource-actions">
+                  <button 
+                    className={`download-button ${downloadStatus[resource.fileName] || 'ready'}`}
+                    onClick={() => handleDownload(resource.fileName, resource.title)}
+                    disabled={downloadStatus[resource.fileName] === 'downloaded'}
+                  >
+                    {downloadStatus[resource.fileName] === 'downloaded' 
+                      ? '✓ Downloaded' 
+                      : '⬇ Download Template'}
+                  </button>
+                </div>
+              )}
+              
+              {resource.external && (
+                <div className="resource-actions">
+                  <button 
+                    className="external-button"
+                    onClick={resource.action}
+                  >
+                    🔗 Open Database
+                  </button>
+                </div>
+              )}
+              
+              {resource.comingSoon && (
+                <div className="resource-actions">
+                  <div className="coming-soon-badge">
+                    🚀 Coming Soon
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ))}
+        </div>
 
+        <div className="additional-content">
           <div className="cold-email-templates-section">
             <h2>Cold Emailing Templates</h2>
             
@@ -179,7 +209,6 @@ const PremedCheatsheetPlusPage = () => {
           </div>
         </div>
       </div>
-      
       <Footer />
     </div>
   );

@@ -2,31 +2,6 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
-.premed-cheatsheet-plus-page {
-  min-height: 100vh;
-  background-color: $background-color;
-  padding: $spacing-12 0;
-  font-family: $font-family-mincho;
-  
-  @media (max-width: $md) {
-    padding: $spacing-8 0;
-  }
-  
-  @media (max-width: $sm) {
-    padding: $spacing-4 0;
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 $spacing-4;
-    
-    @media (max-width: $sm) {
-      padding: 0 $spacing-2;
-    }
-  }
-}
-
 .header-section {
   text-align: center;
   margin-bottom: $spacing-12;
