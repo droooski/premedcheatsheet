@@ -1,0 +1,282 @@
+// src/pages/PremedCheatsheetPlus/PremedCheatsheetPlusPage.scss
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.premed-cheatsheet-plus-page {
+  min-height: 100vh;
+  background-color: $background-color;
+  padding: $spacing-12 0;
+  font-family: $font-family-mincho;
+  
+  @media (max-width: $md) {
+    padding: $spacing-8 0;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4 0;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+    
+    @media (max-width: $sm) {
+      padding: 0 $spacing-2;
+    }
+  }
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: $spacing-12;
+  
+  .page-title {
+    font-family: $font-family-mincho;
+    font-weight: 400;
+    font-size: 4rem;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+    letter-spacing: 0.02em;
+    
+    @media (max-width: $md) {
+      font-size: 3rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 2.5rem;
+    }
+  }
+  
+  .page-subtitle {
+    font-size: 1.2rem;
+    color: $text-color-light;
+    max-width: 600px;
+    margin: 0 auto;
+    
+    @media (max-width: $sm) {
+      font-size: 1rem;
+    }
+  }
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: $spacing-8;
+  margin-bottom: $spacing-16;
+  
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+    gap: $spacing-6;
+  }
+}
+
+.resource-card {
+  background-color: $white;
+  border-radius: 16px;
+  padding: $spacing-8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+  
+  @media (max-width: $md) {
+    padding: $spacing-6;
+  }
+  
+  @media (max-width: $sm) {
+    padding: $spacing-4;
+    border-radius: 12px;
+  }
+}
+
+.resource-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-4;
+  
+  .resource-icon {
+    font-size: 2.5rem;
+    margin-right: $spacing-4;
+    
+    @media (max-width: $sm) {
+      font-size: 2rem;
+      margin-right: $spacing-3;
+    }
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+.resource-description {
+  font-size: 1.1rem;
+  color: $text-color-light;
+  line-height: 1.6;
+  margin-bottom: $spacing-6;
+  
+  @media (max-width: $sm) {
+    font-size: 1rem;
+  }
+}
+
+.resource-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-6;
+  
+  .download-button, .external-button {
+    background-color: $primary-color;
+    color: $white;
+    border: none;
+    border-radius: 8px;
+    padding: $spacing-3 $spacing-6;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($primary-color, 5%);
+      transform: translateY(-2px);
+    }
+    
+    &:disabled {
+      background-color: #10b981;
+      cursor: not-allowed;
+    }
+    
+    &.downloaded {
+      background-color: #10b981;
+    }
+  }
+  
+  .coming-soon-badge {
+    background-color: #f59e0b;
+    color: $white;
+    padding: $spacing-3 $spacing-6;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+}
+
+.additional-content {
+  margin-top: $spacing-16;
+}
+
+.cold-email-templates-section {
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: $spacing-8;
+    color: $text-color;
+    
+    @media (max-width: $md) {
+      font-size: 2rem;
+    }
+    
+    @media (max-width: $sm) {
+      font-size: 1.75rem;
+    }
+  }
+}
+
+.template-card {
+  background-color: $white;
+  border-radius: 12px;
+  padding: $spacing-6;
+  margin-bottom: $spacing-6;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: $spacing-4;
+    color: $text-color;
+    
+    @media (max-width: $sm) {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .template-box {
+    background-color: #f8f9fa;
+    border-left: 4px solid $primary-color;
+    padding: $spacing-4;
+    border-radius: 8px;
+    font-family: $font-family-sans;
+    line-height: 1.6;
+    
+    p {
+      margin-bottom: $spacing-2;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    strong {
+      font-weight: 600;
+      color: $text-color;
+    }
+  }
+}
+
+.templates-grid {
+  display: grid;
+  gap: $spacing-4;
+  
+  .template-item {
+    border: 1px solid $gray-200;
+    border-radius: 8px;
+    padding: $spacing-4;
+    
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-3;
+      color: $text-color;
+    }
+    
+    .template-preview {
+      background-color: #f8f9fa;
+      padding: $spacing-3;
+      border-radius: 6px;
+      font-style: italic;
+      color: $text-color-light;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $sm) {
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .template-card {
+    padding: $spacing-4;
+  }
+  
+  .template-box {
+    padding: $spacing-3;
+    font-size: 0.9rem;
+  }
+}

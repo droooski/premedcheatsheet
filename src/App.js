@@ -1,4 +1,4 @@
-// src/App.js - Update to handle verification link handling
+// src/App.js - Updated with Premed Cheatsheet+ route
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
@@ -11,11 +11,12 @@ import GuestPage from './pages/Guest/GuestPage';
 import AboutPage from './pages/About/AboutPage';
 import PaymentMethodsPage from './pages/Account/PaymentMethodsPage';
 import AddressesPage from './pages/Account/AddressesPage';
+import PremedCheatsheetPlusPage from './pages/PremedCheatsheetPlus/PremedCheatsheetPlusPage'; // New import
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
-import EmailVerificationPage from './components/auth/EmailVerificationPage'; // New component for handling verifications
+import EmailVerificationPage from './components/auth/EmailVerificationPage';
 import { onAuthChange } from './firebase/authService';
 import { AuthProvider } from './contexts/AuthContext';
 import PlanBasedRoute from './components/auth/PlanBasedRoute';
@@ -85,6 +86,21 @@ function App() {
             <PaymentVerifiedRoute fallbackPath="/checkout">
               <PlanBasedRoute requiredAccess="profiles" fallbackPath="/account">
                 <ProfilePage />
+              </PlanBasedRoute>
+            </PaymentVerifiedRoute>
+          ) : isGuest ? (
+            <GuestPage />
+          ) : (
+            <Navigate to="/" />
+          )
+        } />
+
+        {/* NEW ROUTE: Premed Cheatsheet+ Page */}
+        <Route path="/premed-cheatsheet-plus" element={
+          isAuthenticated ? (
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <PlanBasedRoute requiredAccess="cheatsheet-plus" fallbackPath="/account">
+                <PremedCheatsheetPlusPage />
               </PlanBasedRoute>
             </PaymentVerifiedRoute>
           ) : isGuest ? (
