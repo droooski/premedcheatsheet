@@ -56,13 +56,33 @@ const AccountPage = () => {
     const hasApplication = currentPlans.includes('application');
     const hasApplicationPlus = currentPlans.includes('application-plus');
     
+    // Special case: If user has both top-tier plans, they have everything
+    if (hasCheatsheetPlus && hasApplicationPlus) {
+      console.log("User has both top-tier plans - no upgrades available");
+      return []; // No upgrades available
+    }
+    
+    // Special case: If user has Cheatsheet+ and Application (any level), only show Application+
+    if (hasCheatsheetPlus && hasApplication && !hasApplicationPlus) {
+      availableUpgrades.push('application-plus');
+      console.log("Available upgrades:", availableUpgrades);
+      return availableUpgrades;
+    }
+    
+    // Special case: If user has ApplicationPlus and Cheatsheet (any level), only show Cheatsheet+
+    if (hasApplicationPlus && hasCheatsheet && !hasCheatsheetPlus) {
+      availableUpgrades.push('cheatsheet-plus');
+      console.log("Available upgrades:", availableUpgrades);
+      return availableUpgrades;
+    }
+    
     // Logic for Cheatsheet plans
     if (!hasCheatsheet && !hasCheatsheetPlus) {
-      // If user has ANY plus plan, skip basic cheatsheet and only show cheatsheet-plus
-      if (hasApplicationPlus) {
+      // If user has ANY plus plan OR any application plan, skip basic cheatsheet
+      if (hasApplicationPlus || hasApplication) {
         availableUpgrades.push('cheatsheet-plus');
       } else {
-        // User has no plus plans - show both options
+        // User has no conflicting plans - show both options
         availableUpgrades.push('cheatsheet', 'cheatsheet-plus');
       }
     } else if (hasCheatsheet && !hasCheatsheetPlus) {
@@ -73,11 +93,11 @@ const AccountPage = () => {
     
     // Logic for Application plans
     if (!hasApplication && !hasApplicationPlus) {
-      // If user has ANY plus plan, skip basic application and only show application-plus
-      if (hasCheatsheetPlus) {
+      // If user has ANY plus plan OR any cheatsheet plan, skip basic application
+      if (hasCheatsheetPlus || hasCheatsheet) {
         availableUpgrades.push('application-plus');
       } else {
-        // User has no plus plans - show both options
+        // User has no conflicting plans - show both options
         availableUpgrades.push('application', 'application-plus');
       }
     } else if (hasApplication && !hasApplicationPlus) {
@@ -89,6 +109,8 @@ const AccountPage = () => {
     console.log("Available upgrades:", availableUpgrades);
     return availableUpgrades;
   };
+
+  
 
   // Helper function to get plan display names
   const getPlanDisplayName = (plan) => {

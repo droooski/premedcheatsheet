@@ -49,11 +49,11 @@ const PlanBasedRoute = ({ children, requiredAccess, fallbackPath = '/account' })
           let hasRequiredAccess = false;
           
           if (requiredAccess === 'profiles') {
-            // Plans that include profile access (ALL plans include profile access)
-            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'];
+            // Only these plans include profile access (Premed Cheatsheet Members)
+            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application-plus'];
             hasRequiredAccess = userPlans.some(plan => profilePlans.includes(plan));
             console.log("🔒 Profile access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", profilePlans);
-          } 
+          }
           else if (requiredAccess === 'cheatsheet-plus') {
             // ONLY Cheatsheet+ plan includes access to Cheatsheet+ features
             const cheatsheetPlusPlans = ['cheatsheet-plus'];

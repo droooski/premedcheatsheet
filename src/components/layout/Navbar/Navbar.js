@@ -1,5 +1,5 @@
 // src/components/layout/Navbar/Navbar.js - With Stable State Management
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -47,7 +47,7 @@ const Navbar = () => {
   };
 
   const hasAccessToProfiles = (plans) => {
-    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application', 'application-plus'].includes(plan));
+    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
   };
 
   const hasAccessToCheatsheetPlus = (plans) => {
@@ -86,40 +86,46 @@ const Navbar = () => {
     updateStableState();
   }, [user, paymentVerified, userProfile, isAdmin]);
 
+  // Separate function to refresh user profile
+  const refreshUserProfile = useCallback(async (currentUser) => {
+    try {
+      // Always fetch fresh user profile data
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      
+      if (userDoc.exists()) {
+        const profileData = userDoc.data();
+        console.log("🔄 Fresh user profile data:", profileData);
+        console.log("🔄 User subscriptions:", profileData.subscriptions);
+        setUserProfile(profileData);
+        setIsAdmin(profileData.isAdmin === true);
+        
+        // Check payment verification
+        const hasVerifiedPayment = profileData.paymentVerified === true ||
+          (profileData.subscriptions && 
+          profileData.subscriptions.length > 0 && 
+          profileData.subscriptions.some(sub => sub.active));
+            
+        setPaymentVerified(hasVerifiedPayment);
+      } else {
+        setUserProfile(null);
+        setIsAdmin(false);
+        setPaymentVerified(false);
+      }
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+      setUserProfile(null);
+      setIsAdmin(false);
+      setPaymentVerified(false);
+    }
+  }, [db]);
+
   useEffect(() => {
     const unsubscribe = onAuthChange(async (currentUser) => {
       console.log("Navbar - Auth state changed:", currentUser);
       setUser(currentUser);
       
       if (currentUser) {
-        try {
-          // Always fetch fresh user profile data
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          
-          if (userDoc.exists()) {
-            const profileData = userDoc.data();
-            console.log("Fresh user profile data:", profileData);
-            setUserProfile(profileData);
-            setIsAdmin(profileData.isAdmin === true);
-            
-            // Check payment verification
-            const hasVerifiedPayment = profileData.paymentVerified === true ||
-              (profileData.subscriptions && 
-              profileData.subscriptions.length > 0 && 
-              profileData.subscriptions.some(sub => sub.active));
-                
-            setPaymentVerified(hasVerifiedPayment);
-          } else {
-            setUserProfile(null);
-            setIsAdmin(false);
-            setPaymentVerified(false);
-          }
-        } catch (error) {
-          console.error('Error checking user profile:', error);
-          setUserProfile(null);
-          setIsAdmin(false);
-          setPaymentVerified(false);
-        }
+        await refreshUserProfile(currentUser);
       } else {
         // Check if guest access is still valid
         if (isGuest()) {
@@ -136,27 +142,51 @@ const Navbar = () => {
       
     });
 
-    // Also listen for focus events to refresh profile after purchases
+    // Listen for multiple events that might indicate a purchase was completed
     const handleFocus = async () => {
       if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserProfile(userDoc.data());
-          }
-        } catch (error) {
-          console.error('Error refreshing user profile:', error);
-        }
+        console.log("🔄 Window focused - refreshing user profile");
+        await refreshUserProfile(user);
+      }
+    };
+
+    const handleVisibilityChange = async () => {
+      if (!document.hidden && user) {
+        console.log("🔄 Page became visible - refreshing user profile");
+        await refreshUserProfile(user);
+      }
+    };
+
+    // Listen for storage events (when sessionStorage is updated after purchase)
+    const handleStorageChange = async (e) => {
+      if (e.key === 'paymentVerified' && e.newValue === 'true' && user) {
+        console.log("🔄 Payment verified in storage - refreshing user profile");
+        await refreshUserProfile(user);
+      }
+    };
+
+    // Listen for custom events from other components
+    const handleProfileUpdate = async () => {
+      if (user) {
+        console.log("🔄 Profile update event - refreshing user profile");
+        await refreshUserProfile(user);
       }
     };
 
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('profileUpdated', handleProfileUpdate);
     
     return () => {
       unsubscribe();
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
     };
-  }, [db, user]);
+  }, [db, user, refreshUserProfile]);
+
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
