@@ -31,7 +31,9 @@ const PricingCards = ({ onSelectPlan }) => {
   const discountCodes = {
     'PREMEDVIP': { rate: 10, description: 'VIP Discount' },
     'STUDENT2025': { rate: 20, description: 'Student Discount' },
-    'PARTNER': { rate: 100, description: 'Partnership - 100% Off' }
+    'PARTNER': { rate: 100, description: 'Partnership - 100% Off' },
+    'COOLMEMBER': { rate: 100, description: 'Cool Member - 100% Off' }
+
   };
 
   // Toggle coupon input visibility
