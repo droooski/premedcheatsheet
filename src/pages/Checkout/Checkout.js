@@ -704,203 +704,135 @@ const Checkout = () => {
   };
 
   // Updated handleProcessPayment function for Checkout.js
-  const handleProcessPayment = async () => {
-    setLoading(true);
-    setError('');
+  // Replace ONLY the handleProcessPayment function in your existing Checkout.js
+const handleProcessPayment = async () => {
+  setLoading(true);
+  setError('');
 
-    try {
-      console.log("Starting payment processing...");
-      console.log("stripeWrapperRef:", stripeWrapperRef);
-      
-      // Check if stripeWrapperRef is available
-      if (!stripeWrapperRef || !stripeWrapperRef.current) {
-        console.error("Stripe wrapper ref is not available");
-        throw new Error("Payment system not initialized. Please refresh and try again.");
-      }
-      
-      console.log("stripeWrapperRef.current:", stripeWrapperRef.current);
-      console.log("submitPayment method available:", typeof stripeWrapperRef.current.submitPayment === 'function');
-
-      const finalPrice = parseFloat(getFinalPrice());
-      console.log(`Processing payment of $${finalPrice} for plan: ${selectedPlan}`);
-
-      // Call the submitPayment method on the StripeWrapper component
-      console.log("Creating payment method with Stripe...");
-      const paymentResult = await stripeWrapperRef.current.submitPayment();
-      console.log("Payment result:", paymentResult);
-      
-      if (!paymentResult || !paymentResult.success || !paymentResult.paymentMethod) {
-        console.error("Failed to create payment method", paymentResult);
-        throw new Error("Failed to create payment method. Please check your card details and try again.");
-      }
-      
-      const paymentMethod = paymentResult.paymentMethod;
-      console.log("Payment method created:", paymentMethod.id);
-
-      // Now create the user account AFTER payment processing (for new users)
-      if (!user && pendingUserData) {
-        console.log("Creating user account...");
-        const registrationResult = await registerUser(
-          pendingUserData.email,
-          pendingUserData.password,
-          pendingUserData.firstName,
-          pendingUserData.lastName
-        );
-
-        if (!registrationResult.user) {
-          console.error("Account creation failed");
-          throw new Error("Your payment was processed, but we encountered an issue creating your account. Please contact support with your payment confirmation.");
-        }
-
-        // Set the user state with the newly created user
-        setUser(registrationResult.user);
-
-        // Use processPayment service to handle order creation and user updates
-        const orderResult = await processPayment(
-          {
-            paymentMethodId: paymentMethod.id,
-            card: {
-              brand: paymentMethod.card.brand,
-              last4: paymentMethod.card.last4,
-              expMonth: paymentMethod.card.exp_month,
-              expYear: paymentMethod.card.exp_year
-            },
-            billingDetails: paymentMethod.billing_details
-          },
-          registrationResult.user.uid,
-          {
-            amount: finalPrice,
-            plan: selectedPlan,
-            discount: discount,
-            couponCode: couponCode
-          }
-        );
-
-        if (!orderResult.success) {
-          throw new Error(orderResult.error || "Failed to process your order");
-        }
-
-        console.log("Order created successfully:", orderResult.orderId);
-
-        // Save payment method if the user opted to
-        if (savePaymentMethod) {
-          const savedPaymentMethod = {
-            id: uuidv4(),
-            cardholderName: paymentMethod.billing_details.name,
-            lastFourDigits: paymentMethod.card.last4,
-            expiryDate: `${paymentMethod.card.exp_month}/${paymentMethod.card.exp_year.toString().substr(-2)}`,
-            cardType: paymentMethod.card.brand,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await userService.savePaymentMethod(registrationResult.user.uid, savedPaymentMethod);
-        }
-
-        // Save billing address if the user opted to
-        if (saveAddress && billingAddress.name) {
-          const address = {
-            id: uuidv4(),
-            name: billingAddress.name,
-            line1: billingAddress.line1,
-            line2: billingAddress.line2 || '',
-            city: billingAddress.city,
-            state: billingAddress.state,
-            postalCode: billingAddress.postalCode,
-            country: billingAddress.country,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await userService.saveAddress(registrationResult.user.uid, address);
-        }
-
-        // Set payment verification in session storage for immediate access
-        sessionStorage.setItem('paymentVerified', 'true');
-
-        // Move to confirmation step
-        setOrderId(orderResult.orderId);
-        changeCheckoutStep('confirmation');
-      }
-      // For existing users, just process the payment
-      else if (user) {
-        console.log("Processing payment for existing user:", user.uid);
-        
-        // Use processPayment service to handle order creation
-        const orderResult = await processPayment(
-          {
-            paymentMethodId: paymentMethod.id,
-            card: {
-              brand: paymentMethod.card.brand,
-              last4: paymentMethod.card.last4,
-              expMonth: paymentMethod.card.exp_month,
-              expYear: paymentMethod.card.exp_year
-            },
-            billingDetails: paymentMethod.billing_details
-          },
-          user.uid,
-          {
-            amount: finalPrice,
-            plan: selectedPlan,
-            discount: discount,
-            couponCode: couponCode
-          }
-        );
-        
-        if (!orderResult.success) {
-          throw new Error(orderResult.error || "Failed to process your order");
-        }
-
-        console.log('Order created for existing user:', orderResult.orderId);
-        
-        // Save payment method if needed
-        if (savePaymentMethod) {
-          const savedPaymentMethod = {
-            id: uuidv4(),
-            cardholderName: paymentMethod.billing_details.name,
-            lastFourDigits: paymentMethod.card.last4,
-            expiryDate: `${paymentMethod.card.exp_month}/${paymentMethod.card.exp_year.toString().substr(-2)}`,
-            cardType: paymentMethod.card.brand,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await userService.savePaymentMethod(user.uid, savedPaymentMethod);
-        }
-        
-        // Save billing address if needed
-        if (saveAddress && billingAddress.name) {
-          const address = {
-            id: uuidv4(),
-            name: billingAddress.name,
-            line1: billingAddress.line1,
-            line2: billingAddress.line2 || '',
-            city: billingAddress.city,
-            state: billingAddress.state,
-            postalCode: billingAddress.postalCode,
-            country: billingAddress.country,
-            isDefault: true,
-            createdAt: new Date().toISOString()
-          };
-          
-          await userService.saveAddress(user.uid, address);
-        }
-        
-        // Set verification flag and move to confirmation
-        sessionStorage.setItem('paymentVerified', 'true');
-        setOrderId(orderResult.orderId);
-        changeCheckoutStep('confirmation');
-      } else {
-        throw new Error("User information is missing. Please try again or refresh the page.");
-      }
-      
-    } catch (error) {
-      console.error("Payment/Registration error:", error);
-      setError(error.message || "An error occurred during payment processing. Please try again.");
-    } finally {
-      setLoading(false);
+  try {
+    console.log("Starting payment processing...");
+    
+    if (!stripeWrapperRef || !stripeWrapperRef.current) {
+      console.error("Stripe wrapper ref is not available");
+      throw new Error("Payment system not initialized. Please refresh and try again.");
     }
-  };
+
+    const finalPrice = parseFloat(getFinalPrice());
+    console.log(`Processing payment of $${finalPrice} for plan: ${selectedPlan}`);
+
+    // Create payment method with Stripe
+    console.log("Creating payment method with Stripe...");
+    const paymentResult = await stripeWrapperRef.current.submitPayment();
+    console.log("Payment result:", paymentResult);
+    
+    if (!paymentResult || !paymentResult.success || !paymentResult.paymentMethod) {
+      console.error("Failed to create payment method", paymentResult);
+      throw new Error(paymentResult?.error || "Failed to create payment method. Please check your card details and try again.");
+    }
+    
+    const paymentMethod = paymentResult.paymentMethod;
+    console.log("Payment method created:", paymentMethod.id);
+
+    // Create user account if needed (for new users)
+    let currentUserId = user?.uid;
+    if (!user && pendingUserData) {
+      console.log("Creating user account...");
+      const registrationResult = await registerUser(
+        pendingUserData.email,
+        pendingUserData.password,
+        pendingUserData.firstName,
+        pendingUserData.lastName
+      );
+
+      if (!registrationResult.user) {
+        console.error("Account creation failed");
+        throw new Error("Failed to create your account. Please try again.");
+      }
+
+      setUser(registrationResult.user);
+      currentUserId = registrationResult.user.uid;
+    }
+
+    // Process payment through our service - THIS IS THE KEY CHANGE
+    const orderResult = await processPayment(
+      {
+        paymentMethodId: paymentMethod.id,
+        card: {
+          brand: paymentMethod.card.brand,
+          last4: paymentMethod.card.last4,
+          expMonth: paymentMethod.card.exp_month,
+          expYear: paymentMethod.card.exp_year
+        },
+        billingDetails: paymentMethod.billing_details
+      },
+      currentUserId,
+      {
+        amount: finalPrice,
+        plan: selectedPlan,
+        discount: discount,
+        couponCode: couponCode
+      }
+    );
+
+    if (!orderResult.success) {
+      throw new Error(orderResult.error || "Failed to process your order");
+    }
+
+    console.log("Order created successfully:", orderResult.orderId);
+
+    // Save payment method if requested
+    if (savePaymentMethod && currentUserId) {
+      const savedPaymentMethod = {
+        id: uuidv4(),
+        cardholderName: paymentMethod.billing_details.name || 'Unknown',
+        lastFourDigits: paymentMethod.card.last4,
+        expiryDate: `${paymentMethod.card.exp_month}/${paymentMethod.card.exp_year.toString().substr(-2)}`,
+        cardType: paymentMethod.card.brand,
+        isDefault: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      try {
+        await userService.savePaymentMethod(currentUserId, savedPaymentMethod);
+      } catch (saveError) {
+        console.warn("Failed to save payment method:", saveError);
+      }
+    }
+
+    // Save billing address if requested
+    if (saveAddress && billingAddress.name && currentUserId) {
+      const address = {
+        id: uuidv4(),
+        name: billingAddress.name,
+        line1: billingAddress.line1,
+        line2: billingAddress.line2 || '',
+        city: billingAddress.city,
+        state: billingAddress.state,
+        postalCode: billingAddress.postalCode,
+        country: billingAddress.country,
+        isDefault: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      try {
+        await userService.saveAddress(currentUserId, address);
+      } catch (saveError) {
+        console.warn("Failed to save address:", saveError);
+      }
+    }
+
+    // Set payment verification and move to confirmation
+    sessionStorage.setItem('paymentVerified', 'true');
+    setOrderId(orderResult.orderId);
+    changeCheckoutStep('confirmation');
+
+  } catch (error) {
+    console.error("Payment/Registration error:", error);
+    setError(error.message || "An error occurred during payment processing. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Get plan display name
   const getPlanDisplayName = () => {

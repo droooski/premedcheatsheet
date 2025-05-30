@@ -1,7 +1,9 @@
 // src/utils/profilesData.js
 /**
- * Helper utility for loading and working with profile data
+ * Helper utility for loading and working with profile data from Firebase
  */
+
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 // Map of variations of school names to standardized names
 const schoolNameMap = {
@@ -72,7 +74,6 @@ const schoolNameMap = {
 
   'tourocom': 'Touro College of Osteopathic Medicine (TouroCOM)',
   'touro': 'Touro College of Osteopathic Medicine (TouroCOM)',
-  
 
   'umass': 'University of Massachusetts Amherst (UMass)',
 
@@ -107,16 +108,13 @@ const schoolNameMap = {
 
   'vanderbilt': 'Vanderbilt University School of Medicine',
 
-  'washu': 'WASHU',
+  'washu': 'Washington University School of Medicine',
 
   'wayne state': 'Wayne State University School of Medicine',
-
-
-  
 };
 
 // Normalize school name to ensure consistent naming
-const normalizeSchoolName = (schoolName) => {
+export const normalizeSchoolName = (schoolName) => {
   if (!schoolName) return '';
   
   const lowercaseName = schoolName.toLowerCase().trim();
@@ -134,20 +132,53 @@ const normalizeSchoolName = (schoolName) => {
     .join(' ');
 };
 
-// Load the profiles data from JSON file
+// Load the profiles data from Firebase
 export const loadProfiles = async () => {
   try {
-    const response = await fetch('/data/applicant-profiles.json');
-    if (!response.ok) {
-      throw new Error(`Failed to load profiles: ${response.status} ${response.statusText}`);
-    }
-    const data = await response.json();
-    console.log(`Loaded ${data.length} profiles from JSON`);
-    return data;
+    const db = getFirestore();
+    const applicantsSnapshot = await getDocs(collection(db, 'applicants'));
+    const profiles = applicantsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    console.log(`Loaded ${profiles.length} profiles from Firebase`);
+    return profiles;
   } catch (error) {
-    console.error('Error loading profiles:', error);
+    console.error('Error loading profiles from Firebase:', error);
     // Return hardcoded data as fallback
     return getHardcodedProfiles();
+  }
+};
+
+// Load schools data from Firebase
+export const loadSchools = async () => {
+  try {
+    const db = getFirestore();
+    const schoolsSnapshot = await getDocs(collection(db, 'schools'));
+    const schools = schoolsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    console.log(`Loaded ${schools.length} schools from Firebase`);
+    return schools;
+  } catch (error) {
+    console.error('Error loading schools from Firebase:', error);
+    return [];
+  }
+};
+
+// Alternative method: Load profiles and generate schools on the fly
+export const loadProfilesAndGenerateSchools = async () => {
+  try {
+    const profiles = await loadProfiles();
+    const schools = extractSchools(profiles);
+    
+    return { profiles, schools };
+  } catch (error) {
+    console.error('Error loading profiles and generating schools:', error);
+    return { profiles: getHardcodedProfiles(), schools: [] };
   }
 };
 
@@ -400,6 +431,8 @@ export const groupProfilesByType = (profiles) => {
 
 const profileDataUtils = {
   loadProfiles,
+  loadSchools,
+  loadProfilesAndGenerateSchools,
   filterProfiles,
   groupProfilesByType,
   extractSchools,

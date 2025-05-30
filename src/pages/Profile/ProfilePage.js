@@ -1,18 +1,20 @@
-// src/pages/Profile/ProfilePage.js - Updated with MedicalSchoolGrid
+// src/pages/Profile/ProfilePage.js - Updated with Firebase integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar/Navbar';
 import Footer from '../../components/sections/Footer/Footer';
 import ProfileCard from '../../components/sections/ProfileCard/ProfileCard';
-import MedicalSchoolGrid from '../../components/MedicalSchoolGrid/MedicalSchoolGrid'; // Import the new component
+import MedicalSchoolGrid from '../../components/MedicalSchoolGrid/MedicalSchoolGrid';
 import { onAuthChange } from '../../firebase/authService';
-import { loadProfiles, extractSchools } from '../../utils/profilesData';
+import { loadProfiles, loadSchools, extractSchools } from '../../utils/profilesData'; // Updated import
 import './ProfilePage.scss';
 
 const ProfilePage = () => {
   // State management
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false); // Separate loading for data
+  const [error, setError] = useState(''); // Add error state
   const [activeView, setActiveView] = useState('schools'); // 'schools' or 'profiles'
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -47,32 +49,107 @@ const ProfilePage = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Load data
+  // Load data from Firebase
   useEffect(() => {
     const fetchData = async () => {
+      if (!user) return; // Don't load data if not authenticated
+      
       try {
-        const profilesData = await loadProfiles();
+        setDataLoading(true);
+        setError('');
+        
+        console.log('Loading profiles and schools from Firebase...');
+        
+        // Load both profiles and schools from Firebase
+        const [profilesData, schoolsData] = await Promise.all([
+          loadProfiles(),
+          loadSchools()
+        ]);
+        
+        console.log('Loaded profiles:', profilesData.length);
+        console.log('Loaded schools:', schoolsData.length);
+        
+        // Set profiles
         setProfiles(profilesData);
         setFilteredProfiles(profilesData);
         
-        // Extract schools from profiles
-        const schoolsData = extractSchools(profilesData);
-        setSchools(schoolsData);
-        setFilteredSchools(schoolsData);
+        // Use schools from Firebase if available, otherwise generate from profiles
+        let finalSchools;
+        if (schoolsData.length > 0) {
+          console.log('Using schools from Firebase');
+          finalSchools = schoolsData;
+        } else {
+          console.log('Generating schools from profiles');
+          finalSchools = extractSchools(profilesData);
+        }
+        
+        setSchools(finalSchools);
+        setFilteredSchools(finalSchools);
         
         // Calculate total pages for pagination
-        setTotalPages(Math.ceil(schoolsData.length / 10));
+        setTotalPages(Math.ceil(finalSchools.length / 10));
+        
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading data from Firebase:', error);
+        setError(`Failed to load data: ${error.message}`);
+        
+        // Try to fall back to hardcoded data
+        try {
+          console.log('Attempting to load fallback data...');
+          const fallbackProfiles = await loadProfiles(); // This should use the fallback
+          if (fallbackProfiles.length > 0) {
+            setProfiles(fallbackProfiles);
+            setFilteredProfiles(fallbackProfiles);
+            
+            const fallbackSchools = extractSchools(fallbackProfiles);
+            setSchools(fallbackSchools);
+            setFilteredSchools(fallbackSchools);
+            setTotalPages(Math.ceil(fallbackSchools.length / 10));
+            
+            setError('Using cached data. Some information may not be current.');
+          }
+        } catch (fallbackError) {
+          console.error('Fallback data loading failed:', fallbackError);
+          setError('Failed to load data. Please try refreshing the page.');
+        }
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     };
     
-    if (!loading && user) {
+    if (user && !loading) {
       fetchData();
     }
   }, [user, loading]);
+
+  // Retry loading data
+  const retryLoadData = async () => {
+    if (!user) return;
+    
+    try {
+      setDataLoading(true);
+      setError('');
+      
+      const [profilesData, schoolsData] = await Promise.all([
+        loadProfiles(),
+        loadSchools()
+      ]);
+      
+      setProfiles(profilesData);
+      setFilteredProfiles(profilesData);
+      
+      const finalSchools = schoolsData.length > 0 ? schoolsData : extractSchools(profilesData);
+      setSchools(finalSchools);
+      setFilteredSchools(finalSchools);
+      setTotalPages(Math.ceil(finalSchools.length / 10));
+      
+    } catch (error) {
+      console.error('Retry failed:', error);
+      setError(`Retry failed: ${error.message}`);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   // Filter and sort schools
   useEffect(() => {
@@ -93,9 +170,9 @@ const ProfilePage = () => {
     } else if (sortOption === 'alphabetical-reverse') {
       filtered.sort((a, b) => b.name.localeCompare(a.name));
     } else if (sortOption === 'profiles-desc') {
-      filtered.sort((a, b) => b.count - a.count);
+      filtered.sort((a, b) => (b.count || 0) - (a.count || 0));
     } else if (sortOption === 'profiles-asc') {
-      filtered.sort((a, b) => a.count - b.count);
+      filtered.sort((a, b) => (a.count || 0) - (b.count || 0));
     }
     
     setFilteredSchools(filtered);
@@ -236,7 +313,7 @@ const ProfilePage = () => {
         <Navbar />
         <div className="profile-content">
           <div className="container">
-            <div className="loading-spinner">Loading profiles...</div>
+            <div className="loading-spinner">Checking authentication...</div>
           </div>
         </div>
         <Footer />
@@ -251,20 +328,37 @@ const ProfilePage = () => {
       <div className="profile-content">
         <div className="container">
           <h1 className="page-title">The Cheatsheet</h1>
-          <p className="page-subtitle">Look at patterns. What works? What doesn’t? Take inspiration from the profiles of successful applicants.</p>
+          <p className="page-subtitle">Look at patterns. What works? What doesn't? Take inspiration from the profiles of successful applicants.</p>
+          
+          {/* Show error message if there's an error */}
+          {error && (
+            <div className="error-banner">
+              <p className="error-message">⚠️ {error}</p>
+              <button onClick={retryLoadData} className="retry-button" disabled={dataLoading}>
+                {dataLoading ? 'Retrying...' : 'Retry'}
+              </button>
+            </div>
+          )}
+          
+          {/* Show loading indicator for data */}
+          {dataLoading && (
+            <div className="data-loading">
+              <div className="loading-spinner">Loading data from Firebase...</div>
+            </div>
+          )}
           
           <div className="view-toggle-container">
             <button 
               className={`toggle-button ${activeView === 'schools' ? 'active' : ''}`}
               onClick={() => setActiveView('schools')}
             >
-              Medical Schools
+              Medical Schools ({filteredSchools.length})
             </button>
             <button 
               className={`toggle-button ${activeView === 'profiles' ? 'active' : ''}`}
               onClick={() => setActiveView('profiles')}
             >
-              All Profiles
+              All Profiles ({filteredProfiles.length})
             </button>
           </div>
           
@@ -426,7 +520,7 @@ const ProfilePage = () => {
           )}
           
           {activeView === 'schools' ? (
-            // Use the new MedicalSchoolGrid component here instead of the old schools-grid
+            // MedicalSchoolGrid now gets Firebase data
             <MedicalSchoolGrid schools={filteredSchools} searchQuery={searchQuery} />
           ) : (
             <>

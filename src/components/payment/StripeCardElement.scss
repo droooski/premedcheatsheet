@@ -1,7 +1,155 @@
-/* Corrected syntax for src/components/payment/StripeCardElement.scss */
+/* src/components/payment/StripeCardElement.scss */
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as mix;
 
+.stripe-card-element-container {
+  width: 100%;
+  
+  .card-element-wrapper {
+    position: relative;
+    border: 1px solid $gray-300;
+    border-radius: 8px;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+    overflow: hidden;
+    min-height: 60px;
+    
+    // Hover state
+    &:hover {
+      border-color: darken($gray-300, 10%);
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    // Focused state
+    &.focused {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+    
+    // Error state
+    &.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    .card-element-label {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: $text-color;
+      background-color: white;
+      padding: 0 4px;
+      z-index: 2;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    
+    .card-element-input {
+      padding: 24px 60px 12px 12px; // Extra right padding for icons
+      position: relative;
+      z-index: 1;
+      
+      // Target the Stripe element directly
+      .StripeElement {
+        width: 100%;
+        padding: 0;
+        
+        .StripeElement--focus {
+          outline: none;
+        }
+      }
+    }
+    
+    .card-element-icons {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 4px;
+      z-index: 2;
+      
+      .card-brand {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 4px;
+        border-radius: 2px;
+        color: white;
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+        
+        &.visa {
+          background-color: #1A1F71;
+        }
+        
+        &.mastercard {
+          background-color: #EB001B;
+        }
+        
+        &.amex {
+          background-color: #006FCF;
+        }
+        
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  
+  // Error message styling
+  .card-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: $spacing-3;
+    padding: $spacing-3;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    
+    svg {
+      flex-shrink: 0;
+    }
+  }
+  
+  // Processing indicator styling
+  .processing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: lighten($text-color, 20%);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: $spacing-3;
+    padding: $spacing-3;
+    background-color: lighten($gray-100, 2%);
+    border: 1px solid $gray-300;
+    border-radius: 6px;
+    
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid $gray-300;
+      border-top: 2px solid $primary-color;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+    }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+// Legacy support for existing styles
 .stripe-card-element {
   width: 100%;
   
@@ -20,7 +168,7 @@
   .payment-button {
     order: 99; /* High value to ensure it comes after the billing address */
     width: 100%;
-    background-color: #1A3A34;
+    background-color: $primary-color;
     color: white;
     border: none;
     border-radius: 8px;
@@ -35,7 +183,7 @@
     margin-top: $spacing-8;
     
     &:hover:not(:disabled) {
-      background-color: darken(#1A3A34, 5%);
+      background-color: darken($primary-color, 5%);
       transform: translateY(-2px);
     }
     
@@ -97,5 +245,23 @@
     background-color: #fee2e2;
     padding: $spacing-3;
     border-radius: 6px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .stripe-card-element-container {
+    .card-element-wrapper {
+      .card-element-input {
+        padding: 20px 90px 10px 12px; // More right padding for text indicators
+      }
+      
+      .card-element-icons {
+        .card-brand {
+          font-size: 9px;
+          padding: 1px 3px;
+        }
+      }
+    }
   }
 }

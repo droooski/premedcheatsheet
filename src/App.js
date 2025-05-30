@@ -140,7 +140,9 @@ function App() {
         <Route path="/account" element={
           user ? <AccountPage /> : <Navigate to="/" />
         } />
-
+    <Route path="/admin" element={
+          user ? <AdminPanel /> : <Navigate to="/" />
+        } />
         {/* Add these new routes */}
         <Route path="/account/payment-methods" element={
           user ? <PaymentMethodsPage /> : <Navigate to="/" />
