@@ -1,31 +1,23 @@
-// src/components/PricingCards/PricingCards.js - 2 cards per row layout
-import React, { useState } from 'react';
+// src/components/PricingCards/PricingCards.js - Dynamic product loading from Firestore
+import React, { useState, useEffect } from 'react';
+import { getFirestore, collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import './PricingCards.scss';
 
 const PricingCards = ({ onSelectPlan }) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   // Coupon state for showing/hiding the input field
-  const [showCouponInputs, setShowCouponInputs] = useState({
-    'cheatsheet': false,
-    'application': false,
-    'cheatsheet-plus': false,
-    'application-plus': false
-  });
+  const [showCouponInputs, setShowCouponInputs] = useState({});
   
   // Coupon code values
-  const [couponCodes, setCouponCodes] = useState({
-    'cheatsheet': '',
-    'application': '',
-    'cheatsheet-plus': '',
-    'application-plus': ''
-  });
+  const [couponCodes, setCouponCodes] = useState({});
   
   // Coupon application status
-  const [appliedCoupons, setAppliedCoupons] = useState({
-    'cheatsheet': { applied: false, discount: 0 },
-    'application': { applied: false, discount: 0 },
-    'cheatsheet-plus': { applied: false, discount: 0 },
-    'application-plus': { applied: false, discount: 0 }
-  });
+  const [appliedCoupons, setAppliedCoupons] = useState({});
+
+  const db = getFirestore();
 
   // Define discount codes
   const discountCodes = {
@@ -33,33 +25,158 @@ const PricingCards = ({ onSelectPlan }) => {
     'STUDENT2025': { rate: 20, description: 'Student Discount' },
     'PARTNER': { rate: 100, description: 'Partnership - 100% Off' },
     'COOLMEMBER': { rate: 100, description: 'Cool Member - 100% Off' }
+  };
 
+  // Load products from Firestore
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Query active products, ordered by sortOrder then by name
+        const q = query(
+          collection(db, 'products'),
+          where('isActive', '==', true),
+          orderBy('sortOrder', 'asc')
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const productsData = [];
+        
+        querySnapshot.forEach((doc) => {
+          const productData = { id: doc.id, ...doc.data() };
+          productsData.push(productData);
+        });
+
+        // If no products found, fall back to default products
+        if (productsData.length === 0) {
+          console.warn('No products found in Firestore, using default products');
+          setProducts(getDefaultProducts());
+        } else {
+          setProducts(productsData);
+        }
+
+        // Initialize coupon states for all products
+        const initialCouponInputs = {};
+        const initialCouponCodes = {};
+        const initialAppliedCoupons = {};
+        
+        productsData.forEach(product => {
+          const productId = product.id;
+          initialCouponInputs[productId] = false;
+          initialCouponCodes[productId] = '';
+          initialAppliedCoupons[productId] = { applied: false, discount: 0 };
+        });
+        
+        setShowCouponInputs(initialCouponInputs);
+        setCouponCodes(initialCouponCodes);
+        setAppliedCoupons(initialAppliedCoupons);
+
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setError('Failed to load products');
+        
+        // Fall back to default products on error
+        setProducts(getDefaultProducts());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [db]);
+
+  // Default products as fallback
+  const getDefaultProducts = () => {
+    return [
+      {
+        id: 'cheatsheet',
+        name: 'The Cheatsheet',
+        price: 14.99,
+        description: 'New full applicant profile added every couple days.',
+        features: [
+          'Advice and reflections from successful applicants',
+          'Which medical schools an applicant was accepted',
+          'Extra-curriculars that got them in',
+          'MCAT and GPA that got them in',
+          'Gap years they took'
+        ],
+        category: 'cheatsheet',
+        isActive: true,
+        sortOrder: 1
+      },
+      {
+        id: 'application',
+        name: 'Application Cheatsheet',
+        price: 19.99,
+        description: '',
+        features: [
+          'Personal statement writing guide',
+          'Activity section description guide',
+          'Insider advice on what admissions committees want',
+          'General writing strategy guide',
+          'Letter of recommendation email template'
+        ],
+        category: 'application',
+        isActive: true,
+        sortOrder: 2
+      },
+      {
+        id: 'cheatsheet-plus',
+        name: 'The Cheatsheet +',
+        price: 29.99,
+        description: 'Get everything in the Premed Cheatsheet + extra resources. New full applicant profile added every couple days.',
+        features: [
+          'The Premed Cheatsheet',
+          'Proven cold emailing templates',
+          'Polished CV template',
+          'Pre-med summer program database',
+          'MCAT-Optimized Course Schedules & Study Plan'
+        ],
+        category: 'cheatsheet',
+        isActive: true,
+        sortOrder: 3
+      },
+      {
+        id: 'application-plus',
+        name: 'Application Cheatsheet +',
+        price: 34.99,
+        description: 'Get everything in the Premed Cheatsheet + Application Cheatsheet. New full applicant profile added every couple days.',
+        features: [
+          'The Premed Cheatsheet',
+          'The Application Cheatsheet'
+        ],
+        category: 'application',
+        isActive: true,
+        sortOrder: 4
+      }
+    ];
   };
 
   // Toggle coupon input visibility
-  const toggleCouponInput = (plan) => {
+  const toggleCouponInput = (productId) => {
     setShowCouponInputs({
       ...showCouponInputs,
-      [plan]: !showCouponInputs[plan]
+      [productId]: !showCouponInputs[productId]
     });
   };
 
   // Handle coupon code input change
-  const handleCouponChange = (plan, value) => {
+  const handleCouponChange = (productId, value) => {
     setCouponCodes({
       ...couponCodes,
-      [plan]: value
+      [productId]: value
     });
   };
 
   // Apply coupon code
-  const applyCoupon = (plan) => {
-    const code = couponCodes[plan].toUpperCase();
+  const applyCoupon = (productId) => {
+    const code = couponCodes[productId].toUpperCase();
     
     if (discountCodes[code]) {
       setAppliedCoupons({
         ...appliedCoupons,
-        [plan]: {
+        [productId]: {
           applied: true,
           discount: discountCodes[code].rate
         }
@@ -70,42 +187,37 @@ const PricingCards = ({ onSelectPlan }) => {
     }
   };
 
-  // Get base prices for plans
-  const getPlanPrice = (plan) => {
-    switch (plan) {
-      case 'cheatsheet': return 14.99;
-      case 'application': return 19.99;
-      case 'cheatsheet-plus': return 29.99;
-      case 'application-plus': return 34.99;
-      default: return 0;
-    }
-  };
-
   // Get final price after discount
-  const getFinalPrice = (plan) => {
-    const basePrice = getPlanPrice(plan);
-    if (appliedCoupons[plan].applied) {
-      const discountAmount = (basePrice * appliedCoupons[plan].discount) / 100;
+  const getFinalPrice = (product) => {
+    const basePrice = product.price;
+    const productId = product.id;
+    
+    if (appliedCoupons[productId]?.applied) {
+      const discountAmount = (basePrice * appliedCoupons[productId].discount) / 100;
       return Math.max(0, basePrice - discountAmount).toFixed(2);
     }
     return basePrice.toFixed(2);
   };
 
   // Handle plan selection
-  const handleSelectPlan = (plan) => {
-    onSelectPlan(plan, {
-      couponCode: appliedCoupons[plan].applied ? couponCodes[plan] : '',
-      discount: appliedCoupons[plan].discount,
-      finalPrice: getFinalPrice(plan)
+  const handleSelectPlan = (product) => {
+    const productId = product.id;
+    onSelectPlan(productId, {
+      couponCode: appliedCoupons[productId]?.applied ? couponCodes[productId] : '',
+      discount: appliedCoupons[productId]?.discount || 0,
+      finalPrice: getFinalPrice(product),
+      productData: product
     });
   };
 
   // Coupon prompt component
-  const CouponPrompt = ({ plan }) => {
+  const CouponPrompt = ({ product }) => {
+    const productId = product.id;
+    
     return (
       <div className="coupon-section">
-        {!showCouponInputs[plan] ? (
-          <div className="coupon-prompt" onClick={() => toggleCouponInput(plan)}>
+        {!showCouponInputs[productId] ? (
+          <div className="coupon-prompt" onClick={() => toggleCouponInput(productId)}>
             Have a coupon code? Enter it here
           </div>
         ) : (
@@ -113,156 +225,123 @@ const PricingCards = ({ onSelectPlan }) => {
             <input
               type="text"
               placeholder="Enter coupon code"
-              value={couponCodes[plan]}
-              onChange={(e) => handleCouponChange(plan, e.target.value)}
-              disabled={appliedCoupons[plan].applied}
+              value={couponCodes[productId] || ''}
+              onChange={(e) => handleCouponChange(productId, e.target.value)}
+              disabled={appliedCoupons[productId]?.applied}
             />
             <button
               className="apply-button"
-              onClick={() => applyCoupon(plan)}
-              disabled={appliedCoupons[plan].applied}
+              onClick={() => applyCoupon(productId)}
+              disabled={appliedCoupons[productId]?.applied}
             >
-              {appliedCoupons[plan].applied ? 'Applied' : 'Apply'}
+              {appliedCoupons[productId]?.applied ? 'Applied' : 'Apply'}
             </button>
           </div>
         )}
         
-        {appliedCoupons[plan].applied && (
+        {appliedCoupons[productId]?.applied && (
           <div className="discount-info">
-            <p className="discount-text">{appliedCoupons[plan].discount}% discount applied!</p>
-            <p className="final-price">Final price: ${getFinalPrice(plan)}</p>
+            <p className="discount-text">{appliedCoupons[productId].discount}% discount applied!</p>
+            <p className="final-price">Final price: ${getFinalPrice(product)}</p>
           </div>
         )}
       </div>
     );
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="pricing-cards-container">
+        <div className="loading-message">
+          <p>Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="pricing-cards-container">
+        <div className="error-message">
+          <p>Error loading products: {error}</p>
+          <p>Please refresh the page or try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Group products by category for better layout
+  const groupedProducts = products.reduce((acc, product) => {
+    const category = product.category || 'other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {});
+
+  // Render products in rows
+  const renderProductsInRows = () => {
+    const allProducts = products.slice().sort((a, b) => {
+      // Sort by sortOrder first, then by name
+      if (a.sortOrder !== b.sortOrder) {
+        return (a.sortOrder || 0) - (b.sortOrder || 0);
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    const rows = [];
+    for (let i = 0; i < allProducts.length; i += 2) {
+      const rowProducts = allProducts.slice(i, i + 2);
+      rows.push(
+        <div key={`row-${i}`} className="pricing-row">
+          {rowProducts.map(product => (
+            <div 
+              key={product.id} 
+              className={`pricing-card ${appliedCoupons[product.id]?.applied ? 'has-discount' : ''}`}
+            >
+              <h3>{product.name}</h3>
+              <div className="price">
+                <span className="amount">${product.price.toFixed(2)}</span>
+                <span className="period">One time</span>
+              </div>
+              
+              <button 
+                className="sign-up-button"
+                onClick={() => handleSelectPlan(product)}
+              >
+                Sign up
+              </button>
+              
+              {product.description && (
+                <>
+                  <p className="description">{product.description}</p>
+                  <div className="divider"></div>
+                </>
+              )}
+              
+              {product.features && product.features.length > 0 && (
+                <ul className="features-list">
+                  {product.features.map((feature, index) => (
+                    <li key={index}>{feature}</li>
+                  ))}
+                </ul>
+              )}
+              
+              <CouponPrompt product={product} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return rows;
+  };
+
   return (
     <div className="pricing-cards-container">
-      {/* First row: The Cheatsheet and Application Cheatsheet */}
-      <div className="pricing-row">
-        {/* The Cheatsheet card */}
-        <div className={`pricing-card ${appliedCoupons['cheatsheet'].applied ? 'has-discount' : ''}`}>
-          <h3>The Cheatsheet</h3>
-          <div className="price">
-            <span className="amount">$14.99</span>
-            <span className="period">One time</span>
-          </div>
-          
-          <button 
-            className="sign-up-button"
-            onClick={() => handleSelectPlan('cheatsheet')}
-          >
-            Sign up
-          </button>
-          
-          <p className="description">
-            New full applicant profile added every couple days.
-          </p>
-          
-          <div className="divider"></div>
-          
-          <ul className="features-list">
-            <li>Advice and reflections from successful applicants</li>
-            <li>Which medical schools an applicant was accepted</li>
-            <li>Extra-curriculars that got them in</li>
-            <li>MCAT and GPA that got them in</li>
-            <li>Gap years they took</li>
-          </ul>
-          
-          <CouponPrompt plan="cheatsheet" />
-        </div>
-        
-        {/* Application Cheatsheet card */}
-        <div className={`pricing-card ${appliedCoupons['application'].applied ? 'has-discount' : ''}`}>
-          <h3>Application Cheatsheet</h3>
-          <div className="price">
-            <span className="amount">$19.99</span>
-            <span className="period">One time</span>
-          </div>
-          
-          <button 
-            className="sign-up-button"
-            onClick={() => handleSelectPlan('application')}
-          >
-            Sign up
-          </button>
-          
-          <ul className="features-list">
-            <li>Personal statement writing guide</li>
-            <li>Activity section description guide</li>
-            <li>Insider advice on what admissions committees want</li>
-            <li>General writing strategy guide</li>
-            <li>Letter of recommendation email template</li>
-          </ul>
-          
-          <CouponPrompt plan="application" />
-        </div>
-      </div>
-      
-      {/* Second row: The Cheatsheet+ and Application Cheatsheet+ */}
-      <div className="pricing-row">
-        {/* The Cheatsheet+ card */}
-        <div className={`pricing-card ${appliedCoupons['cheatsheet-plus'].applied ? 'has-discount' : ''}`}>
-          <h3>The Cheatsheet +</h3>
-          <div className="price">
-            <span className="amount">$29.99</span>
-            <span className="period">One time</span>
-          </div>
-          
-          <button 
-            className="sign-up-button"
-            onClick={() => handleSelectPlan('cheatsheet-plus')}
-          >
-            Sign up
-          </button>
-          
-          <p className="description">
-            Get everything in the Premed Cheatsheet + extra resources. New full applicant profile added every couple days.
-          </p>
-          
-          <div className="divider"></div>
-          
-          <ul className="features-list">
-            <li>The Premed Cheatsheet</li>
-            <li>Proven cold emailing templates</li>
-            <li>Polished CV template</li>
-            <li>Pre-med summer program database</li>
-            <li>MCAT-Optimized Course Schedules & Study Plan</li>
-          </ul>
-          
-          <CouponPrompt plan="cheatsheet-plus" />
-        </div>
-        
-        {/* Application Cheatsheet+ card - Styled like Image 1 */}
-        <div className={`pricing-card ${appliedCoupons['application-plus'].applied ? 'has-discount' : ''}`}>
-          <h3>Application Cheatsheet +</h3>
-          <div className="price">
-            <span className="amount">$34.99</span>
-            <span className="period">One time</span>
-          </div>
-          
-          <button 
-            className="sign-up-button"
-            onClick={() => handleSelectPlan('application-plus')}
-          >
-            Sign up
-          </button>
-          
-          <p className="description">
-            Get everything in the Premed Cheatsheet + Application Cheatsheet. New full applicant profile added every couple days.
-          </p>
-          
-          <div className="divider"></div>
-          
-          <ul className="features-list">
-            <li>The Premed Cheatsheet</li>
-            <li>The Application Cheatsheet</li>
-          </ul>
-          
-          <CouponPrompt plan="application-plus" />
-        </div>
-      </div>
+      {renderProductsInRows()}
     </div>
   );
 };
