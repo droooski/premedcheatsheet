@@ -1,6 +1,6 @@
-// src/components/PricingCards/PricingCards.js - Dynamic product loading from Firestore
+// src/components/PricingCards/PricingCards.js - Simplified without ordering/sorting
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 import './PricingCards.scss';
 
 const PricingCards = ({ onSelectPlan }) => {
@@ -27,65 +27,6 @@ const PricingCards = ({ onSelectPlan }) => {
     'COOLMEMBER': { rate: 100, description: 'Cool Member - 100% Off' }
   };
 
-  // Load products from Firestore
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        
-        // Query active products, ordered by sortOrder then by name
-        const q = query(
-          collection(db, 'products'),
-          where('isActive', '==', true),
-          orderBy('sortOrder', 'asc')
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const productsData = [];
-        
-        querySnapshot.forEach((doc) => {
-          const productData = { id: doc.id, ...doc.data() };
-          productsData.push(productData);
-        });
-
-        // If no products found, fall back to default products
-        if (productsData.length === 0) {
-          console.warn('No products found in Firestore, using default products');
-          setProducts(getDefaultProducts());
-        } else {
-          setProducts(productsData);
-        }
-
-        // Initialize coupon states for all products
-        const initialCouponInputs = {};
-        const initialCouponCodes = {};
-        const initialAppliedCoupons = {};
-        
-        productsData.forEach(product => {
-          const productId = product.id;
-          initialCouponInputs[productId] = false;
-          initialCouponCodes[productId] = '';
-          initialAppliedCoupons[productId] = { applied: false, discount: 0 };
-        });
-        
-        setShowCouponInputs(initialCouponInputs);
-        setCouponCodes(initialCouponCodes);
-        setAppliedCoupons(initialAppliedCoupons);
-
-      } catch (error) {
-        console.error('Error loading products:', error);
-        setError('Failed to load products');
-        
-        // Fall back to default products on error
-        setProducts(getDefaultProducts());
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, [db]);
-
   // Default products as fallback
   const getDefaultProducts = () => {
     return [
@@ -102,8 +43,7 @@ const PricingCards = ({ onSelectPlan }) => {
           'Gap years they took'
         ],
         category: 'cheatsheet',
-        isActive: true,
-        sortOrder: 1
+        isActive: true
       },
       {
         id: 'application',
@@ -118,8 +58,7 @@ const PricingCards = ({ onSelectPlan }) => {
           'Letter of recommendation email template'
         ],
         category: 'application',
-        isActive: true,
-        sortOrder: 2
+        isActive: true
       },
       {
         id: 'cheatsheet-plus',
@@ -134,8 +73,7 @@ const PricingCards = ({ onSelectPlan }) => {
           'MCAT-Optimized Course Schedules & Study Plan'
         ],
         category: 'cheatsheet',
-        isActive: true,
-        sortOrder: 3
+        isActive: true
       },
       {
         id: 'application-plus',
@@ -147,11 +85,76 @@ const PricingCards = ({ onSelectPlan }) => {
           'The Application Cheatsheet'
         ],
         category: 'application',
-        isActive: true,
-        sortOrder: 4
+        isActive: true
       }
     ];
   };
+
+  // Initialize coupon states for products
+  const initializeCouponStates = (productsData) => {
+    const initialCouponInputs = {};
+    const initialCouponCodes = {};
+    const initialAppliedCoupons = {};
+    
+    productsData.forEach(product => {
+      const productId = product.id;
+      initialCouponInputs[productId] = false;
+      initialCouponCodes[productId] = '';
+      initialAppliedCoupons[productId] = { applied: false, discount: 0 };
+    });
+    
+    setShowCouponInputs(initialCouponInputs);
+    setCouponCodes(initialCouponCodes);
+    setAppliedCoupons(initialAppliedCoupons);
+  };
+
+  // Load products from Firestore
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Simple query for active products only
+        const q = query(
+          collection(db, 'products'),
+          where('isActive', '==', true)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const productsData = [];
+        
+        querySnapshot.forEach((doc) => {
+          const productData = { id: doc.id, ...doc.data() };
+          productsData.push(productData);
+        });
+
+        // If no products found, fall back to default products
+        if (productsData.length === 0) {
+          console.warn('No products found in Firestore, using default products');
+          const defaultProducts = getDefaultProducts();
+          setProducts(defaultProducts);
+          initializeCouponStates(defaultProducts);
+        } else {
+          setProducts(productsData);
+          initializeCouponStates(productsData);
+        }
+
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setError(`Failed to load products: ${error.message}`);
+        
+        // Fall back to default products on error
+        const defaultProducts = getDefaultProducts();
+        setProducts(defaultProducts);
+        initializeCouponStates(defaultProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [db]);
 
   // Toggle coupon input visibility
   const toggleCouponInput = (productId) => {
@@ -260,8 +263,8 @@ const PricingCards = ({ onSelectPlan }) => {
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state - but still show products if we have them
+  if (error && products.length === 0) {
     return (
       <div className="pricing-cards-container">
         <div className="error-message">
@@ -272,29 +275,11 @@ const PricingCards = ({ onSelectPlan }) => {
     );
   }
 
-  // Group products by category for better layout
-  const groupedProducts = products.reduce((acc, product) => {
-    const category = product.category || 'other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(product);
-    return acc;
-  }, {});
-
   // Render products in rows
   const renderProductsInRows = () => {
-    const allProducts = products.slice().sort((a, b) => {
-      // Sort by sortOrder first, then by name
-      if (a.sortOrder !== b.sortOrder) {
-        return (a.sortOrder || 0) - (b.sortOrder || 0);
-      }
-      return a.name.localeCompare(b.name);
-    });
-
     const rows = [];
-    for (let i = 0; i < allProducts.length; i += 2) {
-      const rowProducts = allProducts.slice(i, i + 2);
+    for (let i = 0; i < products.length; i += 2) {
+      const rowProducts = products.slice(i, i + 2);
       rows.push(
         <div key={`row-${i}`} className="pricing-row">
           {rowProducts.map(product => (
@@ -341,6 +326,19 @@ const PricingCards = ({ onSelectPlan }) => {
 
   return (
     <div className="pricing-cards-container">
+      {error && (
+        <div className="warning-message" style={{ 
+          backgroundColor: '#fff3cd', 
+          border: '1px solid #ffeaa7', 
+          color: '#856404', 
+          padding: '10px', 
+          borderRadius: '4px', 
+          marginBottom: '20px' 
+        }}>
+          <p>Warning: {error}</p>
+          <p>Showing default products as fallback.</p>
+        </div>
+      )}
       {renderProductsInRows()}
     </div>
   );
