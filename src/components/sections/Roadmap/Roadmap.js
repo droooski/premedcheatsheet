@@ -19,7 +19,7 @@ const Roadmap = () => {
               detailed stats, successful strategies, and honest insights from accepted students.
             </p>
             <p>
-              Browse thousands of real acceptance profiles, complete with GPAs, MCAT scores, and the extracurriculars that 
+              Browse dozens of real acceptance profiles, complete with GPAs, MCAT scores, and the extracurriculars that 
               actually worked. Created by med students who remember exactly what you're going through.
             </p>
           </div>
