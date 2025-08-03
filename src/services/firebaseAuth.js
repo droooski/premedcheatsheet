@@ -9,6 +9,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { getFirestore, setDoc, doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/config';
 
 // Your Firebase configuration - replace with your actual config
 const firebaseConfig = {
@@ -19,11 +20,6 @@ const firebaseConfig = {
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 export const registerUser = async (email, password, firstName, lastName) => {
   try {
