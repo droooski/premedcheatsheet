@@ -1,0 +1,159 @@
+// src/components/payment/StripeCardElement.scss - Improved spacing and layout
+.stripe-card-element-container {
+  width: 100%;
+  max-width: 100%;
+  
+  .card-input-section {
+    margin-bottom: 20px;
+    
+    .card-input-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+    
+    .card-element-icons {
+        margin-bottom: 10px;
+
+        .card-brand-group {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+
+            .card-icon {
+            width: 36px;
+            height: auto;
+            object-fit: contain;
+            opacity: 0.85;
+            transition: opacity 0.2s ease;
+
+            &:hover {
+                opacity: 1;
+            }
+            }
+        }
+        }
+    
+    .card-input-help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+  }
+  
+  // Error styling
+  .card-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    margin-top: 12px;
+    
+    .error-icon {
+      color: #ef4444;
+      flex-shrink: 0;
+      margin-top: 1px;
+      
+      svg {
+        display: block;
+      }
+    }
+    
+    .error-text {
+      color: #dc2626;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+  }
+  
+  // Processing indicator
+  .processing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-top: 16px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+  
+  // Loading states
+  .stripe-loading {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+  }
+  
+  .stripe-error {
+    padding: 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    text-align: center;
+    font-weight: 500;
+  }
+}
+
+// Spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .stripe-card-element-container {
+    .card-input-section {
+      .card-element-wrapper {
+        padding: 14px;
+        min-height: 52px;
+        
+        .card-element-icons {
+          margin-left: 8px;
+          
+          .card-brand-group {
+            gap: 4px;
+            
+            .card-icon {
+              width: 20px;
+              height: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

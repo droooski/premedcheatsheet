@@ -10,8 +10,8 @@ const StripeCardElement = forwardRef((props, ref) => {
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [complete, setComplete] = useState(false);
 
-  // Enhanced Stripe Card Element styling with better visual appearance
   const cardElementOptions = {
     style: {
       base: {
@@ -21,12 +21,12 @@ const StripeCardElement = forwardRef((props, ref) => {
         '::placeholder': {
           color: '#9ca3af',
         },
-        fontFamily: '"Inter", "Helvetica Neue", Helvetica, Arial, sans-serif',
+        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fontSmoothing: 'antialiased',
         lineHeight: '24px',
-        letterSpacing: '0.025em',
-        // Remove default padding since we're adding it via CSS
-        padding: '0',
+        letterSpacing: '0.01em',
+        padding: '12px 0',
+        iconColor: '#6b7280',
       },
       invalid: {
         color: '#ef4444',
@@ -37,27 +37,20 @@ const StripeCardElement = forwardRef((props, ref) => {
         iconColor: '#059669',
       },
     },
-    hidePostalCode: false, // Show postal code field
+    hidePostalCode: false,
   };
 
-  // Handle card input changes
   const handleCardChange = (event) => {
     setError(event.error ? event.error.message : '');
+    setComplete(event.complete);
     if (onError && event.error) {
       onError(event.error.message);
     }
   };
 
-  // Handle focus events for better visual feedback
-  const handleFocus = () => {
-    setFocused(true);
-  };
+  const handleFocus = () => setFocused(true);
+  const handleBlur = () => setFocused(false);
 
-  const handleBlur = () => {
-    setFocused(false);
-  };
-
-  // Submit payment method creation
   const handleSubmit = async () => {
     if (!stripe || !elements) {
       console.error('Stripe not loaded');
@@ -70,12 +63,10 @@ const StripeCardElement = forwardRef((props, ref) => {
 
     try {
       const cardElement = elements.getElement(CardElement);
-      
       if (!cardElement) {
         throw new Error('Card element not found');
       }
 
-      // Create payment method
       const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -89,13 +80,11 @@ const StripeCardElement = forwardRef((props, ref) => {
       }
 
       console.log('Payment method created successfully:', paymentMethod);
-      
       if (onSuccess) {
         onSuccess(paymentMethod);
       }
 
       return { success: true, paymentMethod };
-
     } catch (error) {
       console.error('Error in handleSubmit:', error);
       setError(error.message);
@@ -106,46 +95,61 @@ const StripeCardElement = forwardRef((props, ref) => {
     }
   };
 
-  // Expose handleSubmit method to parent
   useImperativeHandle(ref, () => ({
     handleSubmit
   }), [stripe, elements]);
 
   return (
     <div className="stripe-card-element-container">
-      <div className={`card-element-wrapper ${focused ? 'focused' : ''} ${error ? 'error' : ''}`}>
-        <div className="card-element-label">
-          Card information
+      <div className="card-input-section">
+        <label className="card-input-label">Card Information</label>
+
+        <div className="card-element-icons" style={{ marginBottom: '8px' }}>
+          <div className="card-brand-group" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            opacity: 0.8,
+            flexWrap: 'wrap'
+          }}>
+            <img src="https://js.stripe.com/v3/fingerprinted/img/visa-365725566f9578a9589553aa9296d178.svg" alt="Visa" className="card-icon" style={{ height: '24px' }} />
+            <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard" className="card-icon" style={{ height: '24px' }} />
+            <img src="https://js.stripe.com/v3/fingerprinted/img/amex-a49b82f46c5cd6a96a6e418a6ca1717c.svg" alt="American Express" className="card-icon" style={{ height: '24px' }} />
+            <img src="https://js.stripe.com/v3/fingerprinted/img/discover-ac52cd46f89fa40a29a0bfb954e33173.svg" alt="Discover" className="card-icon" style={{ height: '24px' }} />
+          </div>
         </div>
-        <div className="card-element-input">
-          <CardElement
-            options={cardElementOptions}
-            onChange={handleCardChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-          />
+
+        <div className={`card-element-wrapper ${focused ? 'focused' : ''} ${error ? 'error' : ''} ${complete ? 'complete' : ''}`}>
+          <div className="card-element-input">
+            <CardElement
+              options={cardElementOptions}
+              onChange={handleCardChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+          </div>
         </div>
-        <div className="card-element-icons">
-          {/* Simple text-based card indicators */}
-          <div className="card-brand visa">VISA</div>
-          <div className="card-brand mastercard">MC</div>
-          <div className="card-brand amex">AMEX</div>
+
+        <div className="card-input-help">
+          Enter your card number, expiry date, CVC, and postal code
         </div>
       </div>
-      
+
       {error && (
         <div className="card-error">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1ZM8.75 11.75H7.25V10.25H8.75V11.75ZM8.75 8.75H7.25V4.25H8.75V8.75Z" fill="#ef4444"/>
-          </svg>
-          {error}
+          <div className="error-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1ZM8.75 11.75H7.25V10.25H8.75V11.75ZM8.75 8.75H7.25V4.25H8.75V8.75Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <span className="error-text">{error}</span>
         </div>
       )}
-      
+
       {(processing || processingPayment) && (
         <div className="processing-indicator">
           <div className="spinner"></div>
-          Processing payment...
+          <span>Processing payment...</span>
         </div>
       )}
     </div>
