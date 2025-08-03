@@ -305,16 +305,7 @@ const AuthModal = ({
                   >
                     Forgot Password?
                   </button>
-                  <p className="account-toggle">
-                    Don't have an account?{' '}
-                    <button 
-                      type="button"
-                      className="toggle-mode-button" 
-                      onClick={toggleAuthMode}
-                    >
-                      Sign up
-                    </button>
-                  </p>
+                  
                 </div>
               ) : (
                 <p className="account-toggle">

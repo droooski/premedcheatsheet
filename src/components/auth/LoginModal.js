@@ -200,16 +200,6 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
               Forgot Password?
             </button>
           </p>
-          <p>
-            Don't have an account?{' '}
-            <button 
-              type="button"
-              className="link-button" 
-              onClick={goToSignup}
-            >
-              Create account
-            </button>
-          </p>
           
           <button className="guest-button" onClick={continueAsGuest}>
             Continue as guest
