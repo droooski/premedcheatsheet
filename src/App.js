@@ -1,6 +1,6 @@
 // src/App.js - Updated with Premed Cheatsheet+ route
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, use } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
 import Checkout from './pages/Checkout/Checkout';
 import ProfilePage from './pages/Profile/ProfilePage';
@@ -11,7 +11,7 @@ import GuestPage from './pages/Guest/GuestPage';
 import AboutPage from './pages/About/AboutPage';
 import PaymentMethodsPage from './pages/Account/PaymentMethodsPage';
 import AddressesPage from './pages/Account/AddressesPage';
-import PremedCheatsheetPlusPage from './pages/PremedCheatsheetPlus/PremedCheatsheetPlusPage'; // New import
+import PremedCheatsheetPlusPage from './pages/PremedCheatsheetPlus/PremedCheatsheetPlusPage';
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
@@ -20,6 +20,7 @@ import EmailVerificationPage from './components/auth/EmailVerificationPage';
 import { onAuthChange } from './firebase/authService';
 import { AuthProvider } from './contexts/AuthContext';
 import PlanBasedRoute from './components/auth/PlanBasedRoute';
+import { trackPageView } from './utils/analytics';
 import './styles/main.scss';
 
 // Function to check if user has guest access
@@ -29,6 +30,17 @@ const hasGuestAccess = () => {
   
   return guestAccess === 'true' && guestExpiry && parseInt(guestExpiry) > Date.now();
 };
+
+//handle route tracking
+function RouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
+
+  return null;
+}
 
 function App() {
   const [user, setUser] = useState(null);
@@ -58,6 +70,7 @@ function App() {
   return (
     <AuthProvider>
     <Router>
+      <RouteTracker />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
@@ -95,7 +108,6 @@ function App() {
           )
         } />
 
-        {/* NEW ROUTE: Premed Cheatsheet+ Page */}
         <Route path="/premed-cheatsheet-plus" element={
           isAuthenticated ? (
             <PaymentVerifiedRoute fallbackPath="/checkout">

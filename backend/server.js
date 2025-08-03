@@ -8,10 +8,10 @@ require('dotenv').config();
 // Initialize Stripe with error handling
 let stripe;
 try {
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!process.env.STRIPE_SECRET_KEY_NEW) {
     throw new Error('STRIPE_SECRET_KEY is not set');
   }
-  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_NEW);
   console.log('✅ Stripe initialized successfully');
 } catch (error) {
   console.error('❌ Stripe initialization error:', error.message);
@@ -107,7 +107,7 @@ app.get('/health', (req, res) => {
       firebase: !!db
     },
     environment: {
-      hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+      hasStripeKey: !!process.env.STRIPE_SECRET_KEY_NEW,
       hasFirebaseProject: !!process.env.FIREBASE_PROJECT_ID,
       hasFirebaseEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
       hasFirebaseKey: !!process.env.FIREBASE_PRIVATE_KEY,

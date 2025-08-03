@@ -1,6 +1,6 @@
 // backend/api/create-payment-intent.js (Node.js/Express example)
 const express = require('express');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_NEW);
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin if not already done
