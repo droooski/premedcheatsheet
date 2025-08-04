@@ -5,6 +5,18 @@
 
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
+//populate the allSchools map with the actual school names instead of school-0, school-1, etc.
+const createSchoolId = (schoolName) => {
+  return schoolName
+    .toLowerCase()
+    .replace(/&/g, '-') // Use regular hyphen instead of ‑
+    .replace(/\./g, '-') // Convert periods to hyphens 
+    .replace(/[^a-z0-9\s-]/g, '') // Remove other special characters except spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+};
+
 // Map of variations of school names to standardized names
 const schoolNameMap = {
   'pittsburgh': 'University of Pittsburgh',
@@ -337,6 +349,7 @@ export const extractSchools = (profiles) => {
         const normalizedName = normalizeSchoolName(school);
         
         if (normalizedName) {
+          const schoolId = createSchoolId(normalizedName);
           if (schoolsMap.has(normalizedName)) {
             const schoolData = schoolsMap.get(normalizedName);
             
@@ -352,7 +365,7 @@ export const extractSchools = (profiles) => {
           } else {
             // Create new school entry
             schoolsMap.set(normalizedName, {
-              id: `school-${schoolsMap.size}`,
+              id: schoolId,
               name: normalizedName,
               count: 1,
               profiles: [profile.id],

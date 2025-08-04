@@ -52,6 +52,8 @@ const SchoolProfilePage = () => {
         
         // Extract all schools with their stats
         const allSchools = extractSchools(allProfiles);
+        console.log("allSchools", allSchools.map(s => s.id));
+        console.log("Looking for:", schoolId);
         
         // Find the school by ID
         const foundSchool = allSchools.find(s => s.id === schoolId);
