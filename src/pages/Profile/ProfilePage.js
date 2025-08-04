@@ -66,8 +66,17 @@ const ProfilePage = () => {
           loadSchools()
         ]);
         
-        console.log('Loaded profiles:', profilesData.length);
-        console.log('Loaded schools:', schoolsData.length);
+        console.log('📊 Raw data loaded:');
+        console.log('  - Profiles:', profilesData.length);
+        console.log('  - Schools from Firebase:', schoolsData.length);
+        // Check if pennsylvania-state-university is in the schools data
+        const pennStateFromFirebase = schoolsData.find(school => school.id === 'pennsylvania-state-university');
+        console.log('🎯 Penn State from Firebase:', pennStateFromFirebase);
+        if (pennStateFromFirebase) {
+          console.log('🖼️ Penn State imageUrl from Firebase:', pennStateFromFirebase.imageUrl);
+        }
+
+  
         
         // Set profiles
         setProfiles(profilesData);
@@ -76,12 +85,28 @@ const ProfilePage = () => {
         // Use schools from Firebase if available, otherwise generate from profiles
         let finalSchools;
         if (schoolsData.length > 0) {
-          console.log('Using schools from Firebase');
+          console.log('✅ Using schools from Firebase');
           finalSchools = schoolsData;
+
+          // Double-check Penn State in final schools
+          const pennStateInFinal = finalSchools.find(s => s.id === 'pennsylvania-state-university');
+          console.log('🎯 Penn State in final schools array:', pennStateInFinal);
+          if (pennStateInFinal) {
+            console.log('🖼️ Penn State imageUrl in final array:', pennStateInFinal.imageUrl);
+          }
         } else {
-          console.log('Generating schools from profiles');
+          console.log('⚠️ Generating schools from profiles');
           finalSchools = extractSchools(profilesData);
+
+          // Check if extractSchools is overwriting your data
+          const pennStateFromExtract = finalSchools.find(s => s.id === 'pennsylvania-state-university');
+          console.log('🎯 Penn State from extractSchools:', pennStateFromExtract);
+          if (pennStateFromExtract) {
+            console.log('🖼️ Penn State imageUrl from extractSchools:', pennStateFromExtract.imageUrl);
+          }
         }
+
+        console.log('🔍 Setting schools state with:', finalSchools.length, 'schools');
         
         setSchools(finalSchools);
         setFilteredSchools(finalSchools);
@@ -95,7 +120,7 @@ const ProfilePage = () => {
         
         // Try to fall back to hardcoded data
         try {
-          console.log('Attempting to load fallback data...');
+          console.log('⚠️ Attempting to load fallback data...');
           const fallbackProfiles = await loadProfiles(); // This should use the fallback
           if (fallbackProfiles.length > 0) {
             setProfiles(fallbackProfiles);

@@ -59,6 +59,8 @@ const schoolNameMap = {
   'pcom': 'Philadelphia College of Osteopathic Medicine (PCOM)',
 
   'penn': 'University of Pennsylvania',
+  'penn state': 'Pennsylvania State University',
+  'pennsylvania state university': 'Pennsylvania State University',
 
   'perelman': 'Perelman School of Medicine',
 
@@ -130,11 +132,11 @@ export const normalizeSchoolName = (schoolName) => {
   if (!schoolName) return '';
   
   const lowercaseName = schoolName.toLowerCase().trim();
-  
+  const sortedKeys = Object.keys(schoolNameMap).sort((a, b) => b.length - a.length);
   // Check for direct matches or partial matches in our mapping
-  for (const [key, value] of Object.entries(schoolNameMap)) {
-    if (lowercaseName === key || lowercaseName.includes(key)) {
-      return value;
+  for (const key of sortedKeys) {
+    if (lowercaseName === key|| lowercaseName.includes(key)) {
+      return schoolNameMap[key];
     }
   }
   
@@ -341,6 +343,7 @@ export const filterProfiles = (profiles, searchTerm = '') => {
 
 // Extract all schools from profiles
 export const extractSchools = (profiles) => {
+  console.log('🏭 extractSchools called with', profiles.length, 'profiles');
   const schoolsMap = new Map();
   
   profiles.forEach(profile => {

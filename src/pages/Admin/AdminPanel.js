@@ -25,6 +25,7 @@ import Footer from '../../components/sections/Footer/Footer';
 import { extractSchools, normalizeSchoolName } from '../../utils/profilesData';
 import './AdminPanel.scss';
 
+
 // Import the complete applicant profiles data
 import applicantProfilesData from './applicant-profiles.json';
 
@@ -217,6 +218,17 @@ const AdminPanel = () => {
     'Penn State': 'https://www.pennstatehealth.org/-/media/images/hero-images/penn-state-health-hero-image.jpg'
   };
 
+  const createSchoolId = (schoolName) => {
+    return schoolName
+      .toLowerCase()
+      .replace(/&/g, '-') // Use regular hyphen instead of ‑
+      .replace(/\./g, '-') // Convert periods to hyphens 
+      .replace(/[^a-z0-9\s-]/g, '') // Remove other special characters except spaces and hyphens
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  };
+
   // Get image URL for a school or use a placeholder
   const getSchoolImageUrl = (schoolName) => {
     // First try exact match
@@ -271,10 +283,11 @@ const AdminPanel = () => {
           batch.update(doc(db, 'schools', docId), schoolData);
         } else {
           // Create new school
-          const newDocRef = doc(schoolsRef);
+          const schoolId = createSchoolId(school.name);
+          const newDocRef = doc(schoolsRef, schoolId);
           batch.set(newDocRef, {
             ...schoolData,
-            id: school.id,
+            id: schoolId,
             createdAt: new Date().toISOString(),
             createdBy: user?.email || 'system'
           });

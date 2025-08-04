@@ -117,16 +117,16 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
   */
   // Get image URL for a school or use a placeholder
   const getSchoolImageUrl = (school) => {
-    console.log('Getting image for school:', school?.name);
+    
     //use customImageURL if its available
     if (school?.customImageUrl) {
-      console.log('✅ Using customImageUrl:', school.customImageUrl);
+    
       return school.customImageUrl;
     }
 
     //if no custom, check for imageURL
     if (school?.imageUrl) {
-      console.log('✅ Using imageUrl:', school.imageUrl);
+     
       return school.imageUrl;
     }
 
