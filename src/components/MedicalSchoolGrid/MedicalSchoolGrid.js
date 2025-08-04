@@ -5,7 +5,7 @@ import './MedicalSchoolGrid.scss';
 
 const MedicalSchoolGrid = ({ schools, searchQuery }) => {
   const navigate = useNavigate();
-
+  /*
   // Complete school images mapping - updated with all schools from the applicant profiles
   const schoolImages = {
     // Original schools
@@ -114,26 +114,25 @@ const MedicalSchoolGrid = ({ schools, searchQuery }) => {
     'Washington University School Of Medicine': 'https://www.mccarthy.com/sites/default/files/styles/open_graph/public/2024-09/WUSM-23330-FINAL-DESKTOP.jpg?h=9782657d&itok=lFg-hQDX',
     'Yale School Of Medicine': 'https://res.cloudinary.com/ysm/image/upload/yms/prod/e9f06bd3-4395-4aa9-ab62-f3e72eab722f',
   };
-
+  */
   // Get image URL for a school or use a placeholder
   const getSchoolImageUrl = (school) => {
-    // First try exact match
-    if (schoolImages[school.name]) {
-      return schoolImages[school.name];
+    console.log('Getting image for school:', school?.name);
+    //use customImageURL if its available
+    if (school?.customImageUrl) {
+      console.log('✅ Using customImageUrl:', school.customImageUrl);
+      return school.customImageUrl;
     }
-    
-    // Try to find a partial match
-    const partialMatch = Object.keys(schoolImages).find(key => 
-      school.name.toLowerCase().includes(key.toLowerCase()) || 
-      key.toLowerCase().includes(school.name.toLowerCase())
-    );
-    
-    if (partialMatch) {
-      return schoolImages[partialMatch];
+
+    //if no custom, check for imageURL
+    if (school?.imageUrl) {
+      console.log('✅ Using imageUrl:', school.imageUrl);
+      return school.imageUrl;
     }
-    
-    // Return a placeholder if no match is found
-    return 'https://via.placeholder.com/400x300?text=Medical+School';
+
+    // fallback imageURL
+    console.warn('❌ No imageUrl found, using placeholder for:', school?.name);
+    return "https://via.placeholder.com/400x300?text=Medical+School";
   };
 
   // Handle clicking on a school card
