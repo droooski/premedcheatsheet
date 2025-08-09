@@ -176,6 +176,13 @@ export const loadSchools = async () => {
     }));
     
     console.log(`Loaded ${schools.length} schools from Firebase`);
+    const pennSchool = schools.find(s => s.id === 'university-of-pennsylvania');
+    if (pennSchool) {
+      console.log('✅ Found university-of-pennsylvania:', pennSchool);
+    } else {
+      console.log('❌ university-of-pennsylvania not found in schools');
+    }
+
     return schools;
   } catch (error) {
     console.error('Error loading schools from Firebase:', error);

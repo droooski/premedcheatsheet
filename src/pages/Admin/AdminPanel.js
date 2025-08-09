@@ -677,6 +677,8 @@ const migrateDefaultProducts = async () => {
       const storageRef = ref(storage, fileName);
       
       // Create upload task with progress tracking
+      console.log('Uploading file:', file);
+      console.log('Type:', file?.type, 'Size:', file?.size);
       const uploadTask = uploadBytesResumable(storageRef, file);
       
       return new Promise((resolve, reject) => {

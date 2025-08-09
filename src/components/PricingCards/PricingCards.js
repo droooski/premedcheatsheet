@@ -1,6 +1,6 @@
 // src/components/PricingCards/PricingCards.js - Simplified without ordering/sorting
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import './PricingCards.scss';
 
 const PricingCards = ({ onSelectPlan }) => {
@@ -118,7 +118,8 @@ const PricingCards = ({ onSelectPlan }) => {
         // Simple query for active products only
         const q = query(
           collection(db, 'products'),
-          where('isActive', '==', true)
+          where('isActive', '==', true),
+          orderBy('sortOrder', 'asc')
         );
         
         const querySnapshot = await getDocs(q);
@@ -324,6 +325,7 @@ const PricingCards = ({ onSelectPlan }) => {
     return rows;
   };
 
+
   return (
     <div className="pricing-cards-container">
       {error && (
@@ -339,6 +341,7 @@ const PricingCards = ({ onSelectPlan }) => {
           <p>Showing default products as fallback.</p>
         </div>
       )}
+      
       {renderProductsInRows()}
     </div>
   );
