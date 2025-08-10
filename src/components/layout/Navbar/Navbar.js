@@ -45,6 +45,7 @@ const Navbar = () => {
     }
     return ['cheatsheet']; // default array
   };
+  
 
   const hasAccessToProfiles = (plans) => {
     return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
@@ -57,6 +58,10 @@ const Navbar = () => {
   const hasAccessToApplication = (plans) => {
     return plans.some(plan => ['application', 'application-plus'].includes(plan));
   };
+
+  const hasAccessToInterview = (plans) =>{
+    return plans.some(plan => ['interview', 'interview-plus'].includes(plan));
+  }
 
   // UPDATE STABLE STATE WHENEVER AUTH CHANGES
   useEffect(() => {
@@ -229,6 +234,8 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
+  
+
   // USE STABLE STATE FOR RENDERING
   const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -310,16 +317,18 @@ const Navbar = () => {
                       </Link>
                     </li>
                   )}
-
-                  <li>
-                    <Link 
-                      to="/interview-cheatsheet" 
-                      onClick={closeMobileMenu}
-                    >
-                      Interview Cheatsheet
-                    </Link>
-                  </li>
+                  {hasAccessToInterview(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/interview-cheatsheet" 
+                        onClick={closeMobileMenu}
+                      >
+                        Interview Cheatsheet
+                      </Link>
+                    </li>
+                  )}
                 </ul>
+                
               )}
             </div>
           )}
