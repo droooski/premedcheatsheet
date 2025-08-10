@@ -8,11 +8,11 @@ import './InterviewCheatsheet.scss';
 
 // Import local preview images
 //TODO: fix the file paths
-import file1Preview from '../../assets/images/File1.png';
-import file2Preview from '../../assets/images/File2.png';
-import file3Preview from '../../assets/images/File3.png';
-import file4Preview from '../../assets/images/File4.png';
-import file5Preview from '../../assets/images/File4.png';
+import file1Preview from '../../assets/images/interview_questions.png';
+import file2Preview from '../../assets/images/school_specific.png';
+import file3Preview from '../../assets/images/interview_question_list.png';
+import file4Preview from '../../assets/images/during_interview.png';
+import file5Preview from '../../assets/images/post_interview_advice.png';
 
 const InterviewCheatsheet = () => {
   const [expandedDoc, setExpandedDoc] = useState(null);
@@ -23,39 +23,39 @@ const InterviewCheatsheet = () => {
   // TODO: fix the google doc ids
   const documents = [
     {
-      id: '1KcAa5d05lxioTnne3551QmRwLYdzT8ZT',
+      id: '1iOLjcYjeoGkJ8T0x1OpV4QJAGGBt3qVC',
       title: 'Premed Cheatsheet: Overall Interview Prep and Strategy',
-      description: 'Learn how to craft a compelling personal statement that showcases your unique story and motivation for medicine.',
+      description: 'Learn how to become a confident, personable interviewee and avoid common mistakes.',
       previewImage: null // This one doesn't need preview as it's the featured document
     },
     {
-      id: '1UPGlV5VJL4Bx_Y7K9GTl4JfBv4OgGmVB',
+      id: '1ZrNwSS3IrCa3PH402iqp-NqZOQB6N2e5',
       title: 'Premed Cheatsheet: Common Questions Strategy',
-      description: 'Tips and templates for writing impactful activity descriptions that highlight your accomplishments and skills.',
+      description: 'Effective frameworks and examples for answering the most common interview questions.',
       previewImage: file1Preview
     },
     {
-      id: '1JgzI5edmE8p0LYxAqdwiHPuASQ9MgNjA',
+      id: '1NJQt4wt-cwQNWcooszmjcbKK41OFHcSa',
       title: 'Premed Cheatsheet: School Specific Interviews',
-      description: 'Learn efficient editing techniques to polish your application materials to perfection.',
+      description: 'Learn how to break down what specific medical schools are looking for and tailor your responses to stand out from the crowd.',
       previewImage: file2Preview
     },
     {
-      id: '1Td6lS6cj0N2OR6g7oFit2LObcqvIupHs',
+      id: '1HiGzoW2BmpWAE0agUQXjW7MEMO3uPDkr',
       title: 'Premed Cheatsheet: Common Questions',
-      description: 'Curated list of books, articles, and tools to help improve your writing skills for medical school applications.',
+      description: 'Curated list of questions to prepare for across a variety of categories.',
       previewImage: file3Preview
     },
     {
-      id: '1QQVT6VCbNCkGuLVoB961ix9AkJ4VNyH8',
+      id: '1U6ZKufJzmjgD2XaykBJZBAOdSRc0pmVn',
       title: 'Premed Cheatsheet: During the Interview',
-      description: 'Professional templates and strategies for securing compelling letters of recommendation from professors and mentors.',
+      description: 'Tips on conducting yourself effectively during interviews and leaving a positive impression.',
       previewImage: file4Preview
     },
     {
-      id: '1QQVT6VCbNCkGuLVoB961ix9AkJ4VNyH8',
+      id: '1RLBgP5h45TCGJo23YdcxNuavEHw9EgGL',
       title: 'Premed Cheatsheet: Post Interview Advice',
-      description: 'Professional templates and strategies for securing compelling letters of recommendation from professors and mentors.',
+      description: 'Advice on follow-up etiquette and reflection strategies to maximize your post-interview success.',
       previewImage: file5Preview
     }
   ];
@@ -83,19 +83,19 @@ const InterviewCheatsheet = () => {
   };
 
   return (
-    <div className="application-cheatsheet-page">
+    <div className="interview-cheatsheet-page">
       <Navbar />
       
       <div className="cheatsheet-content">
         <div className="container">
           <div className="header-container">
-            <h1 className="page-title">Application Cheatsheet</h1>
+            <h1 className="page-title">Interview Cheatsheet</h1>
             <p className="page-subtitle">Feel free to copy and paste any templates!</p>
           </div>
 
           {/* Featured document - first one in fullscreen mode */}
           <div className="featured-document">
-            <h2 className="section-title">Premed Cheatsheet: Crafting Your Personal Statement</h2>
+            <h2 className="section-title">Premed Cheatsheet: Overall Interview Prep and Strategy</h2>
             <div className="featured-document-container">
               <GoogleDocEmbed 
                 docId={documents[0].id}
@@ -115,7 +115,7 @@ const InterviewCheatsheet = () => {
           </div>
 
           {/* Document Grid - Remaining documents */}
-          <h2 className="section-title">Additional Application Resources</h2>
+          <h2 className="section-title">Additional Interview Resources</h2>
           <div className="document-grid">
             {documents.slice(1).map((doc) => (
               <React.Fragment key={doc.id}>

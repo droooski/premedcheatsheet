@@ -231,6 +231,8 @@ const Navbar = () => {
 
   // USE STABLE STATE FOR RENDERING
   const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
 
   return (
     <nav className="navbar">
@@ -268,58 +270,60 @@ const Navbar = () => {
           {/* Center navigation - Only show when authenticated AND payment verified */}
           {isPaidUser && !hasGuestAccess && (
             <div className="navbar-center">
-              <ul className="main-menu">
-                {hasAccessToProfiles(userPlans) && (
+              <button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                Your Products ▼
+              </button>
+              {dropdownOpen && (
+                <ul className="dropdown-menu">
+                  {hasAccessToProfiles(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/profile" 
+                        className={isActive('/profile') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Premed Cheatsheet Members
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {hasAccessToCheatsheetPlus(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/premed-cheatsheet-plus" 
+                        className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Cheatsheet+
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {hasAccessToApplication(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/application-cheatsheet" 
+                        className={isActive('/application-cheatsheet') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Application Cheatsheet
+                      </Link>
+                    </li>
+                  )}
+
                   <li>
                     <Link 
-                      to="/profile" 
-                      className={isActive('/profile') ? 'active' : ''}
+                      to="/interview-cheatsheet" 
                       onClick={closeMobileMenu}
                     >
-                      Premed Cheatsheet Members
+                      Interview Cheatsheet
                     </Link>
                   </li>
-                )}
-                
-                {/* Cheatsheet+ Tab - Only show for cheatsheet-plus plans */}
-                {hasAccessToCheatsheetPlus(userPlans) && (
-                  <li>
-                    <Link 
-                      to="/premed-cheatsheet-plus" 
-                      className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Cheatsheet+
-                    </Link>
-                  </li>
-                )}
-                
-                {hasAccessToApplication(userPlans) && (
-                  <li>
-                    <Link 
-                      to="/application-cheatsheet" 
-                      className={isActive('/application-cheatsheet') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Application Cheatsheet
-                    </Link>
-                  </li>
-                )}
-                
-                {stableIsAdmin && (
-                  <li>
-                    <Link 
-                      to="/admin" 
-                      className={isActive('/admin') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Admin
-                    </Link>
-                  </li>
-                )}
-              </ul>
+                </ul>
+              )}
             </div>
           )}
+
           
           {/* Right side with account or login links */}
           <div className="navbar-right">
