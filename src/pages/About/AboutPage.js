@@ -175,7 +175,7 @@ const AboutPage = () => {
                 </p>
                 
                 <div className="payment-info">
-                  <p>We are currently paying $15 for each 5-10 second video you make on a new account.</p>
+                  <p>We are currently paying $10 for each 5-10 second video you make on a new account.</p>
                 </div>
                 
                 <p className="form-instruction">Send us an email below.</p>
