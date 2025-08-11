@@ -50,7 +50,7 @@ const PlanBasedRoute = ({ children, requiredAccess, fallbackPath = '/account' })
           
           if (requiredAccess === 'profiles') {
             // Only these plans include profile access (Premed Cheatsheet Members)
-            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application-plus'];
+            const profilePlans = ['cheatsheet', 'cheatsheet-plus', 'application-plus', 'interview-cheatsheet-plus'];
             hasRequiredAccess = userPlans.some(plan => profilePlans.includes(plan));
             console.log("🔒 Profile access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", profilePlans);
           }
@@ -65,6 +65,17 @@ const PlanBasedRoute = ({ children, requiredAccess, fallbackPath = '/account' })
             const applicationPlans = ['application', 'application-plus'];
             hasRequiredAccess = userPlans.some(plan => applicationPlans.includes(plan));
             console.log("🔒 Application access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", applicationPlans);
+          } 
+          else if (requiredAccess === 'application') {
+            // Plans that include application guides access
+            const applicationPlans = ['application', 'application-plus'];
+            hasRequiredAccess = userPlans.some(plan => applicationPlans.includes(plan));
+            console.log("🔒 Application access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", applicationPlans);
+          }
+          else if (requiredAccess === 'interview-cheatsheet') {
+            const interviewCheatsheetPlans = ['interview-cheatsheet', 'interview-cheatsheet-plus'];
+            hasRequiredAccess = userPlans.some(plan => interviewCheatsheetPlans.includes(plan));
+            console.log("🔒 Interview Cheatsheet access check:", hasRequiredAccess, "User plans:", userPlans, "Required plans:", interviewCheatsheetPlans);
           } 
           else {
             // Default: if no specific requirement, just check if user has any active subscription

@@ -648,7 +648,8 @@ const migrateDefaultProducts = async () => {
     return name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-');
+      .replace(/\s+/g, '-')
+      .replace(/\+/g, "plus");
   };
 
   // Handle file upload
@@ -1129,7 +1130,7 @@ const migrateDefaultProducts = async () => {
               >
                 <option value="cheatsheet">Cheatsheet</option>
                 <option value="application">Application</option>
-                <option value="bundle">Bundle</option>
+                <option value="interview">Interview</option>
                 <option value="resource">Resource</option>
                 <option value="guide">Guide</option>
               </select>

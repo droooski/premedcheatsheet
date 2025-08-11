@@ -60,7 +60,7 @@ const Navbar = () => {
   };
 
   const hasAccessToInterview = (plans) =>{
-    return plans.some(plan => ['interview', 'interview-plus'].includes(plan));
+    return plans.some(plan => ['interview-cheatsheet', 'interview-cheatsheet-plus'].includes(plan));
   }
 
   // UPDATE STABLE STATE WHENEVER AUTH CHANGES
