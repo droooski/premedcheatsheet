@@ -1,5 +1,5 @@
 // src/components/layout/Navbar/Navbar.js - With Stable State Management
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -234,11 +234,25 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  
-
   // USE STABLE STATE FOR RENDERING
-  const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const dropdownRef = useRef(null);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setDropdownOpen(false);
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
 
 
   return (
@@ -276,7 +290,7 @@ const Navbar = () => {
           
           {/* Center navigation - Only show when authenticated AND payment verified */}
           {isPaidUser && !hasGuestAccess && (
-            <div className="navbar-center">
+            <div className="navbar-center" ref={dropdownRef}>
               <button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>
                 Your Products ▼
               </button>
