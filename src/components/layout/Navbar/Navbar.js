@@ -48,7 +48,7 @@ const Navbar = () => {
   
 
   const hasAccessToProfiles = (plans) => {
-    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
+    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus', 'interview-cheatsheet-plus'].includes(plan));
   };
 
   const hasAccessToCheatsheetPlus = (plans) => {
@@ -95,7 +95,7 @@ const Navbar = () => {
   const refreshUserProfile = useCallback(async (currentUser) => {
     try {
       // Always fetch fresh user profile data
-      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid), { source: 'server' });
       
       if (userDoc.exists()) {
         const profileData = userDoc.data();
