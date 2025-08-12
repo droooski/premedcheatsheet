@@ -15,6 +15,7 @@ import PremedCheatsheetPlusPage from './pages/PremedCheatsheetPlus/PremedCheatsh
 import AdminRoute from './components/auth/AdminRoute';
 import PaymentVerifiedRoute from './components/auth/PaymentVerifiedRoute';
 import ApplicationCheatsheetPage from './pages/ApplicationCheatsheet/ApplicationCheatsheetPage';
+import InterviewCheatsheet from './pages/InterviewCheatsheet/InterviewCheatsheet';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import EmailVerificationPage from './components/auth/EmailVerificationPage';
 import { onAuthChange } from './firebase/authService';
@@ -127,6 +128,20 @@ function App() {
             <PaymentVerifiedRoute fallbackPath="/checkout">
               <PlanBasedRoute requiredAccess="application" fallbackPath="/account">
                 <ApplicationCheatsheetPage />
+              </PlanBasedRoute>
+            </PaymentVerifiedRoute>
+          ) : isGuest ? (
+            <GuestPage />
+          ) : (
+            <Navigate to="/" />
+          )
+        } />
+
+        <Route path="/interview-cheatsheet" element={
+          isAuthenticated ? (
+            <PaymentVerifiedRoute fallbackPath="/checkout">
+              <PlanBasedRoute requiredAccess="interview" fallbackPath="/account">
+                <InterviewCheatsheet />
               </PlanBasedRoute>
             </PaymentVerifiedRoute>
           ) : isGuest ? (

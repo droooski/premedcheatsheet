@@ -225,6 +225,9 @@ const Checkout = () => {
       case 'application-plus':
         setSubscription({ type: 'onetime', price: 34.99 });
         break;
+      case 'interview':
+        setSubscription({type: 'onetime', price: 19.99 });
+        break;
       default:
         setSubscription({ type: 'onetime', price: 14.99 });
     }

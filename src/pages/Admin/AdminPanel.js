@@ -642,26 +642,14 @@ const migrateDefaultProducts = async () => {
   // PRODUCT MANAGEMENT FUNCTIONS
 
   // Generate next product ID
-  const generateNextProductId = async () => {
-    try {
-      const productsSnapshot = await getDocs(collection(db, 'products'));
-      const existingIds = productsSnapshot.docs.map(doc => doc.id);
-      
-      // Extract numbers from existing IDs and find the highest
-      const existingNumbers = existingIds
-        .filter(id => id.startsWith('product-'))
-        .map(id => parseInt(id.replace('product-', '')))
-        .filter(num => !isNaN(num));
-      
-      const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
-      const newId = `product-${nextNumber}`;
-      
-      console.log('Generated new product ID:', newId);
-      return newId;
-    } catch (error) {
-      console.error('Error generating product ID:', error);
-      return `product-${Date.now()}`;
-    }
+  const generateNextProductId = (name) => {
+    if (!name) return `product-${Date.now()}`; //fallback
+    
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/\+/g, "plus");
   };
 
   // Handle file upload
@@ -792,7 +780,7 @@ const migrateDefaultProducts = async () => {
         setUploadStatus('Product updated successfully!');
       } else {
         // Create new product
-        const newId = await generateNextProductId();
+        const newId = await generateNextProductId(processedData.name);
         await setDoc(doc(db, 'products', newId), {
           ...processedData,
           createdAt: new Date().toISOString(),
@@ -918,7 +906,7 @@ const migrateDefaultProducts = async () => {
     const categoryNames = {
       'cheatsheet': 'Cheatsheet',
       'application': 'Application',
-      'bundle': 'Bundle',
+      'interview': 'Interview',
       'resource': 'Resource',
       'guide': 'Guide'
     };
@@ -1142,7 +1130,7 @@ const migrateDefaultProducts = async () => {
               >
                 <option value="cheatsheet">Cheatsheet</option>
                 <option value="application">Application</option>
-                <option value="bundle">Bundle</option>
+                <option value="interview">Interview</option>
                 <option value="resource">Resource</option>
                 <option value="guide">Guide</option>
               </select>

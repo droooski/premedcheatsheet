@@ -1,5 +1,5 @@
 // src/components/layout/Navbar/Navbar.js - With Stable State Management
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthChange, logoutUser } from '../../../firebase/authService';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -45,9 +45,10 @@ const Navbar = () => {
     }
     return ['cheatsheet']; // default array
   };
+  
 
   const hasAccessToProfiles = (plans) => {
-    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus'].includes(plan));
+    return plans.some(plan => ['cheatsheet', 'cheatsheet-plus', 'application-plus', 'interview-cheatsheet-plus'].includes(plan));
   };
 
   const hasAccessToCheatsheetPlus = (plans) => {
@@ -57,6 +58,10 @@ const Navbar = () => {
   const hasAccessToApplication = (plans) => {
     return plans.some(plan => ['application', 'application-plus'].includes(plan));
   };
+
+  const hasAccessToInterview = (plans) =>{
+    return plans.some(plan => ['interview-cheatsheet', 'interview-cheatsheet-plus'].includes(plan));
+  }
 
   // UPDATE STABLE STATE WHENEVER AUTH CHANGES
   useEffect(() => {
@@ -90,7 +95,7 @@ const Navbar = () => {
   const refreshUserProfile = useCallback(async (currentUser) => {
     try {
       // Always fetch fresh user profile data
-      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid), { source: 'server' });
       
       if (userDoc.exists()) {
         const profileData = userDoc.data();
@@ -230,7 +235,25 @@ const Navbar = () => {
   };
 
   // USE STABLE STATE FOR RENDERING
-  const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
+    const { isAuthenticated, isPaidUser, hasGuestAccess, userPlans, isAdmin: stableIsAdmin } = stableUserData;
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const dropdownRef = useRef(null);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setDropdownOpen(false);
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
+
 
   return (
     <nav className="navbar">
@@ -267,59 +290,63 @@ const Navbar = () => {
           
           {/* Center navigation - Only show when authenticated AND payment verified */}
           {isPaidUser && !hasGuestAccess && (
-            <div className="navbar-center">
-              <ul className="main-menu">
-                {hasAccessToProfiles(userPlans) && (
-                  <li>
-                    <Link 
-                      to="/profile" 
-                      className={isActive('/profile') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Premed Cheatsheet Members
-                    </Link>
-                  </li>
-                )}
+            <div className="navbar-center" ref={dropdownRef}>
+              <button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                Your Products ▼
+              </button>
+              {dropdownOpen && (
+                <ul className="dropdown-menu">
+                  {hasAccessToProfiles(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/profile" 
+                        className={isActive('/profile') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Premed Cheatsheet Members
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {hasAccessToCheatsheetPlus(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/premed-cheatsheet-plus" 
+                        className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Cheatsheet+
+                      </Link>
+                    </li>
+                  )}
+                  
+                  {hasAccessToApplication(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/application-cheatsheet" 
+                        className={isActive('/application-cheatsheet') ? 'active' : ''}
+                        onClick={closeMobileMenu}
+                      >
+                        Application Cheatsheet
+                      </Link>
+                    </li>
+                  )}
+                  {hasAccessToInterview(userPlans) && (
+                    <li>
+                      <Link 
+                        to="/interview-cheatsheet" 
+                        onClick={closeMobileMenu}
+                      >
+                        Interview Cheatsheet
+                      </Link>
+                    </li>
+                  )}
+                </ul>
                 
-                {/* Cheatsheet+ Tab - Only show for cheatsheet-plus plans */}
-                {hasAccessToCheatsheetPlus(userPlans) && (
-                  <li>
-                    <Link 
-                      to="/premed-cheatsheet-plus" 
-                      className={isActive('/premed-cheatsheet-plus') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Cheatsheet+
-                    </Link>
-                  </li>
-                )}
-                
-                {hasAccessToApplication(userPlans) && (
-                  <li>
-                    <Link 
-                      to="/application-cheatsheet" 
-                      className={isActive('/application-cheatsheet') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Application Cheatsheet
-                    </Link>
-                  </li>
-                )}
-                
-                {stableIsAdmin && (
-                  <li>
-                    <Link 
-                      to="/admin" 
-                      className={isActive('/admin') ? 'active' : ''}
-                      onClick={closeMobileMenu}
-                    >
-                      Admin
-                    </Link>
-                  </li>
-                )}
-              </ul>
+              )}
             </div>
           )}
+
           
           {/* Right side with account or login links */}
           <div className="navbar-right">
