@@ -1,48 +1,48 @@
 // src/components/auth/AuthModal.js - Redesigned UI while preserving functionality
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginUser, getUserProfile } from '../../firebase/authService';
-import ForgotPassword from './ForgotPassword';
-import './AuthModal.scss';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser, getUserProfile } from "../../firebase/authService";
+import ForgotPassword from "./ForgotPassword";
+import "./AuthModal.scss";
 
-const AuthModal = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess, 
-  initialMode = 'login', 
+const AuthModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialMode = "login",
   preventRedirect = false,
-  dataCollectionOnly = false 
+  dataCollectionOnly = false,
 }) => {
-  const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Update login mode when initialMode prop changes
   useEffect(() => {
-    setIsLogin(initialMode === 'login');
+    setIsLogin(initialMode === "login");
   }, [initialMode]);
 
   // Reset form when modal is opened/closed
   useEffect(() => {
     if (isOpen) {
       // When opening, just reset error
-      setError('');
+      setError("");
       setShowForgotPassword(false);
     } else {
       // When closing, reset all fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setLastName('');
-      setError('');
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setFirstName("");
+      setLastName("");
+      setError("");
       setLoading(false);
       setShowForgotPassword(false);
     }
@@ -51,7 +51,7 @@ const AuthModal = ({
   // Toggle between login and signup modes
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
-    setError('');
+    setError("");
     setShowForgotPassword(false);
   };
 
@@ -59,31 +59,31 @@ const AuthModal = ({
   const handleShowForgotPassword = (e) => {
     e.preventDefault();
     setShowForgotPassword(true);
-    setError('');
+    setError("");
   };
 
   // Back to login from forgot password
   const handleBackToLogin = () => {
     setShowForgotPassword(false);
-    setError('');
+    setError("");
   };
 
   // Handle form submission (login or signup)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // Validate form data
       if (!isLogin && password !== confirmPassword) {
-        throw new Error('Passwords do not match');
+        throw new Error("Passwords do not match");
       }
 
       if (isLogin) {
         // LOGIN FLOW: Actually authenticate with Firebase
         console.log("🔑 LOGIN: Authenticating with Firebase");
-        
+
         const result = await loginUser(email, password);
 
         if (result.user) {
@@ -95,43 +95,44 @@ const AuthModal = ({
               userProfile = profileResult.profile;
             }
           }
-          
+
           // Call onSuccess callback with actual user data
           onSuccess({
             user: result.user,
             profile: userProfile,
             email,
             firstName,
-            lastName
+            lastName,
           });
         } else {
-          throw new Error(result.error || 'Login failed');
+          throw new Error(result.error || "Login failed");
         }
       } else {
         // SIGNUP FLOW: NEVER create Firebase account - just collect data
-        console.log("📝 SIGNUP: Collecting user data (NOT creating account yet)");
-        
+        console.log(
+          "📝 SIGNUP: Collecting user data (NOT creating account yet)"
+        );
+
         // Validate required fields for signup
         if (!firstName || !lastName || !email || !password) {
-          throw new Error('Please fill in all required fields');
+          throw new Error("Please fill in all required fields");
         }
-        
+
         if (password.length < 6) {
-          throw new Error('Password must be at least 6 characters');
+          throw new Error("Password must be at least 6 characters");
         }
-        
+
         // Just pass the data to onSuccess without creating Firebase account
         onSuccess({
           email,
           password,
           firstName,
           lastName,
-          dataCollectionOnly: true // Always true for signup in checkout
+          dataCollectionOnly: true, // Always true for signup in checkout
         });
       }
-      
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error("Authentication error:", error);
       setError(error.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
@@ -141,23 +142,26 @@ const AuthModal = ({
   // Continue as guest option
   const continueAsGuest = () => {
     // Set a cookie or localStorage item to track guest access
-    localStorage.setItem('guestAccess', 'true');
-    localStorage.setItem('guestAccessExpiry', (Date.now() + (24 * 60 * 60 * 1000)).toString()); // 24 hours
-    
+    localStorage.setItem("guestAccess", "true");
+    localStorage.setItem(
+      "guestAccessExpiry",
+      (Date.now() + 24 * 60 * 60 * 1000).toString()
+    ); // 24 hours
+
     // Close the modal
     onClose();
-    
+
     // Only navigate to guest-preview if preventRedirect is false
     if (!preventRedirect) {
       setTimeout(() => {
-        navigate('/guest-preview');
+        navigate("/guest-preview");
       }, 100);
     } else {
       // Let the parent component handle what happens after guest login
       if (onSuccess) {
         onSuccess({
-          user: null, 
-          isGuest: true
+          user: null,
+          isGuest: true,
         });
       }
     }
@@ -176,44 +180,41 @@ const AuthModal = ({
   return (
     <div className="auth-modal-overlay" onClick={handleOverlayClick}>
       <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
-        <button 
-          className="close-button" 
+        <button
+          className="close-button"
           onClick={onClose}
           type="button"
           style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'none',
-            border: 'none',
-            fontSize: '28px',
-            cursor: 'pointer',
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            background: "none",
+            border: "none",
+            fontSize: "28px",
+            cursor: "pointer",
             zIndex: 1002,
-            color: '#666',
-            lineHeight: '1'
+            color: "#666",
+            lineHeight: "1",
           }}
         >
           ×
         </button>
         {/* Conditional rendering based on state */}
         {showForgotPassword ? (
-          <ForgotPassword 
-            onClose={onClose} 
-            onBackToLogin={handleBackToLogin} 
-          />
+          <ForgotPassword onClose={onClose} onBackToLogin={handleBackToLogin} />
         ) : (
           <>
             <h2>
-              {isLogin 
-                ? "Join The Cheatsheet" 
-                : "Join The Cheatsheet"}
+              {isLogin
+                ? "Join The Premed Profiles"
+                : "Join The Premed Profiles"}
             </h2>
             <p className="auth-subtitle">
-              {isLogin 
-                ? "Sign in to unlock exclusive content." 
-                : (dataCollectionOnly 
-                   ? "Enter your details to complete your purchase." 
-                   : "Create an account to unlock exclusive content.")}
+              {isLogin
+                ? "Sign in to unlock exclusive content."
+                : dataCollectionOnly
+                ? "Enter your details to complete your purchase."
+                : "Create an account to unlock exclusive content."}
             </p>
 
             {error && <div className="auth-error">{error}</div>}
@@ -276,50 +277,50 @@ const AuthModal = ({
 
               {!isLogin && (
                 <p className="terms-note">
-                  By joining, you may receive emails and updates related to your account. You can unsubscribe at anytime.
+                  By joining, you may receive emails and updates related to your
+                  account. You can unsubscribe at anytime.
                 </p>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="submit-button"
                 disabled={loading}
               >
-                {loading 
-                  ? "Processing..." 
-                  : (isLogin 
-                     ? "Sign in" 
-                     : (dataCollectionOnly 
-                        ? "Create account" 
-                        : "Create account"))}
+                {loading
+                  ? "Processing..."
+                  : isLogin
+                  ? "Sign in"
+                  : dataCollectionOnly
+                  ? "Create account"
+                  : "Create account"}
               </button>
             </form>
 
             <div className="auth-footer">
               {isLogin ? (
                 <div className="auth-links">
-                  <button 
-                    type="button" 
-                    className="forgot-password-link" 
+                  <button
+                    type="button"
+                    className="forgot-password-link"
                     onClick={handleShowForgotPassword}
                   >
                     Forgot Password?
                   </button>
-                  
                 </div>
               ) : (
                 <p className="account-toggle">
-                  Already have an account?{' '}
-                  <button 
+                  Already have an account?{" "}
+                  <button
                     type="button"
-                    className="toggle-mode-button" 
+                    className="toggle-mode-button"
                     onClick={toggleAuthMode}
                   >
                     Sign in
                   </button>
                 </p>
               )}
-              
+
               {!dataCollectionOnly && (
                 <button className="guest-button" onClick={continueAsGuest}>
                   Continue as guest

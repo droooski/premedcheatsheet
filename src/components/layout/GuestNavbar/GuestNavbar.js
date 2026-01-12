@@ -1,6 +1,6 @@
 // src/components/layout/GuestNavbar/GuestNavbar.js
-import React, { useState } from 'react';
-import './GuestNavbar.scss';
+import React, { useState } from "react";
+import "./GuestNavbar.scss";
 
 const GuestNavbar = ({ onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,50 +27,52 @@ const GuestNavbar = ({ onNavigate }) => {
           {/* Logo and Brand */}
           <div className="logo">
             <span className="logo-icon">✳</span>
-            <span className="logo-text" onClick={() => handleNavigate('/')}>PremedCheatsheet</span>
+            <span className="logo-text" onClick={() => handleNavigate("/")}>
+              Premed Profiles
+            </span>
           </div>
 
           {/* Desktop Menu */}
           <div className="primary-menu">
             <li>
-              <button 
+              <button
                 type="button"
-                className="nav-link-button active" 
-                onClick={() => handleNavigate('/')}
+                className="nav-link-button active"
+                onClick={() => handleNavigate("/")}
               >
                 Home
               </button>
             </li>
             <li>
-              <button 
+              <button
                 type="button"
-                className="nav-link-button active" 
-                onClick={() => handleNavigate('/about')}
+                className="nav-link-button active"
+                onClick={() => handleNavigate("/about")}
               >
                 About
               </button>
             </li>
             <li>
-              <button 
+              <button
                 type="button"
-                className="nav-link-button active" 
-                onClick={() => handleNavigate('/pricing')}
+                className="nav-link-button active"
+                onClick={() => handleNavigate("/pricing")}
               >
                 Pricing
               </button>
             </li>
             <li>
-              <button 
+              <button
                 type="button"
-                className="nav-link-button active" 
-                onClick={() => handleNavigate('/login')}
+                className="nav-link-button active"
+                onClick={() => handleNavigate("/login")}
               >
                 Login
               </button>
             </li>
-            <button 
-              className="try-free-button" 
-              onClick={() => handleNavigate('/signup')}
+            <button
+              className="try-free-button"
+              onClick={() => handleNavigate("/signup")}
             >
               Try it Free
             </button>
@@ -88,39 +90,39 @@ const GuestNavbar = ({ onNavigate }) => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+      <div className={`mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
         <div className="mobile-menu-items">
-          <button 
+          <button
             type="button"
-            className="nav-link-button active" 
-            onClick={() => handleNavigate('/')}
+            className="nav-link-button active"
+            onClick={() => handleNavigate("/")}
           >
             Home
           </button>
-          <button 
-              type="button"
-              className="nav-link-button active" 
-              onClick={() => handleNavigate('/about')}
-            >
-              About
+          <button
+            type="button"
+            className="nav-link-button active"
+            onClick={() => handleNavigate("/about")}
+          >
+            About
           </button>
-          <button 
-              type="button"
-              className="nav-link-button active" 
-              onClick={() => handleNavigate('/pricing')}
-            >
-              Pricing
+          <button
+            type="button"
+            className="nav-link-button active"
+            onClick={() => handleNavigate("/pricing")}
+          >
+            Pricing
           </button>
-          <button 
-              type="button"
-              className="nav-link-button active" 
-              onClick={() => handleNavigate('/login')}
-            >
-              Login
+          <button
+            type="button"
+            className="nav-link-button active"
+            onClick={() => handleNavigate("/login")}
+          >
+            Login
           </button>
-          <button 
-            className="try-free-button" 
-            onClick={() => handleNavigate('/signup')}
+          <button
+            className="try-free-button"
+            onClick={() => handleNavigate("/signup")}
           >
             Try it Free
           </button>
@@ -129,10 +131,7 @@ const GuestNavbar = ({ onNavigate }) => {
 
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
-        <div 
-          className="mobile-menu-overlay" 
-          onClick={toggleMobileMenu}
-        ></div>
+        <div className="mobile-menu-overlay" onClick={toggleMobileMenu}></div>
       )}
     </nav>
   );

@@ -1,10 +1,11 @@
-# PremedCheatsheet
+# PremedProfiles
 
 A comprehensive web application designed to help pre-medical students navigate their journey to medical school through successful applicant profiles, application guidance, and premium resources.
 
 ## 🎯 Overview
 
-PremedCheatsheet provides pre-medical students with:
+PremedProfiles provides pre-medical students with:
+
 - **Real applicant profiles** from students who were accepted to medical schools
 - **Application guidance** including personal statement templates and activity descriptions
 - **Premium resources** like cold email templates, CV templates, and MCAT study schedules
@@ -13,24 +14,28 @@ PremedCheatsheet provides pre-medical students with:
 ## 🚀 Features
 
 ### Core Features
+
 - **Applicant Profile Database**: Browse profiles of successful medical school applicants
 - **Medical School Explorer**: Search and filter medical schools with acceptance data
 - **Interactive Profile Cards**: Detailed breakdown of GPA, MCAT, activities, and reflections
 - **School-specific Profiles**: View which students were accepted to specific medical schools
 
 ### Premium Features (Cheatsheet+)
+
 - ✅ Cold email templates for research opportunities
 - ✅ Professional CV template optimized for medical school applications
 - ✅ Pre-med summer program database
 - ✅ MCAT-optimized course schedules and study plans
 
 ### Application Resources
+
 - 📝 Personal statement writing guide
 - 📝 Activity section description templates
 - 📝 Letter of recommendation email templates
 - 📝 General application strategy guides
 
 ### User Management
+
 - 🔐 Firebase Authentication with email verification
 - 💳 Stripe payment integration for subscriptions
 - 👤 User profile management with payment methods and addresses
@@ -39,12 +44,14 @@ PremedCheatsheet provides pre-medical students with:
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and functional components
 - **React Router DOM 7** - Client-side routing
 - **Sass/SCSS** - Styling with variables and mixins
 - **Responsive Design** - Mobile-first approach
 
 ### Backend & Services
+
 - **Firebase**
   - Authentication (email/password, email verification)
   - Firestore (user profiles, orders, subscriptions)
@@ -53,6 +60,7 @@ PremedCheatsheet provides pre-medical students with:
 - **Google Docs API** - Embedded document viewing
 
 ### Development Tools
+
 - **Create React App** - Development environment
 - **ESLint** - Code linting
 - **Git** - Version control
@@ -107,12 +115,14 @@ src/
 ## 🏗️ Installation & Setup
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 - Firebase project
 - Stripe account
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -131,23 +141,27 @@ REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
 ### Installation Steps
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd premedcheatsheet-new
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up Firebase**
+
    - Create a Firebase project
    - Enable Authentication (Email/Password)
    - Create Firestore database
    - Add your configuration to `.env`
 
 4. **Set up Stripe**
+
    - Create a Stripe account
    - Get your publishable key
    - Add to `.env` file
@@ -162,6 +176,7 @@ REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
 ### Firestore Collections
 
 #### Users Collection (`users`)
+
 ```javascript
 {
   uid: "user_id",
@@ -216,6 +231,7 @@ REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
 ```
 
 #### Orders Collection (`orders`)
+
 ```javascript
 {
   orderId: "order_123",
@@ -231,11 +247,11 @@ REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
 
 ## 💳 Subscription Plans
 
-| Plan | Price | Features |
-|------|-------|----------|
-| **The Cheatsheet** | $14.99 | Applicant profiles access |
-| **The Cheatsheet+** | $29.99 | Profiles + premium resources |
-| **Application Cheatsheet** | $19.99 | Application writing guides |
+| Plan                        | Price  | Features                        |
+| --------------------------- | ------ | ------------------------------- |
+| **The Cheatsheet**          | $14.99 | Applicant profiles access       |
+| **The Cheatsheet+**         | $29.99 | Profiles + premium resources    |
+| **Application Cheatsheet**  | $19.99 | Application writing guides      |
 | **Application Cheatsheet+** | $34.99 | Complete access to all features |
 
 ## 🔐 Authentication Flow
@@ -273,11 +289,13 @@ npm test -- --coverage
 ## 🚀 Deployment
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
 
 ### Environment Setup
+
 - Configure production environment variables
 - Set up Firebase hosting or your preferred hosting service
 - Configure domain and SSL certificates
@@ -303,6 +321,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For support and questions:
+
 - Email: staff@premedcheatsheet.com
 - Website: [premedcheatsheet.com](https://premedcheatsheet.com)
 
